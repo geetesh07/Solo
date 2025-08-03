@@ -26,6 +26,10 @@ export function CalendarView({ goals = [] }: CalendarViewProps) {
   const [isAddingEvent, setIsAddingEvent] = useState(false);
   const [newEventTitle, setNewEventTitle] = useState('');
   const [newEventType, setNewEventType] = useState<'main-mission' | 'training' | 'side-quest'>('main-mission');
+  const [newEventDate, setNewEventDate] = useState(() => {
+    const today = new Date();
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  });
   
   // Load events from localStorage
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>(() => {
@@ -111,12 +115,10 @@ export function CalendarView({ goals = [] }: CalendarViewProps) {
       return;
     }
     
-    const eventDate = selectedDate || `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(new Date().getDate()).padStart(2, '0')}`;
-    
     const newEvent: CalendarEvent = {
       id: `event-${Date.now()}`,
       title: newEventTitle,
-      date: eventDate,
+      date: newEventDate,
       type: newEventType,
       completed: false
     };
@@ -125,10 +127,33 @@ export function CalendarView({ goals = [] }: CalendarViewProps) {
     setCalendarEvents(updatedEvents);
     localStorage.setItem('calendar-events', JSON.stringify(updatedEvents));
     
+    // Schedule notification for the event
+    scheduleNotification(newEvent);
+    
     setNewEventTitle('');
     setIsAddingEvent(false);
     setSelectedDate(null);
-    alert(`Event "${newEvent.title}" added successfully for ${new Date(eventDate).toLocaleDateString()}!`);
+    const today = new Date();
+    setNewEventDate(`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`);
+    alert(`Event "${newEvent.title}" added successfully for ${new Date(newEvent.date).toLocaleDateString()}!`);
+  };
+
+  const scheduleNotification = (event: CalendarEvent) => {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      const eventDate = new Date(event.date);
+      const now = new Date();
+      const timeUntilEvent = eventDate.getTime() - now.getTime();
+      
+      if (timeUntilEvent > 0) {
+        setTimeout(() => {
+          new Notification(`Solo Leveling Quest Reminder`, {
+            body: `Today's ${event.type.replace('-', ' ')}: ${event.title}`,
+            icon: '/favicon.ico',
+            tag: event.id
+          });
+        }, timeUntilEvent);
+      }
+    }
   };
 
   const handleDeleteEvent = (eventId: string) => {
@@ -150,6 +175,7 @@ export function CalendarView({ goals = [] }: CalendarViewProps) {
   const handleDateClick = (day: number) => {
     const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     setSelectedDate(dateStr);
+    setNewEventDate(dateStr);
     setIsAddingEvent(true);
   };
 
@@ -333,14 +359,20 @@ export function CalendarView({ goals = [] }: CalendarViewProps) {
                 className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:border-cyan-400 focus:outline-none"
                 autoFocus
               />
+              <input
+                type="date"
+                value={newEventDate}
+                onChange={(e) => setNewEventDate(e.target.value)}
+                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-cyan-400 focus:outline-none"
+              />
               <select
                 value={newEventType}
                 onChange={(e) => setNewEventType(e.target.value as any)}
-                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-cyan-400 focus:outline-none"
+                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-cyan-400 focus:outline-none cursor-pointer"
               >
-                <option value="main-mission">Main Mission</option>
-                <option value="training">Training</option>
-                <option value="side-quest">Side Quest</option>
+                <option value="main-mission" className="bg-gray-700">Main Mission (High Priority)</option>
+                <option value="training" className="bg-gray-700">Training (Skill Building)</option>
+                <option value="side-quest" className="bg-gray-700">Side Quest (Extra Tasks)</option>
               </select>
               <div className="flex space-x-3">
                 <button

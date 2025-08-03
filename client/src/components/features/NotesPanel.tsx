@@ -243,6 +243,7 @@ export function NotesPanel() {
                     {tag}
                     <button
                       onClick={() => handleRemoveTag(tag)}
+                      type="button"
                       className="ml-2 text-blue-300 hover:text-white"
                     >
                       ✕
