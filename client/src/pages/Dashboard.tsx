@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { AppSidebar } from "../components/layout/AppSidebar";
 import { TopBar } from "../components/layout/TopBar";
 import { useGoals } from "@/hooks/useGoals";
-import { Crown, Star, CheckCircle, Calendar, BarChart3, Target, Plus, X } from "lucide-react";
+import { Crown, Star, CheckCircle, Calendar, BarChart3, Target, Plus, X, Bell, Trash2, Check, Menu } from "lucide-react";
 import { AnalyticsDashboard } from "../components/analytics/AnalyticsDashboard";
 import { CalendarView } from "../components/calendar/CalendarView";
 import { Settings } from "./Settings";
@@ -29,7 +29,6 @@ interface Category {
 
 function Dashboard() {
   const { user } = useAuth();
-  const { goals, addGoal, toggleGoal } = useGoals();
   const [currentView, setCurrentView] = useState('dashboard');
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isMorningModalOpen, setIsMorningModalOpen] = useState(false);
@@ -60,7 +59,7 @@ function Dashboard() {
     }
   ]);
 
-  const [newGoal, setNewGoal] = useState({ title: '', categoryId: '', priority: 'medium' as const, dueDate: '' });
+  const [newGoal, setNewGoal] = useState({ title: '', categoryId: '', priority: 'medium' as 'low' | 'medium' | 'high', dueDate: '' });
   const [isAddingGoal, setIsAddingGoal] = useState<string | null>(null);
 
   // Calculate dynamic user stats from actual goals
@@ -184,7 +183,7 @@ function Dashboard() {
             { label: 'THIS WEEK', value: categories.flatMap(cat => cat.goals).filter(g => g.completed).length, icon: Calendar, color: 'text-blue-400' },
             { label: 'EFFICIENCY', value: totalGoals > 0 ? Math.round((completedGoals / totalGoals) * 100) : 0, icon: BarChart3, color: 'text-purple-400', suffix: '%' }
           ].map((stat, index) => (
-            <div key={index} className="mystical-card p-6 text-center hover:scale-105 transition-all duration-200">
+            <div key={index} className="mystical-card p-6 text-center transition-all duration-200">
               <stat.icon className={`w-8 h-8 mx-auto mb-3 ${stat.color}`} />
               <div className="text-2xl font-bold text-white mb-1">
                 {stat.value}{stat.suffix || ''}
@@ -212,59 +211,75 @@ function Dashboard() {
         </div>
 
         {categories.map((category) => (
-          <div key={category.id} className="quest-category">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-3">
-                <span className="text-2xl">{category.icon}</span>
-                <h3 className="text-xl font-bold text-white font-['Orbitron']">{category.name}</h3>
-                <span className="text-gray-400 text-sm">({category.goals.length} goals)</span>
+          <div key={category.id} className={`hunter-status-window p-6 border-l-4 ${
+            category.id === 'main-mission' ? 'border-red-500 bg-gradient-to-r from-red-900/10 to-gray-900' :
+            category.id === 'training' ? 'border-blue-500 bg-gradient-to-r from-blue-900/10 to-gray-900' :
+            'border-green-500 bg-gradient-to-r from-green-900/10 to-gray-900'
+          }`}>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-4">
+                <span className="text-3xl">{category.icon}</span>
+                <div>
+                  <h3 className={`text-xl font-bold font-['Orbitron'] ${
+                    category.id === 'main-mission' ? 'text-red-400' :
+                    category.id === 'training' ? 'text-blue-400' :
+                    'text-green-400'
+                  }`}>{category.name}</h3>
+                  <span className="text-gray-400 text-sm">({category.goals.length} goals)</span>
+                </div>
               </div>
               <button
                 onClick={() => setIsAddingGoal(category.id)}
-                className="power-button"
+                className={`px-3 py-2 rounded-lg font-medium text-sm transition-colors ${
+                  category.id === 'main-mission' ? 'bg-red-600 hover:bg-red-700 text-white' :
+                  category.id === 'training' ? 'bg-blue-600 hover:bg-blue-700 text-white' :
+                  'bg-green-600 hover:bg-green-700 text-white'
+                }`}
               >
-                <Plus className="w-4 h-4 mr-2" />
+                <Plus className="w-4 h-4 mr-1" />
                 Add Goal
               </button>
             </div>
 
             {/* Add Goal Form */}
             {isAddingGoal === category.id && (
-              <div className="mystical-card p-4 mb-4 bg-gradient-to-r from-gray-900/50 to-gray-800/30">
-                <div className="flex flex-col sm:flex-row gap-3">
+              <div className="bg-gray-800/50 border border-gray-600 rounded-lg p-4 mb-4">
+                <div className="space-y-3">
                   <input
                     type="text"
                     placeholder="Enter your goal..."
                     value={newGoal.title}
                     onChange={(e) => setNewGoal(prev => ({ ...prev, title: e.target.value }))}
-                    className="flex-1 bg-gray-800/80 border border-gray-600 rounded-lg px-4 py-2 text-white placeholder-gray-400 focus:border-cyan-400 focus:outline-none"
+                    className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:border-cyan-400 focus:outline-none text-sm"
                     onKeyPress={(e) => e.key === 'Enter' && handleAddGoal(category.id)}
                   />
-                  <input
-                    type="date"
-                    value={newGoal.dueDate}
-                    onChange={(e) => setNewGoal(prev => ({ ...prev, dueDate: e.target.value }))}
-                    className="bg-gray-800/80 border border-gray-600 rounded-lg px-4 py-2 text-white focus:border-cyan-400 focus:outline-none"
-                  />
-                  <select
-                    value={newGoal.priority}
-                    onChange={(e) => setNewGoal(prev => ({ ...prev, priority: e.target.value as 'low' | 'medium' | 'high' }))}
-                    className="bg-gray-800/80 border border-gray-600 rounded-lg px-4 py-2 text-white focus:border-cyan-400 focus:outline-none"
-                  >
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                  </select>
+                  <div className="flex gap-3">
+                    <input
+                      type="date"
+                      value={newGoal.dueDate}
+                      onChange={(e) => setNewGoal(prev => ({ ...prev, dueDate: e.target.value }))}
+                      className="flex-1 bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-cyan-400 focus:outline-none text-sm"
+                    />
+                    <select
+                      value={newGoal.priority}
+                      onChange={(e) => setNewGoal(prev => ({ ...prev, priority: e.target.value as 'low' | 'medium' | 'high' }))}
+                      className="bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-cyan-400 focus:outline-none text-sm"
+                    >
+                      <option value="low">Low</option>
+                      <option value="medium">Medium</option>
+                      <option value="high">High</option>
+                    </select>
+                  </div>
                   <div className="flex space-x-2">
                     <button
                       onClick={() => handleAddGoal(category.id)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg font-medium transition-colors text-sm"
                     >
                       Add
                     </button>
                     <button
                       onClick={() => setIsAddingGoal(null)}
-                      className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors"
+                      className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-lg transition-colors text-sm"
                     >
                       Cancel
                     </button>
@@ -274,46 +289,42 @@ function Dashboard() {
             )}
 
             {/* Goals List */}
-            <div className="space-y-3">
-              {category.goals.length === 0 ? (
-                <div className="mystical-card p-6 text-center">
-                  <Target className="w-12 h-12 mx-auto mb-3 text-gray-500" />
-                  <p className="text-gray-400">No goals yet. Add your first quest to get started!</p>
-                </div>
-              ) : (
-                category.goals.map((goal) => (
-                  <div
-                    key={goal.id}
-                    className={`mystical-card p-4 flex items-center justify-between group transition-all duration-200 ${
-                      goal.completed ? 'opacity-75 bg-green-900/20' : ''
-                    }`}
-                  >
-                    <div className="flex items-center space-x-4 flex-1">
+            {category.goals.length === 0 ? (
+              <div className="text-center py-6 text-gray-400 bg-gray-800/30 rounded-lg">
+                <Target className="w-12 h-12 text-gray-600 mx-auto mb-3" />
+                <p className="text-sm">No goals yet. Add your first quest to get started!</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {category.goals.map((goal) => (
+                  <div key={goal.id} className="bg-gray-800/40 border border-gray-700 rounded-lg p-3 flex items-center justify-between group">
+                    <div className="flex items-center space-x-3 flex-1">
                       <button
                         onClick={() => handleToggleGoal(category.id, goal.id)}
-                        className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
+                        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
                           goal.completed
-                            ? 'bg-green-500 border-green-500'
-                            : 'border-gray-400 hover:border-cyan-400'
+                            ? 'bg-green-500 border-green-500 text-white'
+                            : 'border-gray-500 hover:border-green-400'
                         }`}
                       >
-                        {goal.completed && <CheckCircle className="w-4 h-4 text-white" />}
+                        {goal.completed && <Check className="w-3 h-3" />}
                       </button>
                       <div className="flex-1">
-                        <h4 className={`font-semibold ${goal.completed ? 'line-through text-gray-500' : 'text-white'}`}>
+                        <h4 className={`font-medium text-sm ${goal.completed ? 'text-gray-500 line-through' : 'text-white'}`}>
                           {goal.title}
                         </h4>
-                        <div className="flex items-center space-x-4 mt-1">
-                          <span className={`text-xs px-2 py-1 rounded-full ${
-                            goal.priority === 'high' ? 'bg-red-500/20 text-red-400' :
-                            goal.priority === 'medium' ? 'bg-yellow-500/20 text-yellow-400' :
-                            'bg-gray-500/20 text-gray-400'
+                        <div className="flex items-center space-x-3 text-xs text-gray-400 mt-1">
+                          <span className={`px-2 py-1 rounded text-xs ${
+                            goal.priority === 'high' ? 'bg-red-900/30 text-red-400' :
+                            goal.priority === 'medium' ? 'bg-yellow-900/30 text-yellow-400' :
+                            'bg-green-900/30 text-green-400'
                           }`}>
-                            {goal.priority} priority
+                            {goal.priority}
                           </span>
                           {goal.dueDate && (
-                            <span className="text-xs text-gray-400">
-                              Due: {new Date(goal.dueDate).toLocaleDateString()}
+                            <span className="flex items-center">
+                              <Calendar className="w-3 h-3 mr-1" />
+                              {new Date(goal.dueDate).toLocaleDateString()}
                             </span>
                           )}
                         </div>
@@ -321,14 +332,14 @@ function Dashboard() {
                     </div>
                     <button
                       onClick={() => handleDeleteGoal(category.id, goal.id)}
-                      className="opacity-0 group-hover:opacity-100 p-2 hover:bg-red-600 rounded-lg transition-all duration-200"
+                      className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-400 transition-all duration-200"
                     >
-                      <X className="w-4 h-4 text-red-400" />
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
-                ))
-              )}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -376,7 +387,7 @@ function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex relative">
+    <div className="h-screen bg-background text-foreground flex relative overflow-hidden">
       {/* Mobile Sidebar Overlay */}
       {isMobileSidebarOpen && (
         <div 
@@ -401,6 +412,7 @@ function Dashboard() {
           currentXP={currentLevelXP}
           maxXP={100}
           rank={rank}
+          user={user}
         />
       </div>
       

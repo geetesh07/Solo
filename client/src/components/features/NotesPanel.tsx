@@ -1,4 +1,5 @@
 import { useState } from "react";
+import * as React from "react";
 import { Search, Plus, Tag, Calendar, Edit3, Trash2, Filter, Star } from "lucide-react";
 
 interface Note {
@@ -13,28 +14,19 @@ interface Note {
 }
 
 export function NotesPanel() {
-  const [notes, setNotes] = useState<Note[]>([
-    {
-      id: '1',
-      title: 'Weekly Planning Strategy',
-      content: 'Focus on breaking down large goals into smaller, manageable daily tasks. Use the Pomodoro technique for complex training quests.',
-      tags: ['productivity', 'planning'],
-      createdAt: new Date('2024-01-15'),
-      updatedAt: new Date('2024-01-15'),
-      category: 'strategy',
-      starred: true
-    },
-    {
-      id: '2',
-      title: 'Reflection: First Week Complete',
-      content: 'Completed 85% of my main missions this week. Need to improve on side quest consistency. Training goals were the most challenging but rewarding.',
-      tags: ['weekly-review', 'progress'],
-      createdAt: new Date('2024-01-14'),
-      updatedAt: new Date('2024-01-14'),
-      category: 'reflection',
-      starred: false
-    }
-  ]);
+  const [notes, setNotes] = useState<Note[]>(() => {
+    const saved = localStorage.getItem('hunter-notes');
+    return saved ? JSON.parse(saved).map((note: any) => ({
+      ...note,
+      createdAt: new Date(note.createdAt),
+      updatedAt: new Date(note.updatedAt)
+    })) : [];
+  });
+
+  // Save notes to localStorage whenever notes change
+  React.useEffect(() => {
+    localStorage.setItem('hunter-notes', JSON.stringify(notes));
+  }, [notes]);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');

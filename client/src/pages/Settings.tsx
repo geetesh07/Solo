@@ -67,42 +67,22 @@ export function Settings() {
           </h2>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="mystical-card p-4">
-            <h3 className="text-white font-semibold mb-3">Hunter Information</h3>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-400">Name:</span>
-                <span className="text-white">{user?.displayName || 'Anonymous Hunter'}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Email:</span>
-                <span className="text-white">{user?.email}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Registration:</span>
-                <span className="text-white">
-                  {user?.metadata?.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString() : 'Unknown'}
-                </span>
-              </div>
+        <div className="mystical-card p-4">
+          <h3 className="text-white font-semibold mb-3">Hunter Information</h3>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between">
+              <span className="text-gray-400">Name:</span>
+              <span className="text-white">{user?.displayName || 'Anonymous Hunter'}</span>
             </div>
-          </div>
-          
-          <div className="mystical-card p-4">
-            <h3 className="text-white font-semibold mb-3">Hunter Stats</h3>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-400">Total Sessions:</span>
-                <span className="text-cyan-400">42</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Goals Created:</span>
-                <span className="text-cyan-400">156</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Avg. Completion:</span>
-                <span className="text-cyan-400">87%</span>
-              </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">Email:</span>
+              <span className="text-white">{user?.email}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">Registration:</span>
+              <span className="text-white">
+                {user?.metadata?.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString() : 'Unknown'}
+              </span>
             </div>
           </div>
         </div>

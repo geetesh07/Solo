@@ -7,6 +7,7 @@ interface AppSidebarProps {
   currentXP?: number;
   maxXP?: number;
   rank?: string;
+  user?: { displayName?: string | null; } | null;
 }
 
 export function AppSidebar({ 
@@ -14,7 +15,8 @@ export function AppSidebar({
   onViewChange, 
   userLevel = 1, 
   currentXP = 0, 
-  maxXP = 100 
+  maxXP = 100,
+  user
 }: AppSidebarProps) {
   const progress = Math.round((currentXP / maxXP) * 100);
 
@@ -35,7 +37,7 @@ export function AppSidebar({
             <User className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-white font-['Orbitron']">HUNTER</h1>
+            <h1 className="text-sm font-bold text-white truncate max-w-32">{user?.displayName || 'Hunter'}</h1>
             <p className="text-xs text-gray-400">Level {userLevel}</p>
           </div>
         </div>

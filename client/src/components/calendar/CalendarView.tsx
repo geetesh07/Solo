@@ -103,7 +103,10 @@ export function CalendarView({ goals = [] }: CalendarViewProps) {
           </h2>
           <p className="text-gray-400 mt-1">Plan and track your daily objectives</p>
         </div>
-        <button className="power-button">
+        <button 
+          className="power-button"
+          onClick={() => alert('Add Event functionality: Click on a calendar day to add events to that date')}
+        >
           <Plus className="w-5 h-5 mr-2" />
           Add Event
         </button>
@@ -114,7 +117,7 @@ export function CalendarView({ goals = [] }: CalendarViewProps) {
         <div className="flex items-center justify-between mb-6">
           <button 
             onClick={() => navigateMonth('prev')}
-            className="mystical-card p-2 hover:scale-110 transition-transform duration-200"
+            className="mystical-card p-2 transition-colors duration-200"
           >
             <ChevronLeft className="w-5 h-5 text-cyan-400" />
           </button>
@@ -127,7 +130,7 @@ export function CalendarView({ goals = [] }: CalendarViewProps) {
           
           <button 
             onClick={() => navigateMonth('next')}
-            className="mystical-card p-2 hover:scale-110 transition-transform duration-200"
+            className="mystical-card p-2 transition-colors duration-200"
           >
             <ChevronRight className="w-5 h-5 text-cyan-400" />
           </button>
