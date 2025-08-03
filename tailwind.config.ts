@@ -5,6 +5,11 @@ export default {
   content: ["./client/index.html", "./client/src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
+      fontFamily: {
+        orbitron: ['Orbitron', 'monospace'],
+        inter: ['Inter', 'sans-serif'],
+        rajdhani: ['Rajdhani', 'sans-serif'],
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
@@ -44,6 +49,18 @@ export default {
         border: "var(--border)",
         input: "var(--input)",
         ring: "var(--ring)",
+        // Solo Leveling colors
+        'solo-black': '#0a0a0a',
+        'solo-dark': '#131323',
+        'solo-darker': '#1a1a2e',
+        'solo-accent': '#16213e',
+        'solo-blue': '#00d4ff',
+        'solo-electric': '#0f3460',
+        'solo-purple': '#533483',
+        'solo-violet': '#7209b7',
+        'solo-gold': '#ffd700',
+        'solo-red': '#ff3333',
+        'solo-shadow': '#0f0f23',
         chart: {
           "1": "var(--chart-1)",
           "2": "var(--chart-2)",

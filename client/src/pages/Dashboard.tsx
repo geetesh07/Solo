@@ -177,11 +177,11 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-solo-dark text-white font-inter flex relative">
+    <div className="min-h-screen bg-solo-black text-white font-rajdhani flex relative">
       {/* Mobile Sidebar Overlay */}
       {isMobileSidebarOpen && (
         <div 
-          className="md:hidden fixed inset-0 bg-black/50 z-40"
+          className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40 animate-fade-in"
           onClick={() => setIsMobileSidebarOpen(false)}
         />
       )}
@@ -189,7 +189,7 @@ export default function Dashboard() {
       {/* Sidebar */}
       <div className={`
         md:relative md:translate-x-0 md:block
-        fixed left-0 top-0 z-50 h-full transition-transform duration-300
+        fixed left-0 top-0 z-50 h-full transition-transform duration-300 ease-out
         ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
       `}>
         <AppSidebar
@@ -212,8 +212,10 @@ export default function Dashboard() {
           onToggleMobileSidebar={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
         />
         
-        <div className="p-6 h-full overflow-y-auto">
-          {renderCurrentView()}
+        <div className="p-4 md:p-6 h-full overflow-y-auto">
+          <div className="animate-fade-in">
+            {renderCurrentView()}
+          </div>
         </div>
       </main>
 
