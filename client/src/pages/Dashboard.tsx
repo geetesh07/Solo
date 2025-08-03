@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { AppSidebar } from "../components/layout/AppSidebar";
 import { TopBar } from "../components/layout/TopBar";
@@ -10,6 +10,7 @@ import { Settings } from "./Settings";
 import { MorningModal } from "@/components/modals/MorningModal";
 import { ShadowArchives } from "../components/features/ShadowArchives";
 import { OnboardingModal } from "@/components/modals/OnboardingModal";
+import { MotivationalGreeting } from "@/components/ui/MotivationalGreeting";
 
 interface Goal {
   id: string;
@@ -33,6 +34,18 @@ function Dashboard() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isMorningModalOpen, setIsMorningModalOpen] = useState(false);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
+  const [showGreeting, setShowGreeting] = useState(false);
+
+  // Show greeting on first visit of the day
+  useEffect(() => {
+    const lastGreeting = localStorage.getItem('last-greeting-date');
+    const today = new Date().toDateString();
+    
+    if (lastGreeting !== today) {
+      setShowGreeting(true);
+      localStorage.setItem('last-greeting-date', today);
+    }
+  }, []);
 
   // Categories with goals state - start empty
   const [categories, setCategories] = useState<Category[]>([
@@ -452,6 +465,14 @@ function Dashboard() {
         isOpen={isOnboardingOpen}
         onClose={() => setIsOnboardingOpen(false)}
       />
+
+      {/* Motivational Greeting */}
+      {showGreeting && (
+        <MotivationalGreeting 
+          userName={user?.displayName || 'Hunter'}
+          onClose={() => setShowGreeting(false)}
+        />
+      )}
     </div>
   );
 }

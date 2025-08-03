@@ -390,7 +390,7 @@ export function CalendarView({ goals = [] }: CalendarViewProps) {
               <CalendarIcon className="w-5 h-5 text-white" />
             </div>
             <h3 className="text-lg font-bold text-white font-['Orbitron']">
-              Events for {new Date(selectedDate).toLocaleDateString()}
+              Events for {new Date(selectedDate).toLocaleDateString('en-GB')}
             </h3>
           </div>
           

@@ -7,13 +7,24 @@ interface NotificationSystemProps {
   onClose: () => void;
 }
 
+interface Reminder {
+  id: string;
+  title: string;
+  time: string;
+  enabled: boolean;
+  weekly?: boolean;
+}
+
 export function NotificationSystem({ isOpen, onClose }: NotificationSystemProps) {
   const [permission, setPermission] = useState<NotificationPermission>('default');
-  const [reminders, setReminders] = useState([
-    { id: '1', title: 'Daily Quest Reminder', time: '09:00', enabled: false },
-    { id: '2', title: 'Evening Review', time: '18:00', enabled: false },
-    { id: '3', title: 'Weekly Goals Check', time: '10:00', enabled: false, weekly: true }
-  ]);
+  const [reminders, setReminders] = useState<Reminder[]>(() => {
+    const saved = localStorage.getItem('notification-reminders');
+    return saved ? JSON.parse(saved) : [
+      { id: '1', title: 'Daily Quest Reminder', time: '09:00', enabled: false },
+      { id: '2', title: 'Evening Review', time: '18:00', enabled: false },
+      { id: '3', title: 'Weekly Goals Check', time: '10:00', enabled: false, weekly: true }
+    ];
+  });
 
   useEffect(() => {
     if ('Notification' in window) {
@@ -58,21 +69,68 @@ export function NotificationSystem({ isOpen, onClose }: NotificationSystemProps)
   };
 
   const toggleReminder = (id: string) => {
-    setReminders(prev => prev.map(reminder => 
-      reminder.id === id ? { ...reminder, enabled: !reminder.enabled } : reminder
-    ));
+    setReminders(prev => {
+      const updated = prev.map(reminder => 
+        reminder.id === id ? { ...reminder, enabled: !reminder.enabled } : reminder
+      );
+      localStorage.setItem('notification-reminders', JSON.stringify(updated));
+      return updated;
+    });
   };
+
+  // Schedule notifications based on enabled reminders
+  useEffect(() => {
+    const scheduleNotifications = () => {
+      reminders.forEach(reminder => {
+        if (reminder.enabled && permission === 'granted') {
+          const [hours, minutes] = reminder.time.split(':').map(Number);
+          const now = new Date();
+          const scheduledTime = new Date();
+          scheduledTime.setHours(hours, minutes, 0, 0);
+          
+          // If time has passed today, schedule for tomorrow
+          if (scheduledTime <= now) {
+            scheduledTime.setDate(scheduledTime.getDate() + 1);
+          }
+          
+          const timeUntilNotification = scheduledTime.getTime() - now.getTime();
+          
+          setTimeout(() => {
+            new Notification(`Solo Leveling - ${reminder.title}`, {
+              body: 'Time to level up your productivity!',
+              icon: '/favicon.ico',
+              badge: '/favicon.ico'
+            });
+          }, timeUntilNotification);
+        }
+      });
+    };
+
+    if (permission === 'granted') {
+      scheduleNotifications();
+    }
+  }, [reminders, permission]);
 
   const testNotification = () => {
     if (permission === 'granted') {
       try {
         new Notification('Hunter System Alert', {
-          body: 'Your daily quest briefing is ready!',
+          body: 'Your daily quest briefing is ready! Time to level up!',
           icon: '/favicon.ico',
           badge: '/favicon.ico'
         });
+        showToast({
+          type: 'success',
+          title: 'Test Notification Sent',
+          message: 'Check your browser notifications!'
+        });
       } catch (error) {
         console.error('Error sending test notification:', error);
+        showToast({
+          type: 'error',
+          title: 'Notification Failed',
+          message: 'Could not send test notification. Please check browser settings.'
+        });
         showToast({
           type: 'error',
           title: 'Notification Failed',
