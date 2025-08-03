@@ -1,4 +1,5 @@
 import { useState } from "react";
+import * as React from "react";
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Plus } from "lucide-react";
 
 interface CalendarEvent {
@@ -25,17 +26,30 @@ export function CalendarView({ goals = [] }: CalendarViewProps) {
   const [isAddingEvent, setIsAddingEvent] = useState(false);
   const [newEventTitle, setNewEventTitle] = useState('');
   const [newEventType, setNewEventType] = useState<'main-mission' | 'training' | 'side-quest'>('main-mission');
+  
+  // Load events from localStorage
+  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>(() => {
+    const saved = localStorage.getItem('calendar-events');
+    return saved ? JSON.parse(saved) : [];
+  });
 
-  // Convert goals to calendar events
-  const events: CalendarEvent[] = goals
+  // Save events to localStorage whenever they change
+  React.useEffect(() => {
+    localStorage.setItem('calendar-events', JSON.stringify(calendarEvents));
+  }, [calendarEvents]);
+
+  // Convert goals to calendar events and combine with stored events
+  const goalEvents: CalendarEvent[] = goals
     .filter(goal => goal.dueDate)
     .map(goal => ({
-      id: goal.id,
+      id: `goal-${goal.id}`,
       title: goal.title,
       date: goal.dueDate!,
       type: goal.category.toLowerCase().replace(' ', '-') as 'main-mission' | 'training' | 'side-quest',
       completed: goal.completed
     }));
+
+  const events: CalendarEvent[] = [...calendarEvents, ...goalEvents];
 
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
@@ -92,12 +106,45 @@ export function CalendarView({ goals = [] }: CalendarViewProps) {
   ];
 
   const handleAddEvent = () => {
-    if (!newEventTitle.trim() || !selectedDate) return;
+    if (!newEventTitle.trim()) {
+      alert('Please enter an event title');
+      return;
+    }
     
-    alert(`Event "${newEventTitle}" added for ${selectedDate}. This would integrate with your goal system.`);
+    const eventDate = selectedDate || `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(new Date().getDate()).padStart(2, '0')}`;
+    
+    const newEvent: CalendarEvent = {
+      id: `event-${Date.now()}`,
+      title: newEventTitle,
+      date: eventDate,
+      type: newEventType,
+      completed: false
+    };
+
+    const updatedEvents = [...calendarEvents, newEvent];
+    setCalendarEvents(updatedEvents);
+    localStorage.setItem('calendar-events', JSON.stringify(updatedEvents));
+    
     setNewEventTitle('');
     setIsAddingEvent(false);
     setSelectedDate(null);
+    alert(`Event "${newEvent.title}" added successfully for ${new Date(eventDate).toLocaleDateString()}!`);
+  };
+
+  const handleDeleteEvent = (eventId: string) => {
+    if (confirm('Are you sure you want to delete this event?')) {
+      const updatedEvents = calendarEvents.filter(event => event.id !== eventId);
+      setCalendarEvents(updatedEvents);
+      localStorage.setItem('calendar-events', JSON.stringify(updatedEvents));
+    }
+  };
+
+  const handleToggleEventComplete = (eventId: string) => {
+    const updatedEvents = calendarEvents.map(event => 
+      event.id === eventId ? { ...event, completed: !event.completed } : event
+    );
+    setCalendarEvents(updatedEvents);
+    localStorage.setItem('calendar-events', JSON.stringify(updatedEvents));
   };
 
   const handleDateClick = (day: number) => {
@@ -222,7 +269,7 @@ export function CalendarView({ goals = [] }: CalendarViewProps) {
             {events.filter(event => event.date === selectedDate).map(event => (
               <div key={event.id} className={`mystical-card p-4 ${event.completed ? 'opacity-60' : ''}`}>
                 <div className="flex items-center justify-between">
-                  <div>
+                  <div className="flex-1">
                     <h4 className={`font-semibold ${event.completed ? 'line-through text-gray-500' : 'text-white'}`}>
                       {event.title}
                     </h4>
@@ -230,12 +277,32 @@ export function CalendarView({ goals = [] }: CalendarViewProps) {
                       {event.type.replace('-', ' ')}
                     </p>
                   </div>
-                  <div className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                    event.completed 
-                      ? 'bg-green-500/20 text-green-400' 
-                      : 'bg-yellow-500/20 text-yellow-400'
-                  }`}>
-                    {event.completed ? 'Completed' : 'Pending'}
+                  <div className="flex items-center space-x-2">
+                    <div className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                      event.completed 
+                        ? 'bg-green-500/20 text-green-400' 
+                        : 'bg-yellow-500/20 text-yellow-400'
+                    }`}>
+                      {event.completed ? 'Completed' : 'Pending'}
+                    </div>
+                    {!event.id.startsWith('goal-') && (
+                      <>
+                        <button
+                          onClick={() => handleToggleEventComplete(event.id)}
+                          className="p-1 text-green-400 hover:text-green-300 transition-colors"
+                          title={event.completed ? 'Mark as pending' : 'Mark as completed'}
+                        >
+                          ✓
+                        </button>
+                        <button
+                          onClick={() => handleDeleteEvent(event.id)}
+                          className="p-1 text-red-400 hover:text-red-300 transition-colors"
+                          title="Delete event"
+                        >
+                          ✕
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -262,7 +329,9 @@ export function CalendarView({ goals = [] }: CalendarViewProps) {
                 placeholder="Event title..."
                 value={newEventTitle}
                 onChange={(e) => setNewEventTitle(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleAddEvent()}
                 className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:border-cyan-400 focus:outline-none"
+                autoFocus
               />
               <select
                 value={newEventType}
