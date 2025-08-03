@@ -222,7 +222,7 @@ export function CalendarView({ goals = [] }: CalendarViewProps) {
   };
 
   const handleDeleteEvent = (eventId: string) => {
-    const event = calendarEvents.find(e => e.id === eventId);
+    const event = calendarEvents.find((e: CalendarEvent) => e.id === eventId);
     if (!event) return;
     
     showConfirm(
@@ -251,7 +251,7 @@ export function CalendarView({ goals = [] }: CalendarViewProps) {
   };
 
   const handleToggleEventComplete = (eventId: string) => {
-    const event = calendarEvents.find(e => e.id === eventId);
+    const event = calendarEvents.find((e: CalendarEvent) => e.id === eventId);
     if (!event) return;
     
     updateEventMutation.mutate({
@@ -330,11 +330,11 @@ export function CalendarView({ goals = [] }: CalendarViewProps) {
           </button>
         </div>
 
-        {/* Calendar Grid */}
-        <div className="grid grid-cols-7 gap-2">
+        {/* Calendar Grid - Compact Version */}
+        <div className="grid grid-cols-7 gap-1 md:gap-2">
           {/* Day headers */}
           {dayNames.map(day => (
-            <div key={day} className="text-center p-2 text-gray-400 font-semibold text-sm">
+            <div key={day} className="text-center p-1 md:p-2 text-gray-400 font-semibold text-xs md:text-sm">
               {day}
             </div>
           ))}
@@ -342,7 +342,7 @@ export function CalendarView({ goals = [] }: CalendarViewProps) {
           {/* Calendar days */}
           {days.map((day, index) => {
             if (day === null) {
-              return <div key={`empty-${index}`} className="aspect-square" />;
+              return <div key={`empty-${index}`} className="h-12 md:h-16" />;
             }
             
             const dayEvents = getEventsForDate(day);
@@ -353,26 +353,26 @@ export function CalendarView({ goals = [] }: CalendarViewProps) {
             return (
               <div
                 key={`${currentDate.getFullYear()}-${currentDate.getMonth()}-${day}`}
-                className={`aspect-square p-2 rounded-lg cursor-pointer transition-all duration-200 ${
+                className={`h-12 md:h-16 p-1 md:p-2 rounded-lg cursor-pointer transition-all duration-200 ${
                   isToday 
                     ? 'bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border-2 border-cyan-500/50' 
                     : 'hover:bg-white/5'
                 } ${dayEvents.length > 0 ? 'ring-1 ring-cyan-500/30' : ''}`}
                 onClick={() => handleDateClick(day)}
               >
-                <div className="text-white font-semibold mb-1">{day}</div>
-                <div className="space-y-1">
-                  {dayEvents.slice(0, 2).map(event => (
+                <div className="text-white font-semibold text-xs md:text-sm mb-1">{day}</div>
+                <div className="space-y-0.5">
+                  {dayEvents.slice(0, 1).map(event => (
                     <div
                       key={event.id}
                       className={`text-xs px-1 py-0.5 rounded border ${getEventTypeColor(event.type)} ${
                         event.completed ? 'opacity-60 line-through' : ''
                       }`}
                     >
-                      {event.title.length > 8 ? event.title.substring(0, 8) + '...' : event.title}
+                      {event.title.length > 6 ? event.title.substring(0, 6) + '...' : event.title}
                     </div>
                   ))}
-                  {dayEvents.length > 2 && (
+                  {dayEvents.length > 1 && (
                     <div className="text-xs text-gray-400">+{dayEvents.length - 2} more</div>
                   )}
                 </div>

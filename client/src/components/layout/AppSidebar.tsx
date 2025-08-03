@@ -32,6 +32,16 @@ export function AppSidebar({
     <aside className="w-64 h-screen bg-gradient-to-b from-gray-900 to-black border-r border-gray-700 flex flex-col">
       {/* Header */}
       <div className="p-6 border-b border-gray-700">
+        {/* Logo Section */}
+        <div className="flex items-center justify-center mb-4">
+          <img 
+            src="/attached_assets/image_1754237156070.png" 
+            alt="Solo Leveling - ARISE" 
+            className="h-12 w-auto object-contain"
+          />
+        </div>
+        
+        {/* User Info */}
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
             <User className="w-5 h-5 text-white" />

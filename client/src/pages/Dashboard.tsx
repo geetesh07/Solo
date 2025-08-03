@@ -8,7 +8,7 @@ import { AnalyticsDashboard } from "../components/analytics/AnalyticsDashboard";
 import { CalendarView } from "../components/calendar/CalendarView";
 import { Settings } from "./Settings";
 import { MorningModal } from "@/components/modals/MorningModal";
-import { NotesPanel } from "../components/features/NotesPanel";
+import { ShadowArchives } from "../components/features/ShadowArchives";
 import { OnboardingModal } from "@/components/modals/OnboardingModal";
 
 interface Goal {
@@ -356,7 +356,7 @@ function Dashboard() {
   );
 
   const renderCalendar = () => (
-    <div className="slide-up p-4 md:p-6">
+    <div className="slide-up h-full overflow-y-auto p-4 md:p-6">
       <CalendarView goals={categories.flatMap(cat => 
         cat.goals.map(goal => ({
           ...goal,
@@ -373,13 +373,13 @@ function Dashboard() {
   );
 
   const renderNotes = () => (
-    <div className="slide-up p-4 md:p-6">
-      <NotesPanel />
+    <div className="slide-up h-full">
+      <ShadowArchives />
     </div>
   );
 
   const renderSettings = () => (
-    <div className="slide-up p-4 md:p-6">
+    <div className="slide-up h-full">
       <Settings />
     </div>
   );
