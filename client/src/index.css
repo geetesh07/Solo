@@ -1,29 +1,38 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@400;700;900&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --background: 222 47% 11%;
+  /* Solo Leveling Premium Colors */
+  --background: 220 25% 7%;
   --foreground: 210 40% 98%;
-  --card: 222 47% 11%;
+  --card: 225 25% 12%;
   --card-foreground: 210 40% 98%;
-  --popover: 222 47% 11%;
+  --popover: 225 25% 12%;
   --popover-foreground: 210 40% 98%;
-  --primary: 217 91% 60%;
-  --primary-foreground: 222 47% 11%;
-  --secondary: 222 47% 11%;
+  --primary: 200 100% 55%;
+  --primary-foreground: 220 25% 7%;
+  --secondary: 240 60% 45%;
   --secondary-foreground: 210 40% 98%;
-  --muted: 217 33% 17%;
+  --muted: 225 25% 18%;
   --muted-foreground: 215 20% 65%;
-  --accent: 217 33% 17%;
+  --accent: 225 25% 18%;
   --accent-foreground: 210 40% 98%;
-  --destructive: 0 63% 31%;
+  --destructive: 0 72% 51%;
   --destructive-foreground: 210 40% 98%;
-  --border: 217 33% 17%;
-  --input: 217 33% 17%;
-  --ring: 217 91% 60%;
-  --radius: 0.5rem;
+  --border: 225 25% 18%;
+  --input: 225 25% 15%;
+  --ring: 200 100% 55%;
+  --radius: 0.75rem;
+  
+  /* Solo Leveling Specific Colors */
+  --neon-blue: #00d4ff;
+  --neon-purple: #8b5cf6;
+  --neon-cyan: #06ffff;
+  --electric-blue: #0099ff;
+  --dark-purple: #1a0d2e;
+  --shadow-dark: #0a0a0f;
 }
 
 * {
@@ -33,6 +42,9 @@
 
 body {
   background: hsl(var(--background));
+  background-image: 
+    radial-gradient(circle at 20% 50%, rgba(0, 212, 255, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.03) 0%, transparent 50%);
   color: hsl(var(--foreground));
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   font-weight: 400;
@@ -43,13 +55,131 @@ body {
   padding: 0;
 }
 
-/* Minimal animations for performance */
+@layer components {
+  /* Premium Neon Box */
+  .neon-box {
+    background: linear-gradient(145deg, rgba(0, 212, 255, 0.1), rgba(139, 92, 246, 0.05));
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    border-radius: 12px;
+    box-shadow: 
+      0 0 20px rgba(0, 212, 255, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .neon-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.1), transparent);
+    animation: shimmer 3s infinite;
+  }
+  
+  /* Premium Card with Glow */
+  .premium-card {
+    background: linear-gradient(145deg, 
+      rgba(34, 34, 46, 0.8), 
+      rgba(25, 25, 35, 0.9)
+    );
+    border: 1px solid rgba(0, 212, 255, 0.2);
+    border-radius: 16px;
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      0 0 0 1px rgba(0, 212, 255, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(16px);
+    transition: all 0.3s ease;
+  }
+  
+  .premium-card:hover {
+    border-color: rgba(0, 212, 255, 0.4);
+    box-shadow: 
+      0 12px 40px rgba(0, 0, 0, 0.4),
+      0 0 0 1px rgba(0, 212, 255, 0.2),
+      0 0 20px rgba(0, 212, 255, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+  }
+  
+  /* Glowing Button */
+  .glow-button {
+    background: linear-gradient(135deg, var(--neon-blue), var(--electric-blue));
+    border: 1px solid rgba(0, 212, 255, 0.5);
+    border-radius: 8px;
+    color: #000;
+    font-weight: 600;
+    font-family: 'Orbitron', monospace;
+    padding: 12px 24px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 
+      0 0 20px rgba(0, 212, 255, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+  
+  .glow-button:hover {
+    box-shadow: 
+      0 0 30px rgba(0, 212, 255, 0.5),
+      0 5px 15px rgba(0, 212, 255, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+  }
+  
+  /* Status Window */
+  .status-window {
+    background: linear-gradient(145deg, 
+      rgba(26, 13, 46, 0.9), 
+      rgba(20, 20, 35, 0.9)
+    );
+    border: 2px solid rgba(139, 92, 246, 0.3);
+    border-radius: 16px;
+    box-shadow: 
+      0 0 40px rgba(139, 92, 246, 0.2),
+      inset 0 2px 0 rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    position: relative;
+  }
+  
+  .status-window::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, 
+      var(--neon-blue), 
+      var(--neon-purple), 
+      var(--neon-cyan)
+    );
+    border-radius: 16px;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .status-window:hover::after {
+    opacity: 0.3;
+  }
+}
+
+/* Smooth animations */
 .fade-in {
-  animation: fadeIn 200ms ease-out;
+  animation: fadeIn 400ms ease-out;
 }
 
 .slide-up {
-  animation: slideUp 250ms ease-out;
+  animation: slideUp 500ms ease-out;
+}
+
+.neon-pulse {
+  animation: neonPulse 2s ease-in-out infinite alternate;
 }
 
 @keyframes fadeIn {
@@ -60,11 +190,25 @@ body {
 @keyframes slideUp {
   0% {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(20px);
   }
   100% {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+@keyframes neonPulse {
+  0% {
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+  }
+  100% {
+    box-shadow: 0 0 30px rgba(0, 212, 255, 0.6);
   }
 }
 
@@ -76,4 +220,79 @@ body {
 /* Smooth scrolling for better UX */
 html {
   scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--neon-blue), var(--neon-purple));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--neon-cyan), var(--neon-blue));
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+  .status-window {
+    margin: 16px;
+    padding: 20px;
+  }
+  
+  .premium-card {
+    padding: 16px;
+  }
+  
+  .neon-box {
+    margin: 8px;
+    padding: 16px;
+  }
+  
+  .glow-button {
+    padding: 14px 20px;
+    font-size: 14px;
+  }
+  
+  /* Touch-friendly tap targets */
+  button, .cursor-pointer {
+    min-height: 44px;
+  }
+  
+  /* Better mobile typography */
+  h1 {
+    font-size: 1.75rem;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+  }
+  
+  /* Mobile-first grid adjustments */
+  .grid-cols-3 {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .md\:grid-cols-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Ultra-wide desktop optimizations */
+@media (min-width: 1920px) {
+  .status-window {
+    max-width: 600px;
+  }
+  
+  .premium-card {
+    padding: 24px;
+  }
 }
