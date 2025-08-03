@@ -45,10 +45,36 @@ export function Settings() {
   const applyTheme = (themeId: string) => {
     setSelectedTheme(themeId);
     localStorage.setItem('hunter-theme', themeId);
+    
+    // Apply the theme styles
+    const theme = colorThemes.find(t => t.id === themeId);
+    if (theme) {
+      // Remove existing theme style
+      const existingStyle = document.getElementById('hunter-theme-style');
+      if (existingStyle) {
+        existingStyle.remove();
+      }
+      
+      // Add new theme style
+      const style = document.createElement('style');
+      style.id = 'hunter-theme-style';
+      style.textContent = `
+        .power-button {
+          background: linear-gradient(135deg, ${theme.colors[0]}, ${theme.colors[1]}) !important;
+        }
+        
+        .mystical-card {
+          border-color: ${theme.colors[0]}33 !important;
+          background: linear-gradient(135deg, ${theme.colors[0]}0a, ${theme.colors[1]}05) !important;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+    
     showToast({
       type: 'success',
       title: 'Theme Applied!',
-      message: `Switched to ${themes.find(t => t.id === themeId)?.name || themeId}`
+      message: `Switched to ${theme?.name || themeId}`
     });
   };
 
@@ -374,7 +400,7 @@ export function Settings() {
                 </div>
                 
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {themes.map((theme) => (
+                  {colorThemes.map((theme) => (
                     <button
                       key={theme.id}
                       onClick={() => applyTheme(theme.id)}
@@ -385,7 +411,15 @@ export function Settings() {
                       }`}
                     >
                       <div className="text-center">
-                        <div className="text-lg mb-1">{theme.icon}</div>
+                        <div className="flex justify-center space-x-1 mb-2">
+                          {theme.colors.map((color, index) => (
+                            <div
+                              key={index}
+                              className="w-3 h-3 rounded-full border border-white/20"
+                              style={{ backgroundColor: color }}
+                            />
+                          ))}
+                        </div>
                         <div className="text-white text-xs sm:text-sm font-medium">{theme.name}</div>
                       </div>
                     </button>
