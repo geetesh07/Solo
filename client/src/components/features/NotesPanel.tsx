@@ -101,7 +101,7 @@ export function NotesPanel() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="w-full max-w-none space-y-6">
       {/* Header */}
       <div className="hunter-status-window p-6">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-6">
@@ -115,7 +115,7 @@ export function NotesPanel() {
           </div>
           <button
             onClick={() => setIsCreating(true)}
-            className="power-button"
+            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors shadow-lg flex items-center"
           >
             <Plus className="w-5 h-5 mr-2" />
             New Entry
@@ -262,7 +262,7 @@ export function NotesPanel() {
             <div className="flex space-x-4">
               <button
                 onClick={handleCreateNote}
-                className="power-button flex-1"
+                className="flex-1 px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-colors shadow-lg"
               >
                 Save Entry
               </button>
@@ -294,7 +294,7 @@ export function NotesPanel() {
             {!searchTerm && selectedCategory === 'all' && (
               <button
                 onClick={() => setIsCreating(true)}
-                className="power-button"
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors shadow-lg flex items-center"
               >
                 <Plus className="w-5 h-5 mr-2" />
                 Create First Note

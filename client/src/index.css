@@ -26,6 +26,16 @@
   --ring: 200 98% 50%;
   --radius: 0.5rem;
   
+  /* Solo Leveling Theme Colors - Customizable */
+  --primary-color: #0ea5e9;
+  --secondary-color: #06b6d4;
+  --accent-color: #8b5cf6;
+  
+  /* Legacy Support */
+  --neon-blue: var(--primary-color);
+  --neon-cyan: var(--secondary-color);
+  --neon-purple: var(--accent-color);
+  
   /* Refined Colors */
   --accent-blue: #3b82f6;
   --accent-cyan: #06b6d4;

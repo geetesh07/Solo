@@ -22,6 +22,9 @@ interface CalendarViewProps {
 export function CalendarView({ goals = [] }: CalendarViewProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [isAddingEvent, setIsAddingEvent] = useState(false);
+  const [newEventTitle, setNewEventTitle] = useState('');
+  const [newEventType, setNewEventType] = useState<'main-mission' | 'training' | 'side-quest'>('main-mission');
 
   // Convert goals to calendar events
   const events: CalendarEvent[] = goals
@@ -88,11 +91,26 @@ export function CalendarView({ goals = [] }: CalendarViewProps) {
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
 
+  const handleAddEvent = () => {
+    if (!newEventTitle.trim() || !selectedDate) return;
+    
+    alert(`Event "${newEventTitle}" added for ${selectedDate}. This would integrate with your goal system.`);
+    setNewEventTitle('');
+    setIsAddingEvent(false);
+    setSelectedDate(null);
+  };
+
+  const handleDateClick = (day: number) => {
+    const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    setSelectedDate(dateStr);
+    setIsAddingEvent(true);
+  };
+
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const days = getDaysInMonth(currentDate);
 
   return (
-    <div className="space-y-6">
+    <div className="w-full max-w-none space-y-6">
       {/* Calendar Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -105,7 +123,7 @@ export function CalendarView({ goals = [] }: CalendarViewProps) {
         </div>
         <button 
           className="power-button"
-          onClick={() => alert('Add Event functionality: Click on a calendar day to add events to that date')}
+          onClick={() => setIsAddingEvent(true)}
         >
           <Plus className="w-5 h-5 mr-2" />
           Add Event
@@ -229,6 +247,47 @@ export function CalendarView({ goals = [] }: CalendarViewProps) {
                 <p>No events scheduled for this date</p>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Add Event Modal */}
+      {isAddingEvent && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="mystical-card max-w-md w-full p-6">
+            <h3 className="text-xl font-bold text-white font-['Orbitron'] mb-4">Add New Quest Event</h3>
+            <div className="space-y-4">
+              <input
+                type="text"
+                placeholder="Event title..."
+                value={newEventTitle}
+                onChange={(e) => setNewEventTitle(e.target.value)}
+                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:border-cyan-400 focus:outline-none"
+              />
+              <select
+                value={newEventType}
+                onChange={(e) => setNewEventType(e.target.value as any)}
+                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-cyan-400 focus:outline-none"
+              >
+                <option value="main-mission">Main Mission</option>
+                <option value="training">Training</option>
+                <option value="side-quest">Side Quest</option>
+              </select>
+              <div className="flex space-x-3">
+                <button
+                  onClick={handleAddEvent}
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                >
+                  Add Event
+                </button>
+                <button
+                  onClick={() => setIsAddingEvent(false)}
+                  className="flex-1 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

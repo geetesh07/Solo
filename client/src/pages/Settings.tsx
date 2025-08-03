@@ -45,15 +45,27 @@ export function Settings() {
     const theme = colorThemes.find(t => t.id === themeId);
     if (theme) {
       const root = document.documentElement;
+      
+      // Update CSS variables for colors used throughout the app
+      root.style.setProperty('--primary-color', theme.colors[0]);
+      root.style.setProperty('--secondary-color', theme.colors[1]);
+      root.style.setProperty('--accent-color', theme.colors[2]);
+      
+      // Update specific color classes
       root.style.setProperty('--neon-blue', theme.colors[0]);
       root.style.setProperty('--neon-cyan', theme.colors[1]);
       root.style.setProperty('--neon-purple', theme.colors[2]);
+      
       setCurrentTheme(themeId);
+      localStorage.setItem('hunter-theme', themeId);
+      
+      // Force re-render of components that use these colors
+      window.dispatchEvent(new CustomEvent('themeChanged', { detail: { theme } }));
     }
   };
 
   return (
-    <div className="space-y-8">
+    <div className="w-full max-w-none space-y-8">
       {/* Profile Section */}
       <div className="hunter-status-window p-6">
         <div className="flex items-center space-x-4 mb-6">

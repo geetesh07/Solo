@@ -50,7 +50,7 @@ export function AnalyticsDashboard({ categories = [] }: AnalyticsDashboardProps)
   });
 
   return (
-    <div className="space-y-8">
+    <div className="w-full max-w-none space-y-8">
       {/* Analytics Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -82,7 +82,7 @@ export function AnalyticsDashboard({ categories = [] }: AnalyticsDashboardProps)
         {/* Chart */}
         <div className="space-y-4">
           {weeklyData.map((day) => {
-            const percentage = (day.completed / day.total) * 100;
+            const percentage = day.total > 0 ? (day.completed / day.total) * 100 : 0;
             return (
               <div key={day.day} className="flex items-center space-x-4">
                 <div className="w-12 text-gray-400 text-sm font-medium">{day.day}</div>
@@ -118,7 +118,7 @@ export function AnalyticsDashboard({ categories = [] }: AnalyticsDashboardProps)
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {categoryStats.map((category) => {
-            const percentage = (category.completed / category.total) * 100;
+            const percentage = category.total > 0 ? (category.completed / category.total) * 100 : 0;
             return (
               <div key={category.name} className="mystical-card p-4">
                 <h4 className="text-white font-semibold mb-2">{category.name}</h4>

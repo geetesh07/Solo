@@ -22,16 +22,25 @@ export function NotificationSystem({ isOpen, onClose }: NotificationSystemProps)
 
   const requestPermission = async () => {
     if ('Notification' in window) {
-      const result = await Notification.requestPermission();
-      setPermission(result);
-      
-      if (result === 'granted') {
-        new Notification('Solo Leveling Productivity', {
-          body: 'Notifications enabled! You\'ll receive quest reminders.',
-          icon: '/favicon.ico',
-          badge: '/favicon.ico'
-        });
+      try {
+        const result = await Notification.requestPermission();
+        setPermission(result);
+        
+        if (result === 'granted') {
+          new Notification('Solo Leveling Productivity', {
+            body: 'Notifications enabled! You\'ll receive quest reminders.',
+            icon: '/favicon.ico',
+            badge: '/favicon.ico'
+          });
+        } else if (result === 'denied') {
+          alert('Notifications were denied. Please enable them in your browser settings to receive quest reminders.');
+        }
+      } catch (error) {
+        console.error('Error requesting notification permission:', error);
+        alert('Could not request notification permission. Please check your browser settings.');
       }
+    } else {
+      alert('This browser does not support notifications.');
     }
   };
 
@@ -43,11 +52,18 @@ export function NotificationSystem({ isOpen, onClose }: NotificationSystemProps)
 
   const testNotification = () => {
     if (permission === 'granted') {
-      new Notification('Hunter System Alert', {
-        body: 'Your daily quest briefing is ready!',
-        icon: '/favicon.ico',
-        badge: '/favicon.ico'
-      });
+      try {
+        new Notification('Hunter System Alert', {
+          body: 'Your daily quest briefing is ready!',
+          icon: '/favicon.ico',
+          badge: '/favicon.ico'
+        });
+      } catch (error) {
+        console.error('Error sending test notification:', error);
+        alert('Failed to send test notification. Please check your browser settings.');
+      }
+    } else {
+      alert('Please enable notifications first by clicking "Enable Notifications" above.');
     }
   };
 
