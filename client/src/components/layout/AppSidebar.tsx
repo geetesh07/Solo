@@ -1,4 +1,4 @@
-import { Home, Calendar, BarChart3, Settings, User, BookOpen } from "lucide-react";
+import { Home, Calendar, BarChart3, Settings, User, BookOpen, Flame } from "lucide-react";
 
 interface AppSidebarProps {
   currentView: string;
@@ -22,6 +22,7 @@ export function AppSidebar({
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: Home },
+    { id: 'streaks', label: 'Streak Tracker', icon: Flame },
     { id: 'calendar', label: 'Calendar', icon: Calendar },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
     { id: 'notes', label: 'Shadow Archives', icon: BookOpen },

@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { AppSidebar } from "../components/layout/AppSidebar";
 import { TopBar } from "../components/layout/TopBar";
 import { useGoals } from "@/hooks/useGoals";
-import { Crown, Star, CheckCircle, Calendar, BarChart3, Target, Plus, X, Bell, Trash2, Check, Menu } from "lucide-react";
+import { Crown, Star, CheckCircle, Calendar, BarChart3, Target, Plus, X, Bell, Trash2, Check, Menu, Flame } from "lucide-react";
 import { AnalyticsDashboard } from "../components/analytics/AnalyticsDashboard";
 import { CalendarView } from "../components/calendar/CalendarView";
 import { Settings } from "./Settings";
@@ -11,6 +11,7 @@ import { MorningModal } from "@/components/modals/MorningModal";
 import { ShadowArchives } from "../components/features/ShadowArchives";
 import { OnboardingModal } from "@/components/modals/OnboardingModal";
 import { MotivationalGreeting } from "@/components/ui/MotivationalGreeting";
+import { StreakTracker } from "@/components/features/StreakTracker";
 
 interface Goal {
   id: string;
@@ -397,9 +398,24 @@ function Dashboard() {
     </div>
   );
 
+  const renderStreaks = () => {
+    const completedGoalsToday = categories.flatMap(cat => cat.goals).filter(g => g.completed).length;
+    const totalGoalsToday = categories.flatMap(cat => cat.goals).length;
+    
+    return (
+      <div className="slide-up p-4 md:p-6">
+        <StreakTracker 
+          completedGoalsToday={completedGoalsToday}
+          totalGoalsToday={totalGoalsToday}
+        />
+      </div>
+    );
+  };
+
   const renderCurrentView = () => {
     switch (currentView) {
       case 'dashboard': return renderDashboard();
+      case 'streaks': return renderStreaks();
       case 'calendar': return renderCalendar();
       case 'analytics': return renderAnalytics();
       case 'notes': return renderNotes();
