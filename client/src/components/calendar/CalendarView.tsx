@@ -362,18 +362,19 @@ export function CalendarView({ goals = [] }: CalendarViewProps) {
               >
                 <div className="text-white font-semibold text-xs md:text-sm mb-1">{day}</div>
                 <div className="space-y-0.5">
-                  {dayEvents.slice(0, 1).map(event => (
+                  {dayEvents.slice(0, 2).map(event => (
                     <div
                       key={event.id}
-                      className={`text-xs px-1 py-0.5 rounded border ${getEventTypeColor(event.type)} ${
+                      className={`text-xs px-1 py-0.5 rounded ${getEventTypeColor(event.type)} ${
                         event.completed ? 'opacity-60 line-through' : ''
-                      }`}
+                      } truncate max-w-full`}
+                      title={event.title}
                     >
-                      {event.title.length > 6 ? event.title.substring(0, 6) + '...' : event.title}
+                      {event.title.length > 8 ? event.title.substring(0, 8) + '...' : event.title}
                     </div>
                   ))}
-                  {dayEvents.length > 1 && (
-                    <div className="text-xs text-gray-400">+{dayEvents.length - 2} more</div>
+                  {dayEvents.length > 2 && (
+                    <div className="text-xs text-gray-400 font-semibold">+{dayEvents.length - 2}</div>
                   )}
                 </div>
               </div>

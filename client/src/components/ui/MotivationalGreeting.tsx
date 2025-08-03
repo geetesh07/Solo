@@ -11,6 +11,26 @@ export function MotivationalGreeting({ userName = "Hunter", onClose }: Motivatio
   const [currentQuote, setCurrentQuote] = useState<MotivationalQuote>(() => getDailyQuote());
   const [greeting, setGreeting] = useState("");
 
+  // Update quote daily - check if we need a new quote
+  useEffect(() => {
+    const checkForNewQuote = () => {
+      const today = new Date().toDateString();
+      const lastQuoteDate = localStorage.getItem('last-quote-date');
+      
+      if (lastQuoteDate !== today) {
+        const newQuote = getDailyQuote();
+        setCurrentQuote(newQuote);
+        localStorage.setItem('last-quote-date', today);
+      }
+    };
+    
+    checkForNewQuote();
+    
+    // Check every hour if we need a new quote (in case user keeps app open overnight)
+    const interval = setInterval(checkForNewQuote, 3600000);
+    return () => clearInterval(interval);
+  }, []);
+
   useEffect(() => {
     const hour = new Date().getHours();
     let timeGreeting = "";

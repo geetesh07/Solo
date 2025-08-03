@@ -375,9 +375,19 @@ export function getQuoteByCategory(category: MotivationalQuote['category']): Mot
 }
 
 export function getDailyQuote(): MotivationalQuote {
-  // Use date as seed for consistent daily quote
-  const today = new Date().toDateString();
-  const seed = today.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const index = seed % motivationalQuotes.length;
+  // Use date as seed for consistent daily quote that changes each day
+  const today = new Date();
+  const dateString = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
+  let hash = 0;
+  
+  // Create hash from date string
+  for (let i = 0; i < dateString.length; i++) {
+    const char = dateString.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32-bit integer
+  }
+  
+  // Ensure positive index
+  const index = Math.abs(hash) % motivationalQuotes.length;
   return motivationalQuotes[index];
 }

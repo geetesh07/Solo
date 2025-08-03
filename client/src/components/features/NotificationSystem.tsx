@@ -33,22 +33,49 @@ export function NotificationSystem({ isOpen, onClose }: NotificationSystemProps)
   }, []);
 
   const requestPermission = async () => {
+    console.log('Requesting notification permission...');
+    
     if ('Notification' in window) {
       try {
         const result = await Notification.requestPermission();
+        console.log('Permission result:', result);
         setPermission(result);
         
         if (result === 'granted') {
-          new Notification('Solo Leveling Productivity', {
-            body: 'Notifications enabled! You\'ll receive quest reminders.',
+          console.log('Permission granted, creating welcome notification...');
+          
+          // Create immediate test notification
+          const welcomeNotification = new Notification('🎯 Hunter System Online!', {
+            body: 'Notifications enabled! You\'ll receive quest reminders and updates.',
             icon: '/favicon.ico',
-            badge: '/favicon.ico'
+            badge: '/favicon.ico',
+            tag: 'welcome-notification',
+            requireInteraction: false
           });
+          
+          welcomeNotification.onclick = () => {
+            console.log('Welcome notification clicked!');
+            window.focus();
+            welcomeNotification.close();
+          };
+          
+          showToast({
+            type: 'success',
+            title: 'Notifications Enabled!',
+            message: 'You should see a welcome notification now!'
+          });
+          
         } else if (result === 'denied') {
           showToast({
             type: 'warning',
             title: 'Notifications Denied',
             message: 'Please enable notifications in your browser settings to receive quest reminders'
+          });
+        } else {
+          showToast({
+            type: 'info',
+            title: 'Permission Pending',
+            message: 'Please respond to the notification permission prompt'
           });
         }
       } catch (error) {

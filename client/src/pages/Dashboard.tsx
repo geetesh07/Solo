@@ -12,6 +12,7 @@ import { ShadowArchives } from "../components/features/ShadowArchives";
 import { OnboardingModal } from "@/components/modals/OnboardingModal";
 import { MotivationalGreeting } from "@/components/ui/MotivationalGreeting";
 import { StreakTracker } from "@/components/features/StreakTracker";
+import { showToast } from "@/components/ui/Toast";
 
 interface Goal {
   id: string;
@@ -83,13 +84,77 @@ function Dashboard() {
     ];
   });
 
-  const [newGoal, setNewGoal] = useState({ title: '', categoryId: '', priority: 'medium' as 'low' | 'medium' | 'high', dueDate: '' });
+  const [newGoal, setNewGoal] = useState({ 
+    title: '', 
+    categoryId: '', 
+    priority: 'medium' as 'low' | 'medium' | 'high', 
+    dueDate: new Date().toISOString().split('T')[0] // Default to today
+  });
   const [isAddingGoal, setIsAddingGoal] = useState<string | null>(null);
 
   // Save categories to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem('hunter-categories-with-goals', JSON.stringify(categories));
   }, [categories]);
+
+  // Auto-remove expired quests and update efficiency
+  useEffect(() => {
+    const now = new Date();
+    now.setHours(23, 59, 59, 999); // End of today
+    
+    setCategories(prev => prev.map(cat => ({
+      ...cat,
+      goals: cat.goals.filter(goal => {
+        if (!goal.dueDate) return true; // Keep goals without due dates
+        
+        const dueDate = new Date(goal.dueDate);
+        dueDate.setHours(23, 59, 59, 999);
+        
+        // If goal is overdue and not completed, remove it
+        if (dueDate < now && !goal.completed) {
+          showToast({
+            type: 'warning',
+            title: 'Quest Expired!',
+            message: `"${goal.title}" has been removed due to missed deadline`,
+            duration: 6000
+          });
+          return false;
+        }
+        return true;
+      })
+    })));
+  }, []); // Run once on component mount
+
+  // Check for expired quests every hour
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = new Date();
+      now.setHours(23, 59, 59, 999);
+      
+      setCategories(prev => prev.map(cat => ({
+        ...cat,
+        goals: cat.goals.filter(goal => {
+          if (!goal.dueDate) return true;
+          
+          const dueDate = new Date(goal.dueDate);
+          dueDate.setHours(23, 59, 59, 999);
+          
+          if (dueDate < now && !goal.completed) {
+            showToast({
+              type: 'warning',
+              title: 'Quest Expired!',
+              message: `"${goal.title}" has been removed due to missed deadline`,
+              duration: 6000
+            });
+            return false;
+          }
+          return true;
+        })
+      })));
+    }, 3600000); // Check every hour
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Calculate dynamic user stats from actual goals
   const totalGoals = categories.flatMap(cat => cat.goals).length;
@@ -118,7 +183,7 @@ function Dashboard() {
         : cat
     ));
 
-    setNewGoal({ title: '', categoryId: '', priority: 'medium', dueDate: '' });
+    setNewGoal({ title: '', categoryId: '', priority: 'medium', dueDate: new Date().toISOString().split('T')[0] });
     setIsAddingGoal(null);
   };
 

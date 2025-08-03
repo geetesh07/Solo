@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { Bell, Palette, User, Shield, RefreshCw, Download, Upload, Trash2, Settings as SettingsIcon, Edit, Save, X } from "lucide-react";
+import { Bell, Palette, User, Shield, RefreshCw, Download, Upload, Trash2, Settings as SettingsIcon, Edit, Save, X, LogOut } from "lucide-react";
 import { NotificationSystem } from "../components/features/NotificationSystem";
 import { showToast } from "@/components/ui/Toast";
 import { useConfirmDialog } from "@/components/ui/ConfirmDialog";
@@ -478,6 +478,52 @@ export function Settings() {
                         </span>
                       </div>
                     </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Account Management */}
+              <div className="mystical-card p-8 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 to-orange-500/10"></div>
+                <div className="relative z-10">
+                  <div className="flex items-center space-x-4 mb-6">
+                    <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-orange-500 rounded-lg flex items-center justify-center shadow-lg">
+                      <User className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-white font-['Orbitron']">ACCOUNT CONTROL</h2>
+                      <p className="text-gray-400">Manage your hunter account</p>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button
+                      onClick={signOut}
+                      className="bg-red-600/20 hover:bg-red-600/30 border-2 border-red-500/30 hover:border-red-500/50 p-6 rounded-xl text-left transition-all duration-300 hover:scale-105 group"
+                    >
+                      <div className="flex items-center space-x-3 mb-3">
+                        <LogOut className="w-6 h-6 text-red-400 group-hover:text-red-300" />
+                        <h3 className="text-red-400 group-hover:text-red-300 font-bold text-lg">Sign Out</h3>
+                      </div>
+                      <p className="text-gray-300 text-sm">Log out of your hunter account safely</p>
+                    </button>
+                    
+                    <button
+                      onClick={() => {
+                        showToast({
+                          type: 'info',
+                          title: 'Export First',
+                          message: 'Consider exporting your data before signing out'
+                        });
+                      }}
+                      className="bg-blue-600/20 hover:bg-blue-600/30 border-2 border-blue-500/30 hover:border-blue-500/50 p-6 rounded-xl text-left transition-all duration-300 hover:scale-105 group"
+                    >
+                      <div className="flex items-center space-x-3 mb-3">
+                        <Download className="w-6 h-6 text-blue-400 group-hover:text-blue-300" />
+                        <h3 className="text-blue-400 group-hover:text-blue-300 font-bold text-lg">Export Data</h3>
+                      </div>
+                      <p className="text-gray-300 text-sm">Download your hunter progress before leaving</p>
+                    </button>
                   </div>
                 </div>
               </div>
