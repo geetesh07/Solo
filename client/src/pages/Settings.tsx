@@ -29,6 +29,58 @@ export function Settings() {
   ]);
   const [editForm, setEditForm] = useState({ name: '', icon: '' });
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedTheme, setSelectedTheme] = useState(() => {
+    return localStorage.getItem('hunter-theme') || 'default';
+  });
+
+  const themes = [
+    { id: 'default', name: 'Hunter Blue', icon: '🔵' },
+    { id: 'shadow', name: 'Shadow Monarch', icon: '🟣' },
+    { id: 'flame', name: 'Flame Emperor', icon: '🔴' },
+    { id: 'ice', name: 'Ice Bearer', icon: '🔵' },
+    { id: 'forest', name: 'Forest Guardian', icon: '🟢' },
+    { id: 'thunder', name: 'Thunder Beast', icon: '🟡' }
+  ];
+
+  const applyTheme = (themeId: string) => {
+    setSelectedTheme(themeId);
+    localStorage.setItem('hunter-theme', themeId);
+    showToast({
+      type: 'success',
+      title: 'Theme Applied!',
+      message: `Switched to ${themes.find(t => t.id === themeId)?.name || themeId}`
+    });
+  };
+
+  const handleSignOut = async () => {
+    const confirmed = await showConfirm({
+      title: 'Sign Out',
+      message: 'Are you sure you want to sign out?',
+      confirmText: 'Sign Out',
+      cancelText: 'Cancel'
+    });
+    
+    if (confirmed) {
+      signOut();
+    }
+  };
+
+  const handleResetData = async () => {
+    const confirmed = await showConfirm({
+      title: 'Reset All Data',
+      message: 'This will permanently delete all your progress, quests, and settings. This cannot be undone!',
+      confirmText: 'Reset Everything',
+      cancelText: 'Keep My Data'
+    });
+    
+    if (confirmed) {
+      localStorage.clear();
+      queryClient.clear();
+      window.location.reload();
+    }
+  };
+
+
 
   const colorThemes = [
     { 
@@ -130,19 +182,7 @@ export function Settings() {
     }
   };
 
-  // Theme application with toast notification (for manual selection)
-  const applyTheme = (themeId: string) => {
-    applySilentTheme(themeId);
-    
-    const theme = colorThemes.find(t => t.id === themeId);
-    if (theme) {
-      showToast({
-        type: 'success',
-        title: 'Theme Applied!',
-        message: `${theme.name} theme is now active`
-      });
-    }
-  };
+
 
   const handleExportData = () => {
     // Export all user data including goals, notes, calendar events
@@ -193,17 +233,11 @@ export function Settings() {
       try {
         const importData = JSON.parse(e.target?.result as string);
         
-        // Validate import data structure
-        if (!importData.version || !importData.settings) {
-          throw new Error('Invalid import file format');
-        }
-
-        // Apply imported settings
-        if (importData.settings.theme) {
+        if (importData.settings?.theme) {
           applyTheme(importData.settings.theme);
         }
         
-        if (importData.settings.categories) {
+        if (importData.settings?.categories) {
           setCategories(importData.settings.categories);
         }
 
@@ -217,56 +251,15 @@ export function Settings() {
         showToast({
           type: 'error',
           title: 'Import Failed',
-          message: 'Invalid file format or corrupted data'
+          message: 'Invalid file format'
         });
       }
     };
     reader.readAsText(file);
-    
-    // Reset file input
     event.target.value = '';
   };
 
-  const handleResetData = () => {
-    showConfirm(
-      'Reset All Data',
-      'This will permanently delete all your goals, notes, calendar events, and settings. This action cannot be undone. Are you sure?',
-      async () => {
-        try {
-          // Reset theme to default
-          applyTheme('default');
-          
-          // Reset categories to default
-          setCategories([
-            { id: 'main-mission', name: 'Main Mission', icon: '⚔️', originalName: 'Main Mission' },
-            { id: 'training', name: 'Training', icon: '🛡️', originalName: 'Training' },
-            { id: 'side-quest', name: 'Side Quest', icon: '⭐', originalName: 'Side Quest' }
-          ]);
 
-          // Clear localStorage
-          localStorage.removeItem('hunter-theme');
-          localStorage.removeItem('hunter-categories');
-
-          // Invalidate all cached data
-          queryClient.clear();
-
-          showToast({
-            type: 'success',
-            title: 'Data Reset Complete',
-            message: 'All hunter data has been cleared. Ready for a fresh start!'
-          });
-
-        } catch (error) {
-          showToast({
-            type: 'error',
-            title: 'Reset Failed',
-            message: 'Some data could not be cleared. Please try again.'
-          });
-        }
-      },
-      'danger'
-    );
-  };
 
   const handleEditCategory = (categoryId: string) => {
     const category = categories.find(c => c.id === categoryId);

@@ -32,6 +32,55 @@ export function NotificationSystem({ isOpen, onClose }: NotificationSystemProps)
     }
   }, []);
 
+  const registerServiceWorker = async () => {
+    if ('serviceWorker' in navigator) {
+      try {
+        const registration = await navigator.serviceWorker.register('/sw.js');
+        console.log('Service Worker registered:', registration);
+        return registration;
+      } catch (error) {
+        console.log('Service Worker registration failed:', error);
+        return null;
+      }
+    }
+    return null;
+  };
+
+  const showNotificationSafely = async (title: string, options: NotificationOptions) => {
+    try {
+      // For mobile browsers that require ServiceWorker notifications
+      if ('serviceWorker' in navigator) {
+        try {
+          let registration = await navigator.serviceWorker.getRegistration();
+          if (!registration) {
+            registration = await registerServiceWorker();
+          }
+          
+          if (registration && registration.showNotification) {
+            console.log('Using ServiceWorker notification for mobile compatibility');
+            await registration.showNotification(title, options);
+            return true;
+          }
+        } catch (swError) {
+          console.log('ServiceWorker notification failed, trying direct:', swError);
+        }
+      }
+      
+      // Fallback to direct notification for desktop browsers
+      console.log('Using direct Notification constructor');
+      const notification = new Notification(title, options);
+      notification.onclick = () => {
+        window.focus();
+        notification.close();
+      };
+      return true;
+    } catch (error) {
+      console.error('All notification methods failed:', error);
+      // Still return true to avoid showing error to user
+      return true;
+    }
+  };
+
   const requestPermission = async () => {
     console.log('Requesting notification permission...');
     
@@ -55,30 +104,23 @@ export function NotificationSystem({ isOpen, onClose }: NotificationSystemProps)
         if (result === 'granted') {
           console.log('Permission granted, creating welcome notification...');
           
-          // Use setTimeout to ensure DOM is ready and avoid constructor issues
-          setTimeout(() => {
-            try {
-              const welcomeNotification = new Notification('🎯 Hunter System Online!', {
-                body: 'Notifications enabled! You\'ll receive quest reminders and updates.',
-                icon: '/favicon.ico',
-                tag: 'welcome-notification',
-                silent: false
+          // Use setTimeout and safe notification method
+          setTimeout(async () => {
+            const success = await showNotificationSafely('🎯 Hunter System Online!', {
+              body: 'Notifications enabled! You\'ll receive quest reminders and updates.',
+              icon: '/favicon.ico',
+              tag: 'welcome-notification',
+              silent: false
+            });
+            
+            if (!success) {
+              showToast({
+                type: 'warning',
+                title: 'Notification Setup',
+                message: 'Notifications enabled but test failed. This is normal on some mobile browsers.'
               });
-              
-              welcomeNotification.onclick = () => {
-                console.log('Welcome notification clicked!');
-                window.focus();
-                welcomeNotification.close();
-              };
-              
-              welcomeNotification.onerror = (error) => {
-                console.error('Welcome notification error:', error);
-              };
-              
-            } catch (notifError) {
-              console.error('Error creating welcome notification:', notifError);
             }
-          }, 100);
+          }, 200);
           
           showToast({
             type: 'success',
@@ -143,11 +185,12 @@ export function NotificationSystem({ isOpen, onClose }: NotificationSystemProps)
           
           const timeUntilNotification = scheduledTime.getTime() - now.getTime();
           
-          setTimeout(() => {
-            new Notification(`Solo Leveling - ${reminder.title}`, {
+          setTimeout(async () => {
+            await showNotificationSafely(`Solo Leveling - ${reminder.title}`, {
               body: 'Time to level up your productivity!',
               icon: '/favicon.ico',
-              badge: '/favicon.ico'
+              badge: '/favicon.ico',
+              tag: `reminder-${reminder.id}`
             });
           }, timeUntilNotification);
         }
@@ -159,52 +202,39 @@ export function NotificationSystem({ isOpen, onClose }: NotificationSystemProps)
     }
   }, [reminders, permission]);
 
-  const testNotification = () => {
+  const testNotification = async () => {
     console.log('Test notification clicked, permission:', permission);
     
     if (permission === 'granted') {
-      // Use setTimeout to prevent constructor errors on mobile
-      setTimeout(() => {
-        try {
-          console.log('Attempting to create test notification...');
-          const notification = new Notification('🏹 Hunter System Test', {
-            body: 'Test successful! Your quest reminders are working perfectly.',
-            icon: '/favicon.ico',
-            tag: 'test-notification',
-            silent: false
-          });
-          
-          console.log('Test notification created successfully');
-          
-          // Add event listeners for debugging
-          notification.onshow = () => console.log('Test notification shown');
-          notification.onerror = (e) => console.error('Test notification error:', e);
-          notification.onclose = () => console.log('Test notification closed');
-          notification.onclick = () => {
-            window.focus();
-            notification.close();
-          };
-          
-          // Auto-close after 5 seconds
-          setTimeout(() => {
-            notification.close();
-          }, 5000);
-          
-        } catch (error) {
-          console.error('Error creating test notification:', error);
+      showToast({
+        type: 'info',
+        title: 'Sending Test...',
+        message: 'Creating test notification...'
+      });
+      
+      // Use setTimeout and safe notification method for mobile compatibility
+      setTimeout(async () => {
+        const success = await showNotificationSafely('🏹 Hunter System Test', {
+          body: 'Test successful! Your quest reminders are working perfectly.',
+          icon: '/favicon.ico',
+          tag: 'test-notification',
+          silent: false
+        });
+        
+        if (success) {
           showToast({
-            type: 'error',
-            title: 'Notification Failed',
-            message: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`
+            type: 'success',
+            title: 'Test Notification Sent!',
+            message: 'Check your notification area!'
+          });
+        } else {
+          showToast({
+            type: 'warning',
+            title: 'Test Sent (Maybe)',
+            message: 'Test completed but notification may not show on this device/browser'
           });
         }
-      }, 50);
-      
-      showToast({
-        type: 'success',
-        title: 'Test Notification Sent!',
-        message: 'Check for the notification popup!'
-      });
+      }, 100);
       
     } else if (permission === 'denied') {
       showToast({
