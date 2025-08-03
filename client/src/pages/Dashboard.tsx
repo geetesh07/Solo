@@ -35,16 +35,6 @@ function Dashboard() {
   const [isMorningModalOpen, setIsMorningModalOpen] = useState(false);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
 
-  // Calculate dynamic user stats from actual goals
-  const totalGoals = categories.flatMap(cat => cat.goals).length;
-  const completedGoals = categories.flatMap(cat => cat.goals).filter(g => g.completed).length;
-  const currentXP = completedGoals * 25; // 25 XP per completed goal
-  const level = Math.floor(currentXP / 100) + 1;
-  const maxXP = level * 100;
-  const currentLevelXP = currentXP % 100;
-  const streak = 0; // Could be calculated from completion dates
-  const rank = level <= 2 ? "E-Rank" : level <= 5 ? "D-Rank" : level <= 10 ? "C-Rank" : level <= 15 ? "B-Rank" : level <= 25 ? "A-Rank" : "S-Rank";
-
   // Categories with goals state - start empty
   const [categories, setCategories] = useState<Category[]>([
     {
@@ -72,6 +62,16 @@ function Dashboard() {
 
   const [newGoal, setNewGoal] = useState({ title: '', categoryId: '', priority: 'medium' as const, dueDate: '' });
   const [isAddingGoal, setIsAddingGoal] = useState<string | null>(null);
+
+  // Calculate dynamic user stats from actual goals
+  const totalGoals = categories.flatMap(cat => cat.goals).length;
+  const completedGoals = categories.flatMap(cat => cat.goals).filter(g => g.completed).length;
+  const currentXP = completedGoals * 25; // 25 XP per completed goal
+  const level = Math.floor(currentXP / 100) + 1;
+  const maxXP = level * 100;
+  const currentLevelXP = currentXP % 100;
+  const streak = 0; // Could be calculated from completion dates
+  const rank = level <= 2 ? "E-Rank" : level <= 5 ? "D-Rank" : level <= 10 ? "C-Rank" : level <= 15 ? "B-Rank" : level <= 25 ? "A-Rank" : "S-Rank";
 
   const handleAddGoal = (categoryId: string) => {
     if (!newGoal.title.trim()) return;
