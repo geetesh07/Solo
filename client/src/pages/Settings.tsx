@@ -43,67 +43,74 @@ export function Settings() {
   ];
 
   const applyTheme = (themeId: string) => {
+    const theme = colorThemes.find(t => t.id === themeId);
+    if (!theme) return;
+    
     setSelectedTheme(themeId);
     localStorage.setItem('hunter-theme', themeId);
     
-    // Apply the theme styles
-    const theme = colorThemes.find(t => t.id === themeId);
-    if (theme) {
-      // Remove existing theme style
-      const existingStyle = document.getElementById('hunter-theme-style');
-      if (existingStyle) {
-        existingStyle.remove();
+    // Remove existing theme style
+    const existingStyle = document.getElementById('hunter-theme-style');
+    if (existingStyle) {
+      existingStyle.remove();
+    }
+    
+    // Add new theme style
+    const style = document.createElement('style');
+    style.id = 'hunter-theme-style';
+    style.textContent = `
+      :root {
+        --primary-color: ${theme.colors[0]};
+        --secondary-color: ${theme.colors[1]};
+        --accent-color: ${theme.colors[2]};
       }
       
-      // Add new theme style
-      const style = document.createElement('style');
-      style.id = 'hunter-theme-style';
-      style.textContent = `
-        .power-button {
-          background: linear-gradient(135deg, ${theme.colors[0]}, ${theme.colors[1]}) !important;
-        }
-        
-        .mystical-card {
-          border-color: ${theme.colors[0]}33 !important;
-          background: linear-gradient(135deg, ${theme.colors[0]}0a, ${theme.colors[1]}05) !important;
-        }
-      `;
-      document.head.appendChild(style);
-    }
+      .power-button {
+        background: linear-gradient(135deg, ${theme.colors[0]}, ${theme.colors[1]}) !important;
+      }
+      
+      .mystical-card {
+        border-color: ${theme.colors[0]}33 !important;
+        background: linear-gradient(135deg, ${theme.colors[0]}0a, ${theme.colors[1]}05) !important;
+      }
+      
+      .bg-gradient-to-r.from-blue-600.to-cyan-600 {
+        background: linear-gradient(to right, ${theme.colors[0]}, ${theme.colors[1]}) !important;
+      }
+      
+      .bg-gradient-to-r.from-purple-400.to-pink-400 {
+        background: linear-gradient(to right, ${theme.colors[1]}, ${theme.colors[2]}) !important;
+        -webkit-background-clip: text !important;
+        background-clip: text !important;
+      }
+    `;
+    document.head.appendChild(style);
     
     showToast({
       type: 'success',
       title: 'Theme Applied!',
-      message: `Switched to ${theme?.name || themeId}`
+      message: `Switched to ${theme.name}`
     });
   };
 
   const handleSignOut = async () => {
-    const confirmed = await showConfirm({
-      title: 'Sign Out',
-      message: 'Are you sure you want to sign out?',
-      confirmText: 'Sign Out',
-      cancelText: 'Cancel'
-    });
-    
-    if (confirmed) {
-      signOut();
-    }
+    const confirmed = await showConfirm(
+      'Sign Out',
+      'Are you sure you want to sign out?',
+      () => signOut()
+    );
   };
 
   const handleResetData = async () => {
-    const confirmed = await showConfirm({
-      title: 'Reset All Data',
-      message: 'This will permanently delete all your progress, quests, and settings. This cannot be undone!',
-      confirmText: 'Reset Everything',
-      cancelText: 'Keep My Data'
-    });
-    
-    if (confirmed) {
-      localStorage.clear();
-      queryClient.clear();
-      window.location.reload();
-    }
+    const confirmed = await showConfirm(
+      'Reset All Data',
+      'This will permanently delete all your progress, quests, and settings. This cannot be undone!',
+      () => {
+        localStorage.clear();
+        queryClient.clear();
+        window.location.reload();
+      }
+    );
   };
 
 
