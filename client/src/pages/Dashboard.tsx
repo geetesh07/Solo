@@ -48,33 +48,48 @@ function Dashboard() {
     }
   }, []);
 
-  // Categories with goals state - start empty
-  const [categories, setCategories] = useState<Category[]>([
-    {
-      id: 'main-mission',
-      name: 'Main Mission',
-      goals: [],
-      icon: '⚔️',
-      color: 'from-red-500 to-red-400'
-    },
-    {
-      id: 'training',
-      name: 'Training',
-      goals: [],
-      icon: '🛡️',
-      color: 'from-blue-500 to-blue-400'
-    },
-    {
-      id: 'side-quest',
-      name: 'Side Quest',
-      goals: [],
-      icon: '⭐',
-      color: 'from-green-500 to-green-400'
+  // Categories with goals state - load from localStorage
+  const [categories, setCategories] = useState<Category[]>(() => {
+    const saved = localStorage.getItem('hunter-categories-with-goals');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error('Failed to parse saved categories:', e);
+      }
     }
-  ]);
+    return [
+      {
+        id: 'main-mission',
+        name: 'Main Mission',
+        goals: [],
+        icon: '⚔️',
+        color: 'from-red-500 to-red-400'
+      },
+      {
+        id: 'training',
+        name: 'Training',
+        goals: [],
+        icon: '🛡️',
+        color: 'from-blue-500 to-blue-400'
+      },
+      {
+        id: 'side-quest',
+        name: 'Side Quest',
+        goals: [],
+        icon: '⭐',
+        color: 'from-green-500 to-green-400'
+      }
+    ];
+  });
 
   const [newGoal, setNewGoal] = useState({ title: '', categoryId: '', priority: 'medium' as 'low' | 'medium' | 'high', dueDate: '' });
   const [isAddingGoal, setIsAddingGoal] = useState<string | null>(null);
+
+  // Save categories to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('hunter-categories-with-goals', JSON.stringify(categories));
+  }, [categories]);
 
   // Calculate dynamic user stats from actual goals
   const totalGoals = categories.flatMap(cat => cat.goals).length;

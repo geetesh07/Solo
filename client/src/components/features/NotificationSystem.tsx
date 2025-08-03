@@ -112,26 +112,44 @@ export function NotificationSystem({ isOpen, onClose }: NotificationSystemProps)
   }, [reminders, permission]);
 
   const testNotification = () => {
+    console.log('Test notification clicked, permission:', permission);
+    
     if (permission === 'granted') {
       try {
-        new Notification('Hunter System Alert', {
-          body: 'Your daily quest briefing is ready! Time to level up!',
+        console.log('Attempting to create notification...');
+        const notification = new Notification('🏹 Hunter System Alert', {
+          body: 'Your daily quest briefing is ready! Time to level up your productivity!',
           icon: '/favicon.ico',
-          badge: '/favicon.ico'
+          tag: 'test-notification',
+          requireInteraction: false
         });
+        
+        console.log('Notification created successfully:', notification);
+        
+        // Add event listeners for debugging
+        notification.onshow = () => console.log('Notification shown');
+        notification.onerror = (e) => console.error('Notification error:', e);
+        notification.onclose = () => console.log('Notification closed');
+        
         showToast({
           type: 'success',
           title: 'Test Notification Sent',
-          message: 'Check your browser notifications!'
+          message: 'Check your system notifications! Should appear in top-right corner.'
         });
       } catch (error) {
-        console.error('Error sending test notification:', error);
+        console.error('Error creating test notification:', error);
         showToast({
           type: 'error',
           title: 'Notification Failed',
-          message: 'Could not send test notification. Please check browser settings.'
+          message: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`
         });
       }
+    } else if (permission === 'denied') {
+      showToast({
+        type: 'warning',
+        title: 'Notifications Blocked',
+        message: 'Please enable notifications in your browser settings first'
+      });
     } else {
       showToast({
         type: 'info',
