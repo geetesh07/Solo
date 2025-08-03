@@ -2,15 +2,23 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
-import { calendarEvents, notes, insertCalendarEventSchema, insertNoteSchema } from "@shared/schema";
+import { users, calendarEvents, notes, insertCalendarEventSchema, insertNoteSchema } from "@shared/schema";
 import { eq, and } from "drizzle-orm";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Helper function to get user ID
+  const getUserId = async () => {
+    const [user] = await db.select().from(users).where(eq(users.firebaseUid, 'temp-user-id'));
+    return user?.id;
+  };
+
   // Calendar Events API
   app.get("/api/calendar-events", async (req, res) => {
     try {
-      // For now, use a dummy user ID until auth is implemented
-      const userId = "temp-user-id";
+      const userId = await getUserId();
+      if (!userId) {
+        return res.status(404).json({ error: "User not found" });
+      }
       const events = await db.select().from(calendarEvents).where(eq(calendarEvents.userId, userId));
       res.json(events);
     } catch (error) {
@@ -21,7 +29,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/calendar-events", async (req, res) => {
     try {
-      const userId = "temp-user-id";
+      const userId = await getUserId();
+      if (!userId) {
+        return res.status(404).json({ error: "User not found" });
+      }
       const eventData = insertCalendarEventSchema.parse({ ...req.body, userId });
       const [event] = await db.insert(calendarEvents).values(eventData).returning();
       res.json(event);
@@ -33,7 +44,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/calendar-events/:id", async (req, res) => {
     try {
-      const userId = "temp-user-id";
+      const userId = await getUserId();
+      if (!userId) {
+        return res.status(404).json({ error: "User not found" });
+      }
       const { id } = req.params;
       const updateData = { ...req.body, updatedAt: new Date() };
       const [event] = await db.update(calendarEvents)
@@ -49,7 +63,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/calendar-events/:id", async (req, res) => {
     try {
-      const userId = "temp-user-id";
+      const userId = await getUserId();
+      if (!userId) {
+        return res.status(404).json({ error: "User not found" });
+      }
       const { id } = req.params;
       await db.delete(calendarEvents)
         .where(and(eq(calendarEvents.id, id), eq(calendarEvents.userId, userId)));
@@ -63,7 +80,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Notes API
   app.get("/api/notes", async (req, res) => {
     try {
-      const userId = "temp-user-id";
+      const userId = await getUserId();
+      if (!userId) {
+        return res.status(404).json({ error: "User not found" });
+      }
       const userNotes = await db.select().from(notes).where(eq(notes.userId, userId));
       res.json(userNotes);
     } catch (error) {
@@ -74,7 +94,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/notes", async (req, res) => {
     try {
-      const userId = "temp-user-id";
+      const userId = await getUserId();
+      if (!userId) {
+        return res.status(404).json({ error: "User not found" });
+      }
       const noteData = insertNoteSchema.parse({ ...req.body, userId });
       const [note] = await db.insert(notes).values(noteData).returning();
       res.json(note);
@@ -86,7 +109,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/notes/:id", async (req, res) => {
     try {
-      const userId = "temp-user-id";
+      const userId = await getUserId();
+      if (!userId) {
+        return res.status(404).json({ error: "User not found" });
+      }
       const { id } = req.params;
       const updateData = { ...req.body, updatedAt: new Date() };
       const [note] = await db.update(notes)
@@ -102,7 +128,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/notes/:id", async (req, res) => {
     try {
-      const userId = "temp-user-id";
+      const userId = await getUserId();
+      if (!userId) {
+        return res.status(404).json({ error: "User not found" });
+      }
       const { id } = req.params;
       await db.delete(notes)
         .where(and(eq(notes.id, id), eq(notes.userId, userId)));
