@@ -62,43 +62,57 @@ export function NotificationSystem({ isOpen, onClose }: NotificationSystemProps)
     try {
       const isMobile = isMobileDevice();
       console.log('Device type:', isMobile ? 'Mobile' : 'Desktop');
+      console.log('Notification permission:', Notification.permission);
       
-      // For mobile devices, always try ServiceWorker first
-      if (isMobile && 'serviceWorker' in navigator) {
+      // Try direct notification first for all devices
+      if ('Notification' in window && Notification.permission === 'granted') {
         try {
-          let registration = await navigator.serviceWorker.getRegistration();
-          if (!registration) {
-            console.log('Registering service worker for mobile...');
-            registration = await registerServiceWorker();
-          }
+          console.log('Attempting direct notification...');
+          const notification = new Notification(title, options);
           
-          if (registration && registration.showNotification) {
-            console.log('Showing notification via ServiceWorker (mobile)');
-            await registration.showNotification(title, options);
-            return true;
-          } else {
-            console.log('ServiceWorker registration or showNotification not available');
+          notification.onclick = () => {
+            console.log('Notification clicked - focusing window');
+            window.focus();
+            notification.close();
+          };
+          
+          notification.onshow = () => {
+            console.log('Notification shown successfully');
+          };
+          
+          notification.onerror = (error) => {
+            console.error('Direct notification error:', error);
+          };
+          
+          return true;
+        } catch (directError) {
+          console.error('Direct notification failed:', directError);
+          
+          // Only try ServiceWorker if direct method fails on mobile
+          if (isMobile && 'serviceWorker' in navigator) {
+            try {
+              console.log('Trying ServiceWorker method as fallback...');
+              let registration = await navigator.serviceWorker.getRegistration();
+              if (!registration) {
+                registration = await registerServiceWorker();
+              }
+              
+              if (registration && registration.showNotification) {
+                console.log('Showing notification via ServiceWorker fallback');
+                await registration.showNotification(title, options);
+                return true;
+              }
+            } catch (swError) {
+              console.error('ServiceWorker fallback also failed:', swError);
+            }
           }
-        } catch (swError) {
-          console.error('ServiceWorker notification failed:', swError);
         }
       }
       
-      // Fallback to direct notification (mainly for desktop)
-      if ('Notification' in window) {
-        console.log('Showing notification via direct constructor');
-        const notification = new Notification(title, options);
-        notification.onclick = () => {
-          window.focus();
-          notification.close();
-        };
-        return true;
-      }
-      
-      console.warn('No notification method available');
+      console.warn('All notification methods exhausted');
       return false;
     } catch (error) {
-      console.error('All notification methods failed:', error);
+      console.error('Notification system error:', error);
       return false;
     }
   };
@@ -255,9 +269,19 @@ export function NotificationSystem({ isOpen, onClose }: NotificationSystemProps)
             type: 'warning',
             title: 'Notification Issue',
             message: isMobile 
-              ? 'Mobile notifications may be blocked. Check your browser settings and allow notifications for this site.'
+              ? 'Mobile notifications failed. Try: 1) Allow notifications in browser settings 2) Add this site to home screen 3) Try desktop mode'
               : 'Notifications may be blocked. Please allow notifications in your browser settings.'
           });
+          
+          // Additional debug info for mobile
+          if (isMobile) {
+            console.log('Mobile notification troubleshooting:');
+            console.log('- User Agent:', navigator.userAgent);
+            console.log('- Service Worker support:', 'serviceWorker' in navigator);
+            console.log('- Notification support:', 'Notification' in window);
+            console.log('- Permission:', Notification.permission);
+            console.log('- Touch points:', navigator.maxTouchPoints);
+          }
         }
       }, 100);
       

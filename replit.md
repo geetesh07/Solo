@@ -32,9 +32,11 @@ Preferred communication style: Simple, everyday language.
 
 ### Data Storage Solutions
 - **Primary Database**: PostgreSQL with Drizzle ORM for schema management
-- **Real-time Database**: Firestore for user data, goals, categories, and statistics
+- **Authentication**: Firebase Authentication with Google sign-in
+- **User Data**: Firestore for user profiles, goals, categories, and statistics
 - **Schema Design**: Normalized structure with users, categories, goals, and user_stats tables
-- **Development Database**: Firestore emulator for local development
+- **Cross-Device Sync**: Firebase ensures data consistency across mobile and desktop devices
+- **Development Database**: Local PostgreSQL for development, Firestore for user authentication and profile data
 
 ### Component Architecture
 - **Layout Components**: Sidebar navigation, top bar, and responsive mobile design
