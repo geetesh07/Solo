@@ -35,49 +35,71 @@ export function NotificationSystem({ isOpen, onClose }: NotificationSystemProps)
   const registerServiceWorker = async () => {
     if ('serviceWorker' in navigator) {
       try {
-        const registration = await navigator.serviceWorker.register('/sw.js');
-        console.log('Service Worker registered:', registration);
+        const registration = await navigator.serviceWorker.register('/sw.js', {
+          scope: '/'
+        });
+        console.log('Service Worker registered successfully:', registration);
+        
+        // Wait for service worker to be ready
+        await navigator.serviceWorker.ready;
+        console.log('Service Worker is ready');
+        
         return registration;
       } catch (error) {
-        console.log('Service Worker registration failed:', error);
+        console.error('Service Worker registration failed:', error);
         return null;
       }
     }
     return null;
   };
 
+  const isMobileDevice = () => {
+    return /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+           (navigator.maxTouchPoints && navigator.maxTouchPoints > 2);
+  };
+
   const showNotificationSafely = async (title: string, options: NotificationOptions) => {
     try {
-      // For mobile browsers that require ServiceWorker notifications
-      if ('serviceWorker' in navigator) {
+      const isMobile = isMobileDevice();
+      console.log('Device type:', isMobile ? 'Mobile' : 'Desktop');
+      
+      // For mobile devices, always try ServiceWorker first
+      if (isMobile && 'serviceWorker' in navigator) {
         try {
           let registration = await navigator.serviceWorker.getRegistration();
           if (!registration) {
+            console.log('Registering service worker for mobile...');
             registration = await registerServiceWorker();
           }
           
           if (registration && registration.showNotification) {
-            console.log('Using ServiceWorker notification for mobile compatibility');
+            console.log('Showing notification via ServiceWorker (mobile)');
             await registration.showNotification(title, options);
             return true;
+          } else {
+            console.log('ServiceWorker registration or showNotification not available');
           }
         } catch (swError) {
-          console.log('ServiceWorker notification failed, trying direct:', swError);
+          console.error('ServiceWorker notification failed:', swError);
         }
       }
       
-      // Fallback to direct notification for desktop browsers
-      console.log('Using direct Notification constructor');
-      const notification = new Notification(title, options);
-      notification.onclick = () => {
-        window.focus();
-        notification.close();
-      };
-      return true;
+      // Fallback to direct notification (mainly for desktop)
+      if ('Notification' in window) {
+        console.log('Showing notification via direct constructor');
+        const notification = new Notification(title, options);
+        notification.onclick = () => {
+          window.focus();
+          notification.close();
+        };
+        return true;
+      }
+      
+      console.warn('No notification method available');
+      return false;
     } catch (error) {
       console.error('All notification methods failed:', error);
-      // Still return true to avoid showing error to user
-      return true;
+      return false;
     }
   };
 
@@ -225,13 +247,16 @@ export function NotificationSystem({ isOpen, onClose }: NotificationSystemProps)
           showToast({
             type: 'success',
             title: 'Test Notification Sent!',
-            message: 'Check your notification area!'
+            message: isMobileDevice() ? 'Check your notification panel!' : 'Check your notification area!'
           });
         } else {
+          const isMobile = isMobileDevice();
           showToast({
             type: 'warning',
-            title: 'Test Sent (Maybe)',
-            message: 'Test completed but notification may not show on this device/browser'
+            title: 'Notification Issue',
+            message: isMobile 
+              ? 'Mobile notifications may be blocked. Check your browser settings and allow notifications for this site.'
+              : 'Notifications may be blocked. Please allow notifications in your browser settings.'
           });
         }
       }, 100);
