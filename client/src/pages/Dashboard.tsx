@@ -4,7 +4,9 @@ import { TopBar } from "@/components/layout/TopBar";
 import { GoalCategory } from "@/components/goals/GoalCategory";
 import { useAuth } from "@/hooks/useAuth";
 import { useGoals } from "@/hooks/useGoals";
-import { Crown, Star, CheckCircle, Calendar, BarChart3 } from "lucide-react";
+import { Crown, Star, CheckCircle, Calendar, BarChart3, Target } from "lucide-react";
+import { AnalyticsDashboard } from "../components/analytics/AnalyticsDashboard";
+import { CalendarView } from "../components/calendar/CalendarView";
 
 interface Goal {
   id: string;
@@ -156,16 +158,28 @@ function Dashboard() {
           </div>
         </div>
 
-        {/* Hunter Stats Grid */}
+        {/* Analytics Dashboard */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="mystical-card p-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-cyan-400 text-sm font-bold uppercase tracking-wide">Strength</p>
-                <p className="text-3xl font-bold text-white font-['Orbitron']">87</p>
-                <p className="text-green-400 text-xs font-semibold">(+12 today)</p>
+                <p className="text-green-400 text-sm font-bold uppercase tracking-wide">Completed Today</p>
+                <p className="text-3xl font-bold text-white font-['Orbitron']">12</p>
+                <p className="text-green-400 text-xs font-semibold">Tasks Done</p>
               </div>
-              <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-orange-500 rounded-lg flex items-center justify-center">
+              <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
+                <CheckCircle className="w-6 h-6 text-white" />
+              </div>
+            </div>
+          </div>
+          <div className="mystical-card p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-blue-400 text-sm font-bold uppercase tracking-wide">Current Streak</p>
+                <p className="text-3xl font-bold text-white font-['Orbitron']">{streak}</p>
+                <p className="text-blue-400 text-xs font-semibold">Days Active</p>
+              </div>
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
                 <Star className="w-6 h-6 text-white" />
               </div>
             </div>
@@ -173,23 +187,11 @@ function Dashboard() {
           <div className="mystical-card p-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-amber-400 text-sm font-bold uppercase tracking-wide">Agility</p>
-                <p className="text-3xl font-bold text-white font-['Orbitron']">92</p>
-                <p className="text-green-400 text-xs font-semibold">(+8 today)</p>
+                <p className="text-amber-400 text-sm font-bold uppercase tracking-wide">This Week</p>
+                <p className="text-3xl font-bold text-white font-['Orbitron']">47</p>
+                <p className="text-amber-400 text-xs font-semibold">Tasks Done</p>
               </div>
-              <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-amber-500 rounded-lg flex items-center justify-center">
-                <CheckCircle className="w-6 h-6 text-white" />
-              </div>
-            </div>
-          </div>
-          <div className="mystical-card p-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-purple-400 text-sm font-bold uppercase tracking-wide">Intelligence</p>
-                <p className="text-3xl font-bold text-white font-['Orbitron']">95</p>
-                <p className="text-green-400 text-xs font-semibold">(+15 today)</p>
-              </div>
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+              <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg flex items-center justify-center">
                 <Crown className="w-6 h-6 text-white" />
               </div>
             </div>
@@ -197,12 +199,12 @@ function Dashboard() {
           <div className="mystical-card p-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-green-400 text-sm font-bold uppercase tracking-wide">Streak</p>
-                <p className="text-3xl font-bold text-white font-['Orbitron']">{streak}</p>
-                <p className="text-amber-400 text-xs font-semibold">DAYS ACTIVE</p>
+                <p className="text-purple-400 text-sm font-bold uppercase tracking-wide">Efficiency</p>
+                <p className="text-3xl font-bold text-white font-['Orbitron']">94%</p>
+                <p className="text-purple-400 text-xs font-semibold">Completion Rate</p>
               </div>
-              <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
-                <CheckCircle className="w-6 h-6 text-white" />
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                <Target className="w-6 h-6 text-white" />
               </div>
             </div>
           </div>
@@ -235,22 +237,14 @@ function Dashboard() {
   );
 
   const renderCalendar = () => (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Calendar</h1>
-      <div className="bg-card border border-border rounded-lg p-8 text-center">
-        <Calendar className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-        <p className="text-muted-foreground">Calendar view coming soon</p>
-      </div>
+    <div className="slide-up">
+      <CalendarView />
     </div>
   );
 
   const renderAnalytics = () => (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Analytics</h1>
-      <div className="bg-card border border-border rounded-lg p-8 text-center">
-        <BarChart3 className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-        <p className="text-muted-foreground">Analytics dashboard coming soon</p>
-      </div>
+    <div className="slide-up">
+      <AnalyticsDashboard />
     </div>
   );
 
