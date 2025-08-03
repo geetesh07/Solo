@@ -117,157 +117,176 @@ function Dashboard() {
   };
 
   const renderDashboard = () => (
-    <div className="space-y-4">
-      {/* Compact Header */}
-      <div className="bg-gray-900/50 border border-gray-700/50 rounded-lg p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center">
-              <Crown className="w-5 h-5 text-white" />
+    <div className="space-y-5">
+      {/* Hunter Status Window */}
+      <div className="bg-gradient-to-br from-gray-900/90 to-gray-800/80 border border-cyan-500/20 rounded-xl p-5 shadow-2xl backdrop-blur-sm">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-4">
+            <div className="relative">
+              <div className="w-14 h-14 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                <Crown className="w-7 h-7 text-white" />
+              </div>
+              <div className="absolute -bottom-1 -right-1 bg-amber-500 text-black text-xs font-bold px-1.5 py-0.5 rounded-full">
+                {rank}
+              </div>
             </div>
             <div>
-              <h1 className="text-lg font-bold text-white">HUNTER LEVEL {level}</h1>
-              <p className="text-cyan-400 text-sm">Welcome, {user?.displayName || 'Hunter'}</p>
+              <h1 className="text-xl font-bold text-white font-['Orbitron']">
+                <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+                  HUNTER LEVEL {level}
+                </span>
+              </h1>
+              <p className="text-gray-300">Welcome back, {user?.displayName || 'Hunter'}</p>
             </div>
           </div>
-          <div className="flex space-x-4 text-center">
+          <div className="flex space-x-5 text-center">
             <div>
-              <div className="text-lg font-bold text-green-400">{completedGoals}</div>
-              <div className="text-xs text-gray-400">Done</div>
+              <div className="text-xl font-bold text-green-400">{completedGoals}</div>
+              <div className="text-xs text-gray-400">Completed</div>
             </div>
             <div>
-              <div className="text-lg font-bold text-yellow-400">{streak}</div>
+              <div className="text-xl font-bold text-amber-400">{streak}</div>
               <div className="text-xs text-gray-400">Streak</div>
             </div>
             <div>
-              <div className="text-lg font-bold text-blue-400">{totalGoals - completedGoals}</div>
+              <div className="text-xl font-bold text-blue-400">{totalGoals - completedGoals}</div>
               <div className="text-xs text-gray-400">Active</div>
             </div>
           </div>
         </div>
 
-        {/* Compact XP Bar */}
-        <div className="mt-3 space-y-1">
-          <div className="flex justify-between text-xs text-gray-400">
-            <span>EXPERIENCE POINTS</span>
-            <span>{currentLevelXP} / 100</span>
+        {/* XP Progress */}
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-300 font-semibold">EXPERIENCE POINTS</span>
+            <span className="text-cyan-400 font-bold">{currentLevelXP} / 100</span>
           </div>
-          <div className="w-full bg-gray-700 rounded-full h-2">
+          <div className="relative h-3 bg-gray-800 rounded-full overflow-hidden border border-gray-700">
             <div 
-              className="h-full bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full transition-all duration-1000"
+              className="h-full bg-gradient-to-r from-blue-500 via-cyan-400 to-amber-400 rounded-full transition-all duration-1000"
               style={{ width: `${(currentLevelXP / 100) * 100}%` }}
             />
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse" />
+          </div>
+          <div className="flex justify-between text-xs text-gray-500">
+            <span>Level {level}</span>
+            <span>Next: Level {level + 1}</span>
           </div>
         </div>
       </div>
 
-      {/* Compact Stats */}
-      <div className="grid grid-cols-4 gap-2">
+      {/* Enhanced Stats Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { label: 'COMPLETED TODAY', value: completedGoals, icon: CheckCircle, color: 'text-green-400' },
-          { label: 'CURRENT STREAK', value: streak, icon: Star, color: 'text-yellow-400' },
-          { label: 'THIS WEEK', value: categories.flatMap(cat => cat.goals).filter(g => g.completed).length, icon: Calendar, color: 'text-blue-400' },
-          { label: 'EFFICIENCY', value: totalGoals > 0 ? Math.round((completedGoals / totalGoals) * 100) : 0, icon: BarChart3, color: 'text-purple-400', suffix: '%' }
+          { label: 'COMPLETED TODAY', value: completedGoals, icon: CheckCircle, color: 'text-green-400', bg: 'from-green-900/20 to-green-800/10' },
+          { label: 'CURRENT STREAK', value: streak, icon: Star, color: 'text-amber-400', bg: 'from-amber-900/20 to-amber-800/10' },
+          { label: 'THIS WEEK', value: categories.flatMap(cat => cat.goals).filter(g => g.completed).length, icon: Calendar, color: 'text-blue-400', bg: 'from-blue-900/20 to-blue-800/10' },
+          { label: 'EFFICIENCY', value: totalGoals > 0 ? Math.round((completedGoals / totalGoals) * 100) : 0, icon: BarChart3, color: 'text-purple-400', bg: 'from-purple-900/20 to-purple-800/10', suffix: '%' }
         ].map((stat, index) => (
-          <div key={index} className="bg-gray-800/40 border border-gray-700/50 rounded-lg p-3 text-center">
-            <stat.icon className={`w-5 h-5 mx-auto mb-2 ${stat.color}`} />
-            <div className="text-lg font-bold text-white">
+          <div key={index} className={`bg-gradient-to-br ${stat.bg} border border-gray-700/30 rounded-lg p-4 text-center shadow-lg backdrop-blur-sm`}>
+            <stat.icon className={`w-6 h-6 mx-auto mb-2 ${stat.color}`} />
+            <div className="text-xl font-bold text-white mb-1">
               {stat.value}{stat.suffix || ''}
             </div>
-            <div className="text-xs text-gray-400">{stat.label}</div>
+            <div className="text-xs text-gray-400 font-medium">{stat.label}</div>
           </div>
         ))}
       </div>
 
-      {/* Active Quests Header */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-bold text-white">
-          <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-            ACTIVE QUESTS
-          </span>
-        </h2>
-        <button 
-          onClick={() => setIsOnboardingOpen(true)}
-          className="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs transition-colors"
-        >
-          Tutorial
-        </button>
-      </div>
+      {/* Active Quests Section */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-bold text-white font-['Orbitron']">
+            <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+              ACTIVE QUESTS
+            </span>
+          </h2>
+          <button 
+            onClick={() => setIsOnboardingOpen(true)}
+            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors shadow-lg"
+          >
+            📖 Tutorial
+          </button>
+        </div>
 
-      {/* Quest Categories */}
-      <div className="space-y-3">
+        {/* Quest Categories */}
         {categories.map((category) => (
-          <div key={category.id} className={`bg-gray-800/40 border border-gray-700/50 rounded-lg overflow-hidden ${
-            category.id === 'main-mission' ? 'border-l-4 border-l-red-500' :
-            category.id === 'training' ? 'border-l-4 border-l-blue-500' :
-            'border-l-4 border-l-green-500'
+          <div key={category.id} className={`bg-gradient-to-br from-gray-900/60 to-gray-800/40 border rounded-xl overflow-hidden shadow-xl backdrop-blur-sm ${
+            category.id === 'main-mission' ? 'border-red-500/30 shadow-red-500/10' :
+            category.id === 'training' ? 'border-blue-500/30 shadow-blue-500/10' :
+            'border-green-500/30 shadow-green-500/10'
           }`}>
             {/* Category Header */}
-            <div className="p-3 border-b border-gray-700/50">
+            <div className={`p-4 border-b ${
+              category.id === 'main-mission' ? 'border-red-500/20 bg-gradient-to-r from-red-900/20 to-transparent' :
+              category.id === 'training' ? 'border-blue-500/20 bg-gradient-to-r from-blue-900/20 to-transparent' :
+              'border-green-500/20 bg-gradient-to-r from-green-900/20 to-transparent'
+            }`}>
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <span className="text-lg">{category.icon}</span>
+                <div className="flex items-center space-x-3">
+                  <span className="text-2xl">{category.icon}</span>
                   <div>
-                    <h3 className={`font-bold text-sm ${
+                    <h3 className={`font-bold font-['Orbitron'] ${
                       category.id === 'main-mission' ? 'text-red-400' :
                       category.id === 'training' ? 'text-blue-400' :
                       'text-green-400'
                     }`}>{category.name}</h3>
-                    <span className="text-xs text-gray-400">({category.goals.length} goals)</span>
+                    <span className="text-sm text-gray-400">({category.goals.length} active quests)</span>
                   </div>
                 </div>
                 <button
                   onClick={() => setIsAddingGoal(category.id)}
-                  className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
-                    category.id === 'main-mission' ? 'bg-red-600 hover:bg-red-700 text-white' :
-                    category.id === 'training' ? 'bg-blue-600 hover:bg-blue-700 text-white' :
-                    'bg-green-600 hover:bg-green-700 text-white'
+                  className={`px-3 py-2 rounded-lg font-medium text-sm transition-all shadow-lg ${
+                    category.id === 'main-mission' ? 'bg-red-600 hover:bg-red-700 text-white hover:shadow-red-500/25' :
+                    category.id === 'training' ? 'bg-blue-600 hover:bg-blue-700 text-white hover:shadow-blue-500/25' :
+                    'bg-green-600 hover:bg-green-700 text-white hover:shadow-green-500/25'
                   }`}
                 >
-                  + Add Goal
+                  <Plus className="w-4 h-4 mr-1 inline" />
+                  Add Goal
                 </button>
               </div>
             </div>
 
             {/* Add Goal Form */}
             {isAddingGoal === category.id && (
-              <div className="p-3 bg-gray-800/50 border-b border-gray-700/50">
-                <div className="space-y-2">
+              <div className="p-4 bg-gray-800/60 border-b border-gray-700/50">
+                <div className="space-y-3">
                   <input
                     type="text"
-                    placeholder="Enter your goal..."
+                    placeholder="Enter your quest objective..."
                     value={newGoal.title}
                     onChange={(e) => setNewGoal(prev => ({ ...prev, title: e.target.value }))}
-                    className="w-full bg-gray-700 border border-gray-600 rounded px-2 py-1.5 text-white text-sm placeholder-gray-400 focus:border-cyan-400 focus:outline-none"
+                    className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:border-cyan-400 focus:outline-none shadow-inner"
                     onKeyPress={(e) => e.key === 'Enter' && handleAddGoal(category.id)}
                   />
-                  <div className="flex gap-2">
+                  <div className="flex gap-3">
                     <input
                       type="date"
                       value={newGoal.dueDate}
                       onChange={(e) => setNewGoal(prev => ({ ...prev, dueDate: e.target.value }))}
-                      className="flex-1 bg-gray-700 border border-gray-600 rounded px-2 py-1.5 text-white text-sm focus:border-cyan-400 focus:outline-none"
+                      className="flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-cyan-400 focus:outline-none"
                     />
                     <select
                       value={newGoal.priority}
                       onChange={(e) => setNewGoal(prev => ({ ...prev, priority: e.target.value as 'low' | 'medium' | 'high' }))}
-                      className="bg-gray-700 border border-gray-600 rounded px-2 py-1.5 text-white text-sm focus:border-cyan-400 focus:outline-none"
+                      className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-cyan-400 focus:outline-none"
                     >
-                      <option value="low">Low</option>
-                      <option value="medium">Medium</option>
-                      <option value="high">High</option>
+                      <option value="low">Low Priority</option>
+                      <option value="medium">Medium Priority</option>
+                      <option value="high">High Priority</option>
                     </select>
                   </div>
-                  <div className="flex space-x-2">
+                  <div className="flex space-x-3">
                     <button
                       onClick={() => handleAddGoal(category.id)}
-                      className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs transition-colors"
+                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors shadow-lg"
                     >
-                      Save
+                      Create Quest
                     </button>
                     <button
                       onClick={() => setIsAddingGoal(null)}
-                      className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-xs transition-colors"
+                      className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors"
                     >
                       Cancel
                     </button>
@@ -277,41 +296,41 @@ function Dashboard() {
             )}
 
             {/* Goals List */}
-            <div className="p-3">
+            <div className="p-4">
               {category.goals.length === 0 ? (
-                <div className="text-center py-4 text-gray-400">
-                  <Target className="w-8 h-8 text-gray-600 mx-auto mb-2" />
-                  <p className="text-xs">No goals yet. Add your first quest!</p>
+                <div className="text-center py-6 text-gray-400">
+                  <Target className="w-10 h-10 text-gray-600 mx-auto mb-3" />
+                  <p className="text-sm">No quests active. Begin your journey by adding a goal!</p>
                 </div>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {category.goals.map((goal) => (
-                    <div key={goal.id} className="bg-gray-800/50 border border-gray-700/30 rounded p-2 flex items-center justify-between group">
-                      <div className="flex items-center space-x-2 flex-1">
+                    <div key={goal.id} className="bg-gray-800/50 border border-gray-700/40 rounded-lg p-3 flex items-center justify-between group transition-all duration-200 hover:bg-gray-800/70">
+                      <div className="flex items-center space-x-3 flex-1">
                         <button
                           onClick={() => handleToggleGoal(category.id, goal.id)}
-                          className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors ${
+                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
                             goal.completed
-                              ? 'bg-green-500 border-green-500 text-white'
-                              : 'border-gray-500 hover:border-green-400'
+                              ? 'bg-green-500 border-green-500 text-white shadow-lg shadow-green-500/25'
+                              : 'border-gray-500 hover:border-green-400 hover:shadow-lg hover:shadow-green-400/25'
                           }`}
                         >
-                          {goal.completed && <Check className="w-2.5 h-2.5" />}
+                          {goal.completed && <Check className="w-3 h-3" />}
                         </button>
                         <div className="flex-1">
-                          <h4 className={`font-medium text-sm ${goal.completed ? 'text-gray-500 line-through' : 'text-white'}`}>
+                          <h4 className={`font-medium ${goal.completed ? 'text-gray-500 line-through' : 'text-white'}`}>
                             {goal.title}
                           </h4>
-                          <div className="flex items-center space-x-2 text-xs text-gray-400 mt-0.5">
-                            <span className={`px-1.5 py-0.5 rounded text-xs ${
-                              goal.priority === 'high' ? 'bg-red-900/30 text-red-400' :
-                              goal.priority === 'medium' ? 'bg-yellow-900/30 text-yellow-400' :
-                              'bg-green-900/30 text-green-400'
+                          <div className="flex items-center space-x-3 text-xs text-gray-400 mt-1">
+                            <span className={`px-2 py-1 rounded font-medium ${
+                              goal.priority === 'high' ? 'bg-red-900/30 text-red-400 border border-red-500/20' :
+                              goal.priority === 'medium' ? 'bg-yellow-900/30 text-yellow-400 border border-yellow-500/20' :
+                              'bg-green-900/30 text-green-400 border border-green-500/20'
                             }`}>
-                              {goal.priority}
+                              {goal.priority} priority
                             </span>
                             {goal.dueDate && (
-                              <span className="flex items-center">
+                              <span className="flex items-center bg-gray-700/50 px-2 py-1 rounded">
                                 <Calendar className="w-3 h-3 mr-1" />
                                 {new Date(goal.dueDate).toLocaleDateString()}
                               </span>
@@ -321,9 +340,9 @@ function Dashboard() {
                       </div>
                       <button
                         onClick={() => handleDeleteGoal(category.id, goal.id)}
-                        className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-400 transition-all"
+                        className="opacity-0 group-hover:opacity-100 p-2 rounded-lg hover:bg-red-600/20 text-gray-400 hover:text-red-400 transition-all duration-200"
                       >
-                        <Trash2 className="w-3 h-3" />
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   ))}
