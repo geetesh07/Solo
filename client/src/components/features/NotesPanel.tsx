@@ -56,7 +56,10 @@ export function NotesPanel() {
   });
 
   const handleCreateNote = () => {
-    if (!newNote.title.trim() || !newNote.content.trim()) return;
+    if (!newNote.title.trim()) {
+      alert('Please enter a title for your note');
+      return;
+    }
 
     const note: Note = {
       id: Date.now().toString(),
@@ -72,6 +75,7 @@ export function NotesPanel() {
     setNotes(prev => [note, ...prev]);
     setNewNote({ title: '', content: '', category: 'plan', tags: [] });
     setIsCreating(false);
+    alert(`Note "${note.title}" created successfully!`);
   };
 
   const handleDeleteNote = (noteId: string) => {

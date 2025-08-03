@@ -166,7 +166,7 @@ export function CalendarView({ goals = [] }: CalendarViewProps) {
           {/* Calendar days */}
           {days.map((day, index) => {
             if (day === null) {
-              return <div key={index} className="aspect-square" />;
+              return <div key={`empty-${index}`} className="aspect-square" />;
             }
             
             const dayEvents = getEventsForDate(day);
@@ -176,13 +176,13 @@ export function CalendarView({ goals = [] }: CalendarViewProps) {
             
             return (
               <div
-                key={day}
+                key={`${currentDate.getFullYear()}-${currentDate.getMonth()}-${day}`}
                 className={`aspect-square p-2 rounded-lg cursor-pointer transition-all duration-200 ${
                   isToday 
                     ? 'bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border-2 border-cyan-500/50' 
                     : 'hover:bg-white/5'
                 } ${dayEvents.length > 0 ? 'ring-1 ring-cyan-500/30' : ''}`}
-                onClick={() => setSelectedDate(`${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`)}
+                onClick={() => handleDateClick(day)}
               >
                 <div className="text-white font-semibold mb-1">{day}</div>
                 <div className="space-y-1">

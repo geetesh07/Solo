@@ -1,0 +1,136 @@
+Warning: Encountered two children with the same key, `1`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+    at div
+    at div
+    at div
+    at CalendarView (https://9e292e27-6ade-4f76-af9b-fde03c661d6c-00-11171d41m6flb.picard.replit.dev/src/components/calendar/CalendarView.tsx:20:32)
+    at div
+    at div
+    at div
+    at main
+    at div
+    at Dashboard (https://9e292e27-6ade-4f76-af9b-fde03c661d6c-00-11171d41m6flb.picard.replit.dev/src/pages/Dashboard.tsx:31:20)
+    at Route (https://9e292e27-6ade-4f76-af9b-fde03c661d6c-00-11171d41m6flb.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=688b3cc9:323:16)
+    at Switch (https://9e292e27-6ade-4f76-af9b-fde03c661d6c-00-11171d41m6flb.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=688b3cc9:379:17)
+    at AuthenticatedApp
+    at AppContent (https://9e292e27-6ade-4f76-af9b-fde03c661d6c-00-11171d41m6flb.picard.replit.dev/src/App.tsx?v=-P17PyB758nVWcTifZ9Co:67:29)
+    at Provider (https://9e292e27-6ade-4f76-af9b-fde03c661d6c-00-11171d41m6flb.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-HY3DORJS.js?v=688b3cc9:44:15)
+    at TooltipProvider (https://9e292e27-6ade-4f76-af9b-fde03c661d6c-00-11171d41m6flb.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=688b3cc9:59:5)
+    at QueryClientProvider (https://9e292e27-6ade-4f76-af9b-fde03c661d6c-00-11171d41m6flb.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=688b3cc9:2805:3)
+    at App
+printWarning @ chunk-RPCDYKBN.js?v=688b3cc9:521
+error @ chunk-RPCDYKBN.js?v=688b3cc9:505
+warnOnInvalidKey @ chunk-RPCDYKBN.js?v=688b3cc9:10219
+reconcileChildrenArray @ chunk-RPCDYKBN.js?v=688b3cc9:10235
+reconcileChildFibers2 @ chunk-RPCDYKBN.js?v=688b3cc9:10559
+reconcileChildren @ chunk-RPCDYKBN.js?v=688b3cc9:14290
+updateFragment @ chunk-RPCDYKBN.js?v=688b3cc9:14522
+beginWork @ chunk-RPCDYKBN.js?v=688b3cc9:15949
+beginWork$1 @ chunk-RPCDYKBN.js?v=688b3cc9:19753
+performUnitOfWork @ chunk-RPCDYKBN.js?v=688b3cc9:19198
+workLoopSync @ chunk-RPCDYKBN.js?v=688b3cc9:19137
+renderRootSync @ chunk-RPCDYKBN.js?v=688b3cc9:19116
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=688b3cc9:18874
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=688b3cc9:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=688b3cc9:18627Understand this error
+chunk-RPCDYKBN.js?v=688b3cc9:521 Warning: Encountered two children with the same key, `2`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+    at div
+    at div
+    at div
+    at CalendarView (https://9e292e27-6ade-4f76-af9b-fde03c661d6c-00-11171d41m6flb.picard.replit.dev/src/components/calendar/CalendarView.tsx:20:32)
+    at div
+    at div
+    at div
+    at main
+    at div
+    at Dashboard (https://9e292e27-6ade-4f76-af9b-fde03c661d6c-00-11171d41m6flb.picard.replit.dev/src/pages/Dashboard.tsx:31:20)
+    at Route (https://9e292e27-6ade-4f76-af9b-fde03c661d6c-00-11171d41m6flb.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=688b3cc9:323:16)
+    at Switch (https://9e292e27-6ade-4f76-af9b-fde03c661d6c-00-11171d41m6flb.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=688b3cc9:379:17)
+    at AuthenticatedApp
+    at AppContent (https://9e292e27-6ade-4f76-af9b-fde03c661d6c-00-11171d41m6flb.picard.replit.dev/src/App.tsx?v=-P17PyB758nVWcTifZ9Co:67:29)
+    at Provider (https://9e292e27-6ade-4f76-af9b-fde03c661d6c-00-11171d41m6flb.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-HY3DORJS.js?v=688b3cc9:44:15)
+    at TooltipProvider (https://9e292e27-6ade-4f76-af9b-fde03c661d6c-00-11171d41m6flb.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=688b3cc9:59:5)
+    at QueryClientProvider (https://9e292e27-6ade-4f76-af9b-fde03c661d6c-00-11171d41m6flb.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=688b3cc9:2805:3)
+    at App
+printWarning @ chunk-RPCDYKBN.js?v=688b3cc9:521
+error @ chunk-RPCDYKBN.js?v=688b3cc9:505
+warnOnInvalidKey @ chunk-RPCDYKBN.js?v=688b3cc9:10219
+reconcileChildrenArray @ chunk-RPCDYKBN.js?v=688b3cc9:10235
+reconcileChildFibers2 @ chunk-RPCDYKBN.js?v=688b3cc9:10559
+reconcileChildren @ chunk-RPCDYKBN.js?v=688b3cc9:14290
+updateFragment @ chunk-RPCDYKBN.js?v=688b3cc9:14522
+beginWork @ chunk-RPCDYKBN.js?v=688b3cc9:15949
+beginWork$1 @ chunk-RPCDYKBN.js?v=688b3cc9:19753
+performUnitOfWork @ chunk-RPCDYKBN.js?v=688b3cc9:19198
+workLoopSync @ chunk-RPCDYKBN.js?v=688b3cc9:19137
+renderRootSync @ chunk-RPCDYKBN.js?v=688b3cc9:19116
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=688b3cc9:18874
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=688b3cc9:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=688b3cc9:18627Understand this error
+chunk-RPCDYKBN.js?v=688b3cc9:521 Warning: Encountered two children with the same key, `3`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+    at div
+    at div
+    at div
+    at CalendarView (https://9e292e27-6ade-4f76-af9b-fde03c661d6c-00-11171d41m6flb.picard.replit.dev/src/components/calendar/CalendarView.tsx:20:32)
+    at div
+    at div
+    at div
+    at main
+    at div
+    at Dashboard (https://9e292e27-6ade-4f76-af9b-fde03c661d6c-00-11171d41m6flb.picard.replit.dev/src/pages/Dashboard.tsx:31:20)
+    at Route (https://9e292e27-6ade-4f76-af9b-fde03c661d6c-00-11171d41m6flb.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=688b3cc9:323:16)
+    at Switch (https://9e292e27-6ade-4f76-af9b-fde03c661d6c-00-11171d41m6flb.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=688b3cc9:379:17)
+    at AuthenticatedApp
+    at AppContent (https://9e292e27-6ade-4f76-af9b-fde03c661d6c-00-11171d41m6flb.picard.replit.dev/src/App.tsx?v=-P17PyB758nVWcTifZ9Co:67:29)
+    at Provider (https://9e292e27-6ade-4f76-af9b-fde03c661d6c-00-11171d41m6flb.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-HY3DORJS.js?v=688b3cc9:44:15)
+    at TooltipProvider (https://9e292e27-6ade-4f76-af9b-fde03c661d6c-00-11171d41m6flb.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=688b3cc9:59:5)
+    at QueryClientProvider (https://9e292e27-6ade-4f76-af9b-fde03c661d6c-00-11171d41m6flb.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=688b3cc9:2805:3)
+    at App
+printWarning @ chunk-RPCDYKBN.js?v=688b3cc9:521
+error @ chunk-RPCDYKBN.js?v=688b3cc9:505
+warnOnInvalidKey @ chunk-RPCDYKBN.js?v=688b3cc9:10219
+reconcileChildrenArray @ chunk-RPCDYKBN.js?v=688b3cc9:10235
+reconcileChildFibers2 @ chunk-RPCDYKBN.js?v=688b3cc9:10559
+reconcileChildren @ chunk-RPCDYKBN.js?v=688b3cc9:14290
+updateFragment @ chunk-RPCDYKBN.js?v=688b3cc9:14522
+beginWork @ chunk-RPCDYKBN.js?v=688b3cc9:15949
+beginWork$1 @ chunk-RPCDYKBN.js?v=688b3cc9:19753
+performUnitOfWork @ chunk-RPCDYKBN.js?v=688b3cc9:19198
+workLoopSync @ chunk-RPCDYKBN.js?v=688b3cc9:19137
+renderRootSync @ chunk-RPCDYKBN.js?v=688b3cc9:19116
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=688b3cc9:18874
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=688b3cc9:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=688b3cc9:18627Understand this error
+chunk-RPCDYKBN.js?v=688b3cc9:521 Warning: Encountered two children with the same key, `4`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+    at div
+    at div
+    at div
+    at CalendarView (https://9e292e27-6ade-4f76-af9b-fde03c661d6c-00-11171d41m6flb.picard.replit.dev/src/components/calendar/CalendarView.tsx:20:32)
+    at div
+    at div
+    at div
+    at main
+    at div
+    at Dashboard (https://9e292e27-6ade-4f76-af9b-fde03c661d6c-00-11171d41m6flb.picard.replit.dev/src/pages/Dashboard.tsx:31:20)
+    at Route (https://9e292e27-6ade-4f76-af9b-fde03c661d6c-00-11171d41m6flb.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=688b3cc9:323:16)
+    at Switch (https://9e292e27-6ade-4f76-af9b-fde03c661d6c-00-11171d41m6flb.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=688b3cc9:379:17)
+    at AuthenticatedApp
+    at AppContent (https://9e292e27-6ade-4f76-af9b-fde03c661d6c-00-11171d41m6flb.picard.replit.dev/src/App.tsx?v=-P17PyB758nVWcTifZ9Co:67:29)
+    at Provider (https://9e292e27-6ade-4f76-af9b-fde03c661d6c-00-11171d41m6flb.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-HY3DORJS.js?v=688b3cc9:44:15)
+    at TooltipProvider (https://9e292e27-6ade-4f76-af9b-fde03c661d6c-00-11171d41m6flb.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=688b3cc9:59:5)
+    at QueryClientProvider (https://9e292e27-6ade-4f76-af9b-fde03c661d6c-00-11171d41m6flb.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=688b3cc9:2805:3)
+    at App
+printWarning @ chunk-RPCDYKBN.js?v=688b3cc9:521
+error @ chunk-RPCDYKBN.js?v=688b3cc9:505
+warnOnInvalidKey @ chunk-RPCDYKBN.js?v=688b3cc9:10219
+reconcileChildrenArray @ chunk-RPCDYKBN.js?v=688b3cc9:10235
+reconcileChildFibers2 @ chunk-RPCDYKBN.js?v=688b3cc9:10559
+reconcileChildren @ chunk-RPCDYKBN.js?v=688b3cc9:14290
+updateFragment @ chunk-RPCDYKBN.js?v=688b3cc9:14522
+beginWork @ chunk-RPCDYKBN.js?v=688b3cc9:15949
+beginWork$1 @ chunk-RPCDYKBN.js?v=688b3cc9:19753
+performUnitOfWork @ chunk-RPCDYKBN.js?v=688b3cc9:19198
+workLoopSync @ chunk-RPCDYKBN.js?v=688b3cc9:19137
+renderRootSync @ chunk-RPCDYKBN.js?v=688b3cc9:19116
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=688b3cc9:18874
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=688b3cc9:9119
+(anonymous) @ chunk-RPCDYKBN.js?v=688b3cc9:18627Understand this error
