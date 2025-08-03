@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, ChevronDown, ChevronRight, Target, CheckCircle2, Circle, Star } from "lucide-react";
+import { Plus, ChevronDown, ChevronRight, Target, CheckCircle2, Circle, Star, Trash2, X } from "lucide-react";
 
 interface Goal {
   id: string;
@@ -19,9 +19,10 @@ interface GoalCategoryProps {
   };
   onAddGoal: (categoryId: string, goalData: Omit<Goal, 'id'>) => void;
   onToggleGoal: (goalId: string) => void;
+  onDeleteGoal: (goalId: string) => void;
 }
 
-export function GoalCategory({ category, onAddGoal, onToggleGoal }: GoalCategoryProps) {
+export function GoalCategory({ category, onAddGoal, onToggleGoal, onDeleteGoal }: GoalCategoryProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newGoalText, setNewGoalText] = useState("");
@@ -199,11 +200,25 @@ export function GoalCategory({ category, onAddGoal, onToggleGoal }: GoalCategory
             category.goals.map((goal, index) => (
               <div
                 key={goal.id}
-                className="goal-quest cursor-pointer group fade-in"
+                className="goal-quest group fade-in relative"
                 style={{ animationDelay: `${index * 100}ms` }}
-                onClick={() => onToggleGoal(goal.id)}
               >
-                <div className="flex items-start space-x-4">
+                {/* Delete Button */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDeleteGoal(goal.id);
+                  }}
+                  className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 bg-red-600 hover:bg-red-700 rounded-full z-10"
+                  title="Delete goal"
+                >
+                  <X className="w-4 h-4 text-white" />
+                </button>
+
+                <div 
+                  className="flex items-start space-x-4 cursor-pointer"
+                  onClick={() => onToggleGoal(goal.id)}
+                >
                   <button className="mt-1 group-hover:scale-125 transition-all duration-300">
                     {goal.completed ? (
                       <div className="relative">

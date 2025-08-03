@@ -36,11 +36,10 @@ export function TopBar({ user, onOpenMorningModal, onToggleMobileSidebar }: TopB
 
       <div className="flex items-center space-x-3">
         <button 
-          onClick={onOpenMorningModal}
           className="relative p-2 hover:bg-accent rounded-md"
+          title="Notifications - Coming Soon"
         >
           <Bell className="w-5 h-5" />
-          <div className="absolute top-1 right-1 w-2 h-2 bg-destructive rounded-full" />
         </button>
         
         <div className="relative">
@@ -63,7 +62,7 @@ export function TopBar({ user, onOpenMorningModal, onToggleMobileSidebar }: TopB
           </button>
           
           {showUserMenu && (
-            <div className="absolute right-0 top-full mt-1 w-48 bg-gray-900 border-2 border-gray-700 rounded-lg shadow-2xl z-50 backdrop-blur-sm">
+            <div className="absolute right-0 top-full mt-1 w-48 bg-gray-900 border-2 border-gray-700 rounded-lg shadow-2xl z-[9999] backdrop-blur-sm">
               <div className="p-4 border-b border-gray-700">
                 <p className="font-semibold text-sm text-white">{user?.displayName || 'Anonymous Hunter'}</p>
                 <p className="text-xs text-gray-400">{user?.email}</p>

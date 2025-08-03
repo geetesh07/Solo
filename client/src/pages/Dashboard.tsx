@@ -8,6 +8,7 @@ import { Crown, Star, CheckCircle, Calendar, BarChart3, Target } from "lucide-re
 import { AnalyticsDashboard } from "../components/analytics/AnalyticsDashboard";
 import { CalendarView } from "../components/calendar/CalendarView";
 import { Settings } from "./Settings";
+import { MorningModal } from "@/components/modals/MorningModal";
 
 interface Goal {
   id: string;
@@ -39,35 +40,17 @@ function Dashboard() {
   const streak = 0;
   const rank = "E-Rank";
 
-  // Categories with goals state
+  // Categories with goals state - start empty
   const [categories, setCategories] = useState<Category[]>([
     {
       id: '1',
       name: 'Main Mission',
-      goals: [
-        {
-          id: '1',
-          title: 'Complete project proposal',
-          description: 'Finish the quarterly project proposal document',
-          completed: false,
-          priority: 'high',
-          dueDate: '2025-08-05',
-          xpReward: 50
-        }
-      ]
+      goals: []
     },
     {
       id: '2', 
       name: 'Training',
-      goals: [
-        {
-          id: '3',
-          title: 'Learn React hooks',
-          completed: false,
-          priority: 'medium',
-          xpReward: 30
-        }
-      ]
+      goals: []
     },
     {
       id: '3',
@@ -100,6 +83,13 @@ function Dashboard() {
     })));
   };
 
+  const handleDeleteGoal = (goalId: string) => {
+    setCategories(prev => prev.map(category => ({
+      ...category,
+      goals: category.goals.filter(goal => goal.id !== goalId)
+    })));
+  };
+
   const renderDashboard = () => (
     <div className="space-y-8 slide-up">
       <div className="flex items-center justify-between">
@@ -114,8 +104,9 @@ function Dashboard() {
         <button
           onClick={() => setIsMorningModalOpen(true)}
           className="power-button"
+          title="Opens a motivational morning planning session to help you plan your day's goals"
         >
-          <span className="relative z-10">Daily Quest Briefing</span>
+          <span className="relative z-10">Daily Planning</span>
         </button>
       </div>
 
@@ -238,6 +229,7 @@ function Dashboard() {
             category={category}
             onToggleGoal={handleToggleGoal}
             onAddGoal={handleAddGoal}
+            onDeleteGoal={handleDeleteGoal}
           />
         ))}
       </div>
