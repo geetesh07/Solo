@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import * as React from "react";
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Plus, Grid3X3, CalendarDays } from "lucide-react";
 import { showToast } from "@/components/ui/Toast";
 import { useConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { WeeklyView } from "./WeeklyView";
 
 interface CalendarEvent {
   id: string;
@@ -24,6 +25,7 @@ interface CalendarViewProps {
 }
 
 export function CalendarView({ goals = [] }: CalendarViewProps) {
+  const [viewMode, setViewMode] = useState<'month' | 'week'>('week');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [isAddingEvent, setIsAddingEvent] = useState(false);
@@ -33,6 +35,21 @@ export function CalendarView({ goals = [] }: CalendarViewProps) {
     const today = new Date();
     return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
   });
+
+  // Set initial view mode based on screen size
+  useEffect(() => {
+    const checkScreenSize = () => {
+      if (window.innerWidth < 768) {
+        setViewMode('week');
+      } else {
+        setViewMode('month');
+      }
+    };
+
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
   
   const { showConfirm, confirmDialog } = useConfirmDialog();
   
@@ -285,25 +302,59 @@ export function CalendarView({ goals = [] }: CalendarViewProps) {
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const days = getDaysInMonth(currentDate);
 
+  // If weekly view is selected, use the WeeklyView component
+  if (viewMode === 'week') {
+    return <WeeklyView goals={goals} />;
+  }
+
   return (
-    <div className="w-full max-w-none space-y-6">
+    <div className="w-full max-w-none space-y-4 sm:space-y-6">
       {/* Calendar Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-2xl font-bold text-white font-['Orbitron']">
+          <h2 className="text-xl sm:text-2xl font-bold text-white font-['Orbitron']">
             <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
               MISSION CALENDAR
             </span>
           </h2>
-          <p className="text-gray-400 mt-1">Plan and track your daily objectives</p>
+          <p className="text-gray-400 mt-1 text-sm sm:text-base">Plan and track your daily objectives</p>
         </div>
-        <button 
-          className="power-button"
-          onClick={() => setIsAddingEvent(true)}
-        >
-          <Plus className="w-5 h-5 mr-2" />
-          Add Event
-        </button>
+        
+        <div className="flex items-center space-x-2">
+          {/* View Toggle - Hidden on mobile since it auto-switches */}
+          <div className="hidden sm:flex bg-gray-800 rounded-lg p-1">
+            <button
+              onClick={() => setViewMode('week')}
+              className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                viewMode === 'week' 
+                  ? 'bg-cyan-500 text-white' 
+                  : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              <CalendarDays className="w-4 h-4 mr-1 inline" />
+              Week
+            </button>
+            <button
+              onClick={() => setViewMode('month')}
+              className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                viewMode === 'month' 
+                  ? 'bg-cyan-500 text-white' 
+                  : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              <Grid3X3 className="w-4 h-4 mr-1 inline" />
+              Month
+            </button>
+          </div>
+          
+          <button 
+            className="power-button text-sm px-3 py-2"
+            onClick={() => setIsAddingEvent(true)}
+          >
+            <Plus className="w-4 h-4 mr-1" />
+            Add
+          </button>
+        </div>
       </div>
 
       {/* Calendar Navigation */}
@@ -330,19 +381,19 @@ export function CalendarView({ goals = [] }: CalendarViewProps) {
           </button>
         </div>
 
-        {/* Calendar Grid - Compact Version */}
-        <div className="grid grid-cols-7 gap-1 md:gap-2">
+        {/* Calendar Grid - Mobile Optimized */}
+        <div className="grid grid-cols-7 gap-1 sm:gap-2">
           {/* Day headers */}
           {dayNames.map(day => (
-            <div key={day} className="text-center p-1 md:p-2 text-gray-400 font-semibold text-xs md:text-sm">
-              {day}
+            <div key={day} className="text-center p-1 sm:p-2 text-gray-400 font-semibold text-xs sm:text-sm">
+              {day.substring(0, 3)}
             </div>
           ))}
           
           {/* Calendar days */}
           {days.map((day, index) => {
             if (day === null) {
-              return <div key={`empty-${index}`} className="h-12 md:h-16" />;
+              return <div key={`empty-${index}`} className="h-16 sm:h-20" />;
             }
             
             const dayEvents = getEventsForDate(day);
@@ -353,16 +404,18 @@ export function CalendarView({ goals = [] }: CalendarViewProps) {
             return (
               <div
                 key={`${currentDate.getFullYear()}-${currentDate.getMonth()}-${day}`}
-                className={`h-12 md:h-16 p-1 md:p-2 rounded-lg cursor-pointer transition-all duration-200 ${
+                className={`h-16 sm:h-20 p-1 sm:p-2 rounded-lg cursor-pointer transition-all duration-200 ${
                   isToday 
                     ? 'bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border-2 border-cyan-500/50' 
                     : 'hover:bg-white/5'
                 } ${dayEvents.length > 0 ? 'ring-1 ring-cyan-500/30' : ''}`}
                 onClick={() => handleDateClick(day)}
               >
-                <div className="text-white font-semibold text-xs md:text-sm mb-1">{day}</div>
+                <div className={`font-semibold text-xs sm:text-sm mb-1 ${isToday ? 'text-cyan-400' : 'text-white'}`}>
+                  {day}
+                </div>
                 <div className="space-y-0.5">
-                  {dayEvents.slice(0, 2).map(event => (
+                  {dayEvents.slice(0, 1).map(event => (
                     <div
                       key={event.id}
                       className={`text-xs px-1 py-0.5 rounded ${getEventTypeColor(event.type)} ${
@@ -370,11 +423,11 @@ export function CalendarView({ goals = [] }: CalendarViewProps) {
                       } truncate max-w-full`}
                       title={event.title}
                     >
-                      {event.title.length > 8 ? event.title.substring(0, 8) + '...' : event.title}
+                      {event.title.length > 6 ? event.title.substring(0, 6) + '...' : event.title}
                     </div>
                   ))}
-                  {dayEvents.length > 2 && (
-                    <div className="text-xs text-gray-400 font-semibold">+{dayEvents.length - 2}</div>
+                  {dayEvents.length > 1 && (
+                    <div className="text-xs text-gray-400 text-center font-semibold">+{dayEvents.length - 1}</div>
                   )}
                 </div>
               </div>

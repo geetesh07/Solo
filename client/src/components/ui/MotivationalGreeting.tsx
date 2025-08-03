@@ -75,45 +75,45 @@ export function MotivationalGreeting({ userName = "Hunter", onClose }: Motivatio
   };
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="mystical-card max-w-2xl w-full animate-in zoom-in-95 duration-300">
-        <div className="p-6 border-b border-gray-700">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4">
+      <div className="mystical-card max-w-2xl w-full max-h-[95vh] overflow-y-auto animate-in zoom-in-95 duration-300">
+        <div className="p-3 sm:p-6 border-b border-gray-700">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
-                <Star className="w-6 h-6 text-white" />
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
+                <Star className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-white font-['Orbitron']">
-                  HUNTER'S DAILY MOTIVATION
+                <h2 className="text-lg sm:text-xl font-bold text-white font-['Orbitron']">
+                  DAILY MOTIVATION
                 </h2>
-                <p className="text-gray-400 text-sm">Fuel your inner power</p>
+                <p className="text-gray-400 text-xs sm:text-sm">Fuel your inner power</p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+              className="p-2 hover:bg-gray-700 rounded-lg transition-colors flex-shrink-0"
             >
               <X className="w-5 h-5 text-gray-400" />
             </button>
           </div>
         </div>
 
-        <div className="p-6 space-y-6">
+        <div className="p-3 sm:p-6 space-y-4 sm:space-y-6">
           {/* Greeting */}
           <div className="text-center">
-            <h3 className="text-2xl font-bold text-white mb-2 font-['Orbitron']">
+            <h3 className="text-lg sm:text-2xl font-bold text-white mb-2 font-['Orbitron'] leading-tight">
               {greeting}
             </h3>
-            <p className="text-gray-300">
-              Another day, another chance to prove your strength and achieve greatness!
+            <p className="text-gray-300 text-sm sm:text-base">
+              Another day, another chance to prove your strength!
             </p>
           </div>
 
           {/* Quote Section */}
-          <div className="mystical-card p-6 bg-gradient-to-br from-gray-900/60 to-gray-800/40">
-            <div className="flex items-center justify-between mb-4">
-              <div className={`px-3 py-1 rounded-full border text-xs font-semibold uppercase tracking-wider ${getCategoryColor(currentQuote.category)}`}>
+          <div className="mystical-card p-3 sm:p-6 bg-gradient-to-br from-gray-900/60 to-gray-800/40">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <div className={`px-2 sm:px-3 py-1 rounded-full border text-xs font-semibold uppercase tracking-wider ${getCategoryColor(currentQuote.category)}`}>
                 {currentQuote.category}
               </div>
               <button
@@ -125,23 +125,20 @@ export function MotivationalGreeting({ userName = "Hunter", onClose }: Motivatio
               </button>
             </div>
 
-            <blockquote className="text-white text-lg leading-relaxed mb-4 font-medium">
+            <blockquote className="text-white text-sm sm:text-lg leading-relaxed mb-3 sm:mb-4 font-medium">
               "{currentQuote.text}"
             </blockquote>
 
-            <div className="flex items-center justify-between">
-              <div className="text-right">
-                <p className="text-cyan-400 font-semibold">— {currentQuote.author}</p>
-                <p className="text-gray-400 text-sm">{currentQuote.anime}</p>
-              </div>
+            <div className="text-right">
+              <p className="text-cyan-400 font-semibold text-sm sm:text-base">— {currentQuote.author}</p>
+              <p className="text-gray-400 text-xs sm:text-sm">{currentQuote.anime}</p>
             </div>
           </div>
 
           {/* Action Section */}
-          <div className="text-center space-y-4">
-            <p className="text-gray-300">
-              Remember: Every small step forward is progress. Every completed quest makes you stronger.
-              Your journey to becoming the ultimate Hunter starts now!
+          <div className="text-center space-y-3 sm:space-y-4">
+            <p className="text-gray-300 text-sm sm:text-base">
+              Every completed quest makes you stronger. Your Hunter journey starts now!
             </p>
             
             <div className="flex flex-col md:flex-row gap-3">

@@ -37,6 +37,17 @@ export function NotificationSystem({ isOpen, onClose }: NotificationSystemProps)
     
     if ('Notification' in window) {
       try {
+        // Check if permission is already granted to avoid multiple requests
+        if (Notification.permission === 'granted') {
+          setPermission('granted');
+          showToast({
+            type: 'success',
+            title: 'Already Enabled!',
+            message: 'Notifications are already working'
+          });
+          return;
+        }
+        
         const result = await Notification.requestPermission();
         console.log('Permission result:', result);
         setPermission(result);
@@ -44,25 +55,35 @@ export function NotificationSystem({ isOpen, onClose }: NotificationSystemProps)
         if (result === 'granted') {
           console.log('Permission granted, creating welcome notification...');
           
-          // Create immediate test notification
-          const welcomeNotification = new Notification('🎯 Hunter System Online!', {
-            body: 'Notifications enabled! You\'ll receive quest reminders and updates.',
-            icon: '/favicon.ico',
-            badge: '/favicon.ico',
-            tag: 'welcome-notification',
-            requireInteraction: false
-          });
-          
-          welcomeNotification.onclick = () => {
-            console.log('Welcome notification clicked!');
-            window.focus();
-            welcomeNotification.close();
-          };
+          // Use setTimeout to ensure DOM is ready and avoid constructor issues
+          setTimeout(() => {
+            try {
+              const welcomeNotification = new Notification('🎯 Hunter System Online!', {
+                body: 'Notifications enabled! You\'ll receive quest reminders and updates.',
+                icon: '/favicon.ico',
+                tag: 'welcome-notification',
+                silent: false
+              });
+              
+              welcomeNotification.onclick = () => {
+                console.log('Welcome notification clicked!');
+                window.focus();
+                welcomeNotification.close();
+              };
+              
+              welcomeNotification.onerror = (error) => {
+                console.error('Welcome notification error:', error);
+              };
+              
+            } catch (notifError) {
+              console.error('Error creating welcome notification:', notifError);
+            }
+          }, 100);
           
           showToast({
             type: 'success',
             title: 'Notifications Enabled!',
-            message: 'You should see a welcome notification now!'
+            message: 'You should see a welcome notification!'
           });
           
         } else if (result === 'denied') {
@@ -142,35 +163,49 @@ export function NotificationSystem({ isOpen, onClose }: NotificationSystemProps)
     console.log('Test notification clicked, permission:', permission);
     
     if (permission === 'granted') {
-      try {
-        console.log('Attempting to create notification...');
-        const notification = new Notification('🏹 Hunter System Alert', {
-          body: 'Your daily quest briefing is ready! Time to level up your productivity!',
-          icon: '/favicon.ico',
-          tag: 'test-notification',
-          requireInteraction: false
-        });
-        
-        console.log('Notification created successfully:', notification);
-        
-        // Add event listeners for debugging
-        notification.onshow = () => console.log('Notification shown');
-        notification.onerror = (e) => console.error('Notification error:', e);
-        notification.onclose = () => console.log('Notification closed');
-        
-        showToast({
-          type: 'success',
-          title: 'Test Notification Sent',
-          message: 'Check your system notifications! Should appear in top-right corner.'
-        });
-      } catch (error) {
-        console.error('Error creating test notification:', error);
-        showToast({
-          type: 'error',
-          title: 'Notification Failed',
-          message: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`
-        });
-      }
+      // Use setTimeout to prevent constructor errors on mobile
+      setTimeout(() => {
+        try {
+          console.log('Attempting to create test notification...');
+          const notification = new Notification('🏹 Hunter System Test', {
+            body: 'Test successful! Your quest reminders are working perfectly.',
+            icon: '/favicon.ico',
+            tag: 'test-notification',
+            silent: false
+          });
+          
+          console.log('Test notification created successfully');
+          
+          // Add event listeners for debugging
+          notification.onshow = () => console.log('Test notification shown');
+          notification.onerror = (e) => console.error('Test notification error:', e);
+          notification.onclose = () => console.log('Test notification closed');
+          notification.onclick = () => {
+            window.focus();
+            notification.close();
+          };
+          
+          // Auto-close after 5 seconds
+          setTimeout(() => {
+            notification.close();
+          }, 5000);
+          
+        } catch (error) {
+          console.error('Error creating test notification:', error);
+          showToast({
+            type: 'error',
+            title: 'Notification Failed',
+            message: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`
+          });
+        }
+      }, 50);
+      
+      showToast({
+        type: 'success',
+        title: 'Test Notification Sent!',
+        message: 'Check for the notification popup!'
+      });
+      
     } else if (permission === 'denied') {
       showToast({
         type: 'warning',
@@ -181,7 +216,7 @@ export function NotificationSystem({ isOpen, onClose }: NotificationSystemProps)
       showToast({
         type: 'info',
         title: 'Permission Required',
-        message: 'Please enable notifications first by clicking "Enable Notifications" above'
+        message: 'Please grant notification permission first'
       });
     }
   };

@@ -316,215 +316,151 @@ export function Settings() {
   };
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900 overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
       {/* Animated Background */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-900/20 via-purple-900/10 to-transparent animate-pulse"></div>
       <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
       
       {/* Main Content */}
-      <div className="relative h-full overflow-y-auto">
-        <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8">
+      <div className="relative min-h-screen p-3 sm:p-6 lg:p-8">
+        <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8">
           {/* Header Section */}
-          <div className="text-center mb-8 relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500/10 to-transparent blur-3xl"></div>
-            <div className="relative z-10">
-              <h1 className="text-4xl md:text-6xl font-bold text-white font-['Orbitron'] mb-4">
-                <span className="bg-gradient-to-r from-blue-400 via-cyan-300 to-purple-400 bg-clip-text text-transparent animate-gradient">
-                  HUNTER COMMAND CENTER
+          <div className="text-center mb-6 sm:mb-8">
+            <div className="flex items-center justify-center space-x-3 sm:space-x-4 mb-4 sm:mb-6">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-r from-purple-500 to-blue-500 rounded-xl flex items-center justify-center shadow-2xl">
+                <SettingsIcon className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
+              </div>
+              <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white font-['Orbitron']">
+                <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                  HUNTER PANEL
                 </span>
               </h1>
-              <p className="text-gray-300 text-lg">Master your Solo Leveling experience</p>
-              <div className="w-32 h-1 bg-gradient-to-r from-blue-500 to-cyan-500 mx-auto mt-4 rounded-full"></div>
             </div>
+            <p className="text-gray-300 text-base sm:text-lg">Configure your quest environment</p>
           </div>
 
-          {/* Profile Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Hunter Profile Card */}
-            <div className="lg:col-span-1">
-              <div className="mystical-card p-8 h-full relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10"></div>
-                <div className="relative z-10">
-                  <div className="text-center mb-6">
-                    <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full mx-auto mb-4 flex items-center justify-center shadow-2xl">
-                      <User className="w-10 h-10 text-white" />
-                    </div>
-                    <h2 className="text-2xl font-bold text-white font-['Orbitron'] mb-2">
-                      <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                        HUNTER PROFILE
-                      </span>
-                    </h2>
+          {/* Settings Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+            <div className="space-y-6 sm:space-y-8">
+              {/* Hunter Profile Card */}
+              <div className="mystical-card p-4 sm:p-6">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
+                    <User className="w-5 h-5 text-white" />
                   </div>
-                  
-                  <div className="space-y-4">
-                    <div className="bg-gray-800/50 p-4 rounded-lg border border-gray-700/50">
-                      <div className="text-gray-400 text-sm mb-1">Hunter Name</div>
-                      <div className="text-white font-bold text-lg">{user?.displayName || 'Anonymous Hunter'}</div>
-                    </div>
-                    <div className="bg-gray-800/50 p-4 rounded-lg border border-gray-700/50">
-                      <div className="text-gray-400 text-sm mb-1">Email</div>
-                      <div className="text-white font-medium">{user?.email}</div>
-                    </div>
-                    <div className="bg-gray-800/50 p-4 rounded-lg border border-gray-700/50">
-                      <div className="text-gray-400 text-sm mb-1">Registration</div>
-                      <div className="text-white font-medium">
-                        {user?.metadata?.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString('en-GB') : 'Unknown'}
-                      </div>
-                    </div>
-                    <div className="bg-gray-800/50 p-4 rounded-lg border border-gray-700/50">
-                      <div className="text-gray-400 text-sm mb-1">Active Theme</div>
-                      <div className="text-white font-medium">
-                        {colorThemes.find(t => t.id === currentTheme)?.name || 'Hunter Blue'}
-                      </div>
-                    </div>
+                  <h2 className="text-lg sm:text-xl font-bold text-white font-['Orbitron']">
+                    <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                      HUNTER PROFILE
+                    </span>
+                  </h2>
+                </div>
+                
+                <div className="space-y-3">
+                  <div className="bg-gray-800/50 p-3 rounded-lg border border-gray-700/50">
+                    <div className="text-gray-400 text-xs sm:text-sm mb-1">Hunter Name</div>
+                    <div className="text-white font-bold text-sm sm:text-base">{user?.displayName || 'Anonymous Hunter'}</div>
                   </div>
+                  <div className="bg-gray-800/50 p-3 rounded-lg border border-gray-700/50">
+                    <div className="text-gray-400 text-xs sm:text-sm mb-1">Email</div>
+                    <div className="text-white font-medium text-sm sm:text-base break-all">{user?.email}</div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Theme Selection */}
+              <div className="mystical-card p-4 sm:p-6">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-teal-500 rounded-lg flex items-center justify-center">
+                    <Palette className="w-5 h-5 text-white" />
+                  </div>
+                  <h2 className="text-lg sm:text-xl font-bold text-white font-['Orbitron']">
+                    <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                      THEME SELECTION
+                    </span>
+                  </h2>
+                </div>
+                
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {themes.map((theme) => (
+                    <button
+                      key={theme.id}
+                      onClick={() => applyTheme(theme.id)}
+                      className={`p-3 rounded-lg transition-all duration-200 border-2 ${
+                        selectedTheme === theme.id
+                          ? 'border-cyan-500 bg-cyan-500/20'
+                          : 'border-gray-700 hover:border-gray-600 bg-gray-800/50'
+                      }`}
+                    >
+                      <div className="text-center">
+                        <div className="text-lg mb-1">{theme.icon}</div>
+                        <div className="text-white text-xs sm:text-sm font-medium">{theme.name}</div>
+                      </div>
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>
 
-            {/* Settings Panels */}
-            <div className="lg:col-span-2 space-y-8">
-
-              {/* Appearance Settings */}
-              <div className="mystical-card p-8 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-pink-500/10"></div>
-                <div className="relative z-10">
-                  <div className="flex items-center space-x-4 mb-6">
-                    <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center shadow-lg">
-                      <Palette className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h2 className="text-2xl font-bold text-white font-['Orbitron']">SHADOW THEMES</h2>
-                      <p className="text-gray-400">Customize your Hunter interface</p>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {colorThemes.map((theme) => (
-                      <button
-                        key={theme.id}
-                        onClick={() => applyTheme(theme.id)}
-                        className={`bg-gray-800/50 border-2 p-6 rounded-xl text-left transition-all duration-300 hover:scale-105 hover:shadow-xl ${
-                          currentTheme === theme.id ? 'border-cyan-400 bg-cyan-900/20 shadow-cyan-400/25' : 'border-gray-700/50 hover:border-gray-600'
-                        }`}
-                      >
-                        <div className="flex items-center space-x-3 mb-4">
-                          <div className="flex space-x-1">
-                            {theme.colors.map((color, index) => (
-                              <div
-                                key={index}
-                                className="w-5 h-5 rounded-full border-2 border-white/20"
-                                style={{ backgroundColor: color }}
-                              />
-                            ))}
-                          </div>
-                          <h3 className="text-white font-bold text-lg">{theme.name}</h3>
-                        </div>
-                        <p className="text-gray-300 text-sm mb-3">{theme.description}</p>
-                        {currentTheme === theme.id && (
-                          <div className="flex items-center text-cyan-400 font-bold text-sm">
-                            <span className="w-2 h-2 bg-cyan-400 rounded-full mr-2 animate-pulse"></span>
-                            ACTIVE THEME
-                          </div>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
+            {/* Right Column - Settings */}
+            <div className="space-y-6 sm:space-y-8">
 
               {/* Notification Settings */}
-              <div className="mystical-card p-8 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-cyan-500/10"></div>
-                <div className="relative z-10">
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center shadow-lg">
-                        <Bell className="w-6 h-6 text-white" />
-                      </div>
-                      <div>
-                        <h2 className="text-2xl font-bold text-white font-['Orbitron']">ALERT SYSTEM</h2>
-                        <p className="text-gray-400">Manage quest reminders and notifications</p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => setIsNotificationOpen(true)}
-                      className="power-button"
-                    >
-                      <Bell className="w-4 h-4 mr-2" />
-                      Configure Alerts
-                    </button>
+              <div className="mystical-card p-4 sm:p-6">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="w-10 h-10 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg flex items-center justify-center">
+                    <Bell className="w-5 h-5 text-white" />
                   </div>
-                  
-                  <div className="bg-gray-800/50 border border-gray-700/50 p-6 rounded-xl">
-                    <p className="text-gray-300 mb-4 text-lg leading-relaxed">
-                      Enable browser notifications to receive real-time updates about your hunter activities. 
-                      Get alerts for quest deadlines, daily check-ins, achievement unlocks, and streak milestones.
-                    </p>
-                    <div className="flex items-center justify-between bg-gray-900/50 p-4 rounded-lg">
-                      <div className="text-sm">
-                        <span className="text-gray-400">Permission Status:</span>
-                        <span className={`ml-2 font-bold ${
-                          typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted' 
-                            ? 'text-green-400' 
-                            : typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'denied'
-                            ? 'text-red-400'
-                            : 'text-yellow-400'
-                        }`}>
-                          {typeof window !== 'undefined' && 'Notification' in window 
-                            ? Notification.permission === 'granted' ? 'Granted' : 'Pending'
-                            : 'Not supported'
-                          }
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+                  <h2 className="text-lg sm:text-xl font-bold text-white font-['Orbitron']">
+                    <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                      ALERT SYSTEM
+                    </span>
+                  </h2>
                 </div>
+                
+                <button
+                  onClick={() => setIsNotificationOpen(true)}
+                  className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white px-4 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105"
+                >
+                  <Bell className="w-4 h-4 mr-2 inline" />
+                  Configure Alerts
+                </button>
               </div>
 
               {/* Account Management */}
-              <div className="mystical-card p-8 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 to-orange-500/10"></div>
-                <div className="relative z-10">
-                  <div className="flex items-center space-x-4 mb-6">
-                    <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-orange-500 rounded-lg flex items-center justify-center shadow-lg">
-                      <User className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h2 className="text-2xl font-bold text-white font-['Orbitron']">ACCOUNT CONTROL</h2>
-                      <p className="text-gray-400">Manage your hunter account</p>
-                    </div>
+              <div className="mystical-card p-4 sm:p-6">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-pink-500 rounded-lg flex items-center justify-center">
+                    <Shield className="w-5 h-5 text-white" />
                   </div>
+                  <h2 className="text-lg sm:text-xl font-bold text-white font-['Orbitron']">
+                    <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                      ACCOUNT CONTROL
+                    </span>
+                  </h2>
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <button
+                    onClick={handleSignOut}
+                    className="bg-red-600/20 hover:bg-red-600/30 border-2 border-red-500/30 hover:border-red-500/50 p-4 rounded-lg text-left transition-all duration-300 hover:scale-105 group"
+                  >
+                    <div className="flex items-center space-x-2 mb-2">
+                      <LogOut className="w-5 h-5 text-red-400 group-hover:text-red-300" />
+                      <h3 className="text-red-400 group-hover:text-red-300 font-bold text-sm sm:text-base">Sign Out</h3>
+                    </div>
+                    <p className="text-gray-300 text-xs sm:text-sm">Log out safely</p>
+                  </button>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <button
-                      onClick={signOut}
-                      className="bg-red-600/20 hover:bg-red-600/30 border-2 border-red-500/30 hover:border-red-500/50 p-6 rounded-xl text-left transition-all duration-300 hover:scale-105 group"
-                    >
-                      <div className="flex items-center space-x-3 mb-3">
-                        <LogOut className="w-6 h-6 text-red-400 group-hover:text-red-300" />
-                        <h3 className="text-red-400 group-hover:text-red-300 font-bold text-lg">Sign Out</h3>
-                      </div>
-                      <p className="text-gray-300 text-sm">Log out of your hunter account safely</p>
-                    </button>
-                    
-                    <button
-                      onClick={() => {
-                        showToast({
-                          type: 'info',
-                          title: 'Export First',
-                          message: 'Consider exporting your data before signing out'
-                        });
-                      }}
-                      className="bg-blue-600/20 hover:bg-blue-600/30 border-2 border-blue-500/30 hover:border-blue-500/50 p-6 rounded-xl text-left transition-all duration-300 hover:scale-105 group"
-                    >
-                      <div className="flex items-center space-x-3 mb-3">
-                        <Download className="w-6 h-6 text-blue-400 group-hover:text-blue-300" />
-                        <h3 className="text-blue-400 group-hover:text-blue-300 font-bold text-lg">Export Data</h3>
-                      </div>
-                      <p className="text-gray-300 text-sm">Download your hunter progress before leaving</p>
-                    </button>
-                  </div>
+                  <button
+                    onClick={handleResetData}
+                    className="bg-orange-600/20 hover:bg-orange-600/30 border-2 border-orange-500/30 hover:border-orange-500/50 p-4 rounded-lg text-left transition-all duration-300 hover:scale-105 group"
+                  >
+                    <div className="flex items-center space-x-2 mb-2">
+                      <Trash2 className="w-5 h-5 text-orange-400 group-hover:text-orange-300" />
+                      <h3 className="text-orange-400 group-hover:text-orange-300 font-bold text-sm sm:text-base">Reset Data</h3>
+                    </div>
+                    <p className="text-gray-300 text-xs sm:text-sm">Clear all progress</p>
+                  </button>
                 </div>
               </div>
             </div>
