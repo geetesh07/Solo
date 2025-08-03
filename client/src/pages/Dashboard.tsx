@@ -7,6 +7,7 @@ import { useGoals } from "@/hooks/useGoals";
 import { Crown, Star, CheckCircle, Calendar, BarChart3, Target } from "lucide-react";
 import { AnalyticsDashboard } from "../components/analytics/AnalyticsDashboard";
 import { CalendarView } from "../components/calendar/CalendarView";
+import { Settings } from "./Settings";
 
 interface Goal {
   id: string;
@@ -31,15 +32,15 @@ function Dashboard() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isMorningModalOpen, setIsMorningModalOpen] = useState(false);
 
-  // Mock user stats - replace with real data
-  const level = 5;
-  const currentXP = 2850;
-  const maxXP = 3000;
-  const streak = 7;
-  const rank = "C-Rank";
+  // Initialize user stats from level 1
+  const level = 1;
+  const currentXP = 0;
+  const maxXP = 100;
+  const streak = 0;
+  const rank = "E-Rank";
 
-  // Mock categories with goals
-  const categories: Category[] = [
+  // Categories with goals state
+  const [categories, setCategories] = useState<Category[]>([
     {
       id: '1',
       name: 'Main Mission',
@@ -52,13 +53,6 @@ function Dashboard() {
           priority: 'high',
           dueDate: '2025-08-05',
           xpReward: 50
-        },
-        {
-          id: '2',
-          title: 'Team meeting preparation',
-          completed: true,
-          priority: 'medium',
-          xpReward: 25
         }
       ]
     },
@@ -68,32 +62,46 @@ function Dashboard() {
       goals: [
         {
           id: '3',
-          title: 'Read documentation',
+          title: 'Learn React hooks',
           completed: false,
-          priority: 'low',
-          xpReward: 15
+          priority: 'medium',
+          xpReward: 30
         }
       ]
     },
     {
       id: '3',
-      name: 'Side Quests',
+      name: 'Side Quest',
       goals: []
     }
-  ];
+  ]);
 
-  const handleAddGoal = (categoryId: string) => {
-    // This would normally add a goal to the category
-    console.log('Add goal to category:', categoryId);
+  const handleAddGoal = (categoryId: string, goalData: Omit<Goal, 'id'>) => {
+    const newGoal: Goal = {
+      ...goalData,
+      id: Date.now().toString()
+    };
+    
+    setCategories(prev => prev.map(category => 
+      category.id === categoryId 
+        ? { ...category, goals: [...category.goals, newGoal] }
+        : category
+    ));
   };
 
   const handleToggleGoal = (goalId: string) => {
-    // This would normally toggle the goal status
-    console.log('Toggle goal:', goalId);
+    setCategories(prev => prev.map(category => ({
+      ...category,
+      goals: category.goals.map(goal => 
+        goal.id === goalId 
+          ? { ...goal, completed: !goal.completed }
+          : goal
+      )
+    })));
   };
 
   const renderDashboard = () => (
-    <div className="space-y-8 slide-up particle-effect">
+    <div className="space-y-8 slide-up">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-white font-['Orbitron']">
@@ -112,7 +120,7 @@ function Dashboard() {
       </div>
 
       {/* Hunter Status Window */}
-      <div className="hunter-status-window p-8 hunter-glow">
+      <div className="mystical-card p-8">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-6">
             <div className="relative">
@@ -132,7 +140,7 @@ function Dashboard() {
             </div>
           </div>
           <div className="text-right">
-            <div className="text-6xl font-bold text-transparent bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text font-['Orbitron'] level-up">
+            <div className="text-6xl font-bold text-transparent bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text font-['Orbitron']">
               {level}
             </div>
             <p className="text-gray-400 text-sm font-semibold">CURRENT LEVEL</p>
@@ -249,12 +257,8 @@ function Dashboard() {
   );
 
   const renderSettings = () => (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-semibold">Settings</h1>
-      <div className="bg-card border border-border rounded-lg p-6">
-        <h3 className="font-medium mb-4">Preferences</h3>
-        <p className="text-muted-foreground">Settings panel coming soon</p>
-      </div>
+    <div className="slide-up">
+      <Settings />
     </div>
   );
 

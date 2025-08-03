@@ -1,4 +1,4 @@
-import { Home, Calendar, BarChart3, Settings } from "lucide-react";
+import { Home, Calendar, BarChart3, Settings, User } from "lucide-react";
 
 interface AppSidebarProps {
   currentView: string;
@@ -26,28 +26,35 @@ export function AppSidebar({
   ];
 
   return (
-    <aside className="w-64 h-screen bg-card border-r border-border flex flex-col">
+    <aside className="w-64 h-screen bg-gradient-to-b from-gray-900 to-black border-r border-gray-700 flex flex-col">
       {/* Header */}
-      <div className="p-4 border-b border-border">
-        <h1 className="text-lg font-semibold">Solo Hunter</h1>
-        <p className="text-sm text-muted-foreground">Productivity System</p>
+      <div className="p-6 border-b border-gray-700">
+        <div className="flex items-center space-x-3">
+          <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
+            <User className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h1 className="text-lg font-bold text-white font-['Orbitron']">HUNTER</h1>
+            <p className="text-xs text-gray-400">Level {userLevel}</p>
+          </div>
+        </div>
       </div>
 
-      {/* Stats */}
-      <div className="p-4 border-b border-border">
-        <div className="space-y-2">
+      {/* XP Progress */}
+      <div className="p-6 border-b border-gray-700">
+        <div className="space-y-3">
           <div className="flex justify-between text-sm">
-            <span>Level {userLevel}</span>
-            <span>{currentXP.toLocaleString()} XP</span>
+            <span className="text-gray-300">XP Progress</span>
+            <span className="text-cyan-400 font-semibold">{currentXP}/{maxXP}</span>
           </div>
-          <div className="w-full bg-muted rounded-full h-2">
+          <div className="w-full bg-gray-800 rounded-full h-2 overflow-hidden">
             <div 
-              className="bg-primary h-2 rounded-full transition-all duration-300"
+              className="bg-gradient-to-r from-blue-500 to-cyan-400 h-2 rounded-full transition-all duration-500"
               style={{ width: `${progress}%` }}
             />
           </div>
-          <div className="text-xs text-muted-foreground text-center">
-            {progress}% to next level
+          <div className="text-xs text-gray-400 text-center">
+            {maxXP - currentXP} XP to next level
           </div>
         </div>
       </div>
@@ -63,10 +70,10 @@ export function AppSidebar({
               <button
                 key={item.id}
                 onClick={() => onViewChange(item.id)}
-                className={`w-full flex items-center space-x-3 px-3 py-2 rounded-md text-left transition-colors ${
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-all duration-200 font-medium ${
                   isActive
-                    ? 'bg-primary text-primary-foreground'
-                    : 'hover:bg-accent hover:text-accent-foreground'
+                    ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg'
+                    : 'text-gray-300 hover:bg-gray-800 hover:text-white'
                 }`}
               >
                 <Icon className="w-5 h-5" />

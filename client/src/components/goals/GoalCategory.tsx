@@ -17,7 +17,7 @@ interface GoalCategoryProps {
     name: string;
     goals: Goal[];
   };
-  onAddGoal: (categoryId: string) => void;
+  onAddGoal: (categoryId: string, goalData: Omit<Goal, 'id'>) => void;
   onToggleGoal: (goalId: string) => void;
 }
 
@@ -32,7 +32,12 @@ export function GoalCategory({ category, onAddGoal, onToggleGoal }: GoalCategory
 
   const handleAddGoal = () => {
     if (newGoalText.trim()) {
-      onAddGoal(category.id);
+      onAddGoal(category.id, {
+        title: newGoalText.trim(),
+        completed: false,
+        priority: 'medium',
+        xpReward: 25
+      });
       setNewGoalText("");
       setShowAddForm(false);
     }

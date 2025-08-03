@@ -63,10 +63,10 @@ export function TopBar({ user, onOpenMorningModal, onToggleMobileSidebar }: TopB
           </button>
           
           {showUserMenu && (
-            <div className="absolute right-0 top-full mt-1 w-48 bg-popover border border-border rounded-md shadow-lg z-50">
-              <div className="p-3 border-b border-border">
-                <p className="font-medium text-sm">{user?.displayName || 'Anonymous'}</p>
-                <p className="text-xs text-muted-foreground">{user?.email}</p>
+            <div className="absolute right-0 top-full mt-1 w-48 bg-gray-900 border-2 border-gray-700 rounded-lg shadow-2xl z-50 backdrop-blur-sm">
+              <div className="p-4 border-b border-gray-700">
+                <p className="font-semibold text-sm text-white">{user?.displayName || 'Anonymous Hunter'}</p>
+                <p className="text-xs text-gray-400">{user?.email}</p>
               </div>
               <button
                 onClick={() => {
