@@ -1,187 +1,205 @@
 import { useState, useEffect } from "react";
-import { Star, CheckCircle, Flame, Crown } from "lucide-react";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { TopBar } from "@/components/layout/TopBar";
 import { GoalCategory } from "@/components/goals/GoalCategory";
-import { MorningModal } from "@/components/goals/MorningModal";
-import { CalendarView } from "@/components/calendar/CalendarView";
-import { AnalyticsView } from "@/components/analytics/AnalyticsView";
-import { SettingsView } from "@/components/settings/SettingsView";
 import { useAuth } from "@/hooks/useAuth";
 import { useGoals } from "@/hooks/useGoals";
-import { useUserProfile } from "@/hooks/useUserProfile";
+import { Crown, Star, CheckCircle, Calendar, BarChart3 } from "lucide-react";
 
-export default function Dashboard() {
+interface Goal {
+  id: string;
+  title: string;
+  description?: string;
+  completed: boolean;
+  priority: 'low' | 'medium' | 'high';
+  dueDate?: string;
+  xpReward?: number;
+}
+
+interface Category {
+  id: string;
+  name: string;
+  goals: Goal[];
+}
+
+function Dashboard() {
   const { user } = useAuth();
-  const { categories, loading, addGoal, toggleGoalStatus } = useGoals();
-  const { profile } = useUserProfile();
+  const { goals, addGoal, toggleGoal } = useGoals();
   const [currentView, setCurrentView] = useState('dashboard');
-  const [isMorningModalOpen, setIsMorningModalOpen] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isMorningModalOpen, setIsMorningModalOpen] = useState(false);
 
-  // Show morning modal automatically at 7 AM (can be customized)
-  useEffect(() => {
-    const checkMorningTime = () => {
-      const now = new Date();
-      const hours = now.getHours();
-      const lastShown = localStorage.getItem('lastMorningPrompt');
-      const today = now.toDateString();
-      
-      // Show at 7 AM if not shown today
-      if (hours === 7 && lastShown !== today) {
-        setIsMorningModalOpen(true);
-        localStorage.setItem('lastMorningPrompt', today);
-      }
-    };
+  // Mock user stats - replace with real data
+  const level = 5;
+  const currentXP = 2850;
+  const maxXP = 3000;
+  const streak = 7;
+  const rank = "C-Rank";
 
-    const interval = setInterval(checkMorningTime, 60000); // Check every minute
-    checkMorningTime(); // Check immediately
+  // Mock categories with goals
+  const categories: Category[] = [
+    {
+      id: '1',
+      name: 'Main Mission',
+      goals: [
+        {
+          id: '1',
+          title: 'Complete project proposal',
+          description: 'Finish the quarterly project proposal document',
+          completed: false,
+          priority: 'high',
+          dueDate: '2025-08-05',
+          xpReward: 50
+        },
+        {
+          id: '2',
+          title: 'Team meeting preparation',
+          completed: true,
+          priority: 'medium',
+          xpReward: 25
+        }
+      ]
+    },
+    {
+      id: '2', 
+      name: 'Training',
+      goals: [
+        {
+          id: '3',
+          title: 'Read documentation',
+          completed: false,
+          priority: 'low',
+          xpReward: 15
+        }
+      ]
+    },
+    {
+      id: '3',
+      name: 'Side Quests',
+      goals: []
+    }
+  ];
 
-    return () => clearInterval(interval);
-  }, []);
-
-  const handleAddGoal = async (goalData: any) => {
-    if (categories.length === 0) return;
-    
-    // If no category is selected, use the first available category
-    const categoryId = goalData.categoryId || categories[0].id;
-    
-    await addGoal({
-      ...goalData,
-      categoryId,
-    });
+  const handleAddGoal = (categoryId: string) => {
+    // This would normally add a goal to the category
+    console.log('Add goal to category:', categoryId);
   };
 
-  // Calculate daily stats
-  const todaysGoals = categories.flatMap(cat => cat.goals);
-  const completedGoals = todaysGoals.filter(goal => goal.status === 'completed');
-  const dailyXP = completedGoals.reduce((total, goal) => total + goal.xpValue, 0);
+  const handleToggleGoal = (goalId: string) => {
+    // This would normally toggle the goal status
+    console.log('Toggle goal:', goalId);
+  };
 
-  // Calculate XP for next level
-  const currentXP = profile?.currentXP || 0;
-  const level = profile?.level || 1;
-  const maxXP = 1000; // XP needed per level
-  const rank = profile?.rank || 'E-Rank';
-  const streak = profile?.streak || 0;
+  const renderDashboard = () => (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">Dashboard</h1>
+        <button
+          onClick={() => setIsMorningModalOpen(true)}
+          className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+        >
+          Daily Briefing
+        </button>
+      </div>
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-solo-dark flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 bg-gradient-to-r from-solo-blue to-solo-violet rounded-full mx-auto mb-4 flex items-center justify-center animate-pulse">
-            <Crown className="w-8 h-8 text-white" />
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="bg-card border border-border rounded-lg p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-muted-foreground text-sm">Level</p>
+              <p className="text-2xl font-semibold">{level}</p>
+            </div>
+            <Crown className="w-6 h-6 text-primary" />
           </div>
-          <p className="text-gray-300">Loading your quest data...</p>
+        </div>
+        <div className="bg-card border border-border rounded-lg p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-muted-foreground text-sm">XP</p>
+              <p className="text-2xl font-semibold">{currentXP.toLocaleString()}</p>
+            </div>
+            <Star className="w-6 h-6 text-yellow-500" />
+          </div>
+        </div>
+        <div className="bg-card border border-border rounded-lg p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-muted-foreground text-sm">Streak</p>
+              <p className="text-2xl font-semibold">{streak}</p>
+            </div>
+            <CheckCircle className="w-6 h-6 text-green-500" />
+          </div>
+        </div>
+        <div className="bg-card border border-border rounded-lg p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-muted-foreground text-sm">Rank</p>
+              <p className="text-2xl font-semibold">{rank}</p>
+            </div>
+            <Crown className="w-6 h-6 text-primary" />
+          </div>
         </div>
       </div>
-    );
-  }
+
+      {/* Categories */}
+      {categories.map((category) => (
+        <GoalCategory
+          key={category.id}
+          category={category}
+          onToggleGoal={handleToggleGoal}
+          onAddGoal={handleAddGoal}
+        />
+      ))}
+    </div>
+  );
+
+  const renderCalendar = () => (
+    <div className="space-y-6">
+      <h1 className="text-2xl font-semibold">Calendar</h1>
+      <div className="bg-card border border-border rounded-lg p-8 text-center">
+        <Calendar className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+        <p className="text-muted-foreground">Calendar view coming soon</p>
+      </div>
+    </div>
+  );
+
+  const renderAnalytics = () => (
+    <div className="space-y-6">
+      <h1 className="text-2xl font-semibold">Analytics</h1>
+      <div className="bg-card border border-border rounded-lg p-8 text-center">
+        <BarChart3 className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+        <p className="text-muted-foreground">Analytics dashboard coming soon</p>
+      </div>
+    </div>
+  );
+
+  const renderSettings = () => (
+    <div className="space-y-6">
+      <h1 className="text-2xl font-semibold">Settings</h1>
+      <div className="bg-card border border-border rounded-lg p-6">
+        <h3 className="font-medium mb-4">Preferences</h3>
+        <p className="text-muted-foreground">Settings panel coming soon</p>
+      </div>
+    </div>
+  );
 
   const renderCurrentView = () => {
     switch (currentView) {
-      case 'calendar':
-        return <CalendarView />;
-      case 'analytics':
-        return <AnalyticsView />;
-      case 'settings':
-        return <SettingsView />;
-      default:
-        return (
-          <div className="space-y-6">
-            {/* Morning Routine Prompt */}
-            <div className="bg-gradient-to-r from-solo-indigo/20 to-solo-violet/20 border border-solo-blue/30 rounded-lg p-4 animate-pulse-slow">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-orbitron font-bold text-lg text-solo-blue">Morning Quest Briefing</h3>
-                  <p className="text-gray-300">What goals do you want to crush today, hunter?</p>
-                </div>
-                <button 
-                  onClick={() => setIsMorningModalOpen(true)}
-                  className="bg-gradient-to-r from-solo-blue to-solo-violet px-6 py-2 rounded-lg font-semibold hover:shadow-lg hover:shadow-solo-blue/25 transition-all"
-                >
-                  Start Quest
-                </button>
-              </div>
-            </div>
-
-            {/* Today's Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-gray-400 text-sm">Today's XP</p>
-                    <p className="text-2xl font-bold text-green-400">{dailyXP}</p>
-                  </div>
-                  <Star className="w-6 h-6 text-yellow-400" />
-                </div>
-              </div>
-              <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-gray-400 text-sm">Completed</p>
-                    <p className="text-2xl font-bold text-solo-blue">{completedGoals.length} / {todaysGoals.length}</p>
-                  </div>
-                  <CheckCircle className="w-6 h-6 text-green-400" />
-                </div>
-              </div>
-              <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-gray-400 text-sm">Streak</p>
-                    <p className="text-2xl font-bold text-orange-400">{streak} days</p>
-                  </div>
-                  <Flame className="w-6 h-6 text-red-400" />
-                </div>
-              </div>
-              <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-gray-400 text-sm">Rank</p>
-                    <p className="text-xl font-bold text-solo-violet">{rank}</p>
-                  </div>
-                  <Crown className="w-6 h-6 text-yellow-400" />
-                </div>
-              </div>
-            </div>
-
-            {/* Goal Categories */}
-            <div className="space-y-6">
-              {categories.map((category) => (
-                <GoalCategory
-                  key={category.id}
-                  category={category}
-                  onToggleGoal={toggleGoalStatus}
-                  onAddGoal={() => setIsMorningModalOpen(true)}
-                />
-              ))}
-              
-              {categories.length === 0 && (
-                <div className="text-center py-12">
-                  <div className="w-16 h-16 bg-gray-800 rounded-full mx-auto mb-4 flex items-center justify-center">
-                    <Crown className="w-8 h-8 text-gray-600" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-300 mb-2">No Quest Categories Yet</h3>
-                  <p className="text-gray-400 mb-4">Start your hunter journey by adding your first quest!</p>
-                  <button 
-                    onClick={() => setIsMorningModalOpen(true)}
-                    className="bg-gradient-to-r from-solo-blue to-solo-violet px-6 py-2 rounded-lg font-semibold hover:shadow-lg hover:shadow-solo-blue/25 transition-all"
-                  >
-                    Begin Your Journey
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        );
+      case 'dashboard': return renderDashboard();
+      case 'calendar': return renderCalendar();
+      case 'analytics': return renderAnalytics();
+      case 'settings': return renderSettings();
+      default: return renderDashboard();
     }
   };
 
   return (
-    <div className="min-h-screen bg-solo-black text-white font-rajdhani flex relative">
+    <div className="min-h-screen bg-background text-foreground flex relative">
       {/* Mobile Sidebar Overlay */}
       {isMobileSidebarOpen && (
         <div 
-          className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40 animate-fade-in"
+          className="md:hidden fixed inset-0 bg-background/80 backdrop-blur-sm z-40 fade-in"
           onClick={() => setIsMobileSidebarOpen(false)}
         />
       )}
@@ -212,19 +230,40 @@ export default function Dashboard() {
           onToggleMobileSidebar={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
         />
         
-        <div className="p-4 md:p-6 h-full overflow-y-auto">
-          <div className="animate-fade-in">
+        <div className="p-4 md:p-6 h-[calc(100vh-4rem)] overflow-y-auto">
+          <div className="fade-in">
             {renderCurrentView()}
           </div>
         </div>
       </main>
 
-      <MorningModal
-        isOpen={isMorningModalOpen}
-        onClose={() => setIsMorningModalOpen(false)}
-        categories={categories}
-        onAddGoal={handleAddGoal}
-      />
+      {/* Morning Modal */}
+      {isMorningModalOpen && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-card border border-border rounded-lg p-6 w-full max-w-md">
+            <h2 className="text-lg font-semibold mb-4">Daily Quest Briefing</h2>
+            <p className="text-muted-foreground mb-4">
+              Ready to start your hunter journey for today?
+            </p>
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setIsMorningModalOpen(false)}
+                className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+              >
+                Let's Go!
+              </button>
+              <button
+                onClick={() => setIsMorningModalOpen(false)}
+                className="px-4 py-2 border border-border rounded-md hover:bg-accent"
+              >
+                Later
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
+export default Dashboard;

@@ -1,415 +1,79 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  /* Solo Leveling Authentic Colors */
-  --solo-black: #0a0a0a;
-  --solo-dark: #131323;
-  --solo-darker: #1a1a2e;
-  --solo-accent: #16213e;
-  --solo-blue: #00d4ff;
-  --solo-electric: #0f3460;
-  --solo-purple: #533483;
-  --solo-violet: #7209b7;
-  --solo-gold: #ffd700;
-  --solo-red: #ff3333;
-  --solo-shadow: #0f0f23;
-  
-  /* Gradients */
-  --gradient-primary: linear-gradient(135deg, #00d4ff 0%, #533483 100%);
-  --gradient-dark: linear-gradient(135deg, #0a0a0a 0%, #131323 100%);
-  --gradient-card: linear-gradient(135deg, rgba(19, 19, 35, 0.8) 0%, rgba(21, 33, 62, 0.6) 100%);
-  
-  /* System Colors */
-  --background: var(--solo-black);
-  --foreground: #ffffff;
-  --card: var(--solo-darker);
-  --card-foreground: #ffffff;
-  --border: rgba(0, 212, 255, 0.2);
-  --input: var(--solo-accent);
-  --primary: var(--solo-blue);
-  --primary-foreground: var(--solo-black);
-  --ring: var(--solo-blue);
-  --radius: 0.75rem;
-}
-
-.dark {
-  --background: hsl(240, 26%, 6%);
-  --foreground: hsl(0, 0%, 98%);
-  --muted: hsl(240, 3.7%, 15.9%);
-  --muted-foreground: hsl(240, 5%, 64.9%);
-  --popover: hsl(240, 10%, 3.9%);
-  --popover-foreground: hsl(0, 0%, 98%);
-  --card: hsl(240, 10%, 3.9%);
-  --card-foreground: hsl(0, 0%, 98%);
-  --border: hsl(240, 3.7%, 15.9%);
-  --input: hsl(240, 3.7%, 15.9%);
-  --primary: hsl(195, 100%, 42%);
-  --primary-foreground: hsl(211, 100%, 99%);
-  --secondary: hsl(240, 3.7%, 15.9%);
-  --secondary-foreground: hsl(0, 0%, 98%);
-  --accent: hsl(240, 3.7%, 15.9%);
-  --accent-foreground: hsl(0, 0%, 98%);
-  --destructive: hsl(0, 62.8%, 30.6%);
-  --destructive-foreground: hsl(0, 0%, 98%);
-  --ring: hsl(240, 4.9%, 83.9%);
+  --background: 222 47% 11%;
+  --foreground: 210 40% 98%;
+  --card: 222 47% 11%;
+  --card-foreground: 210 40% 98%;
+  --popover: 222 47% 11%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 217 91% 60%;
+  --primary-foreground: 222 47% 11%;
+  --secondary: 222 47% 11%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 217 33% 17%;
+  --muted-foreground: 215 20% 65%;
+  --accent: 217 33% 17%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 63% 31%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 217 33% 17%;
+  --input: 217 33% 17%;
+  --ring: 217 91% 60%;
   --radius: 0.5rem;
 }
 
-@layer base {
-  * {
-    @apply border-border;
-    box-sizing: border-box;
-  }
-
-  html {
-    @apply dark;
-    font-size: 16px;
-    scroll-behavior: smooth;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-
-  body {
-    @apply font-rajdhani antialiased text-foreground;
-    background: var(--solo-black);
-    background-image: 
-      radial-gradient(circle at 20% 50%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
-      radial-gradient(circle at 80% 20%, rgba(83, 52, 131, 0.1) 0%, transparent 50%),
-      radial-gradient(circle at 40% 80%, rgba(15, 52, 96, 0.1) 0%, transparent 50%);
-    background-attachment: fixed;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* Scrollbar */
-  ::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  ::-webkit-scrollbar-track {
-    background: var(--solo-darker);
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: var(--solo-blue);
-    border-radius: 3px;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: #00b8e6;
-  }
+* {
+  border-color: hsl(var(--border));
+  box-sizing: border-box;
 }
 
-@layer utilities {
-  .font-orbitron {
-    font-family: 'Orbitron', monospace;
-  }
-  
-  .font-inter {
-    font-family: 'Inter', sans-serif;
-  }
+body {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 400;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  padding: 0;
+}
 
-  .font-rajdhani {
-    font-family: 'Rajdhani', sans-serif;
-  }
+/* Minimal animations for performance */
+.fade-in {
+  animation: fadeIn 200ms ease-out;
+}
 
-  /* Solo Leveling UI Components */
-  .solo-card {
-    background: var(--gradient-card);
-    border: 1px solid rgba(0, 212, 255, 0.3);
-    backdrop-filter: blur(20px);
-    border-radius: var(--radius);
-    box-shadow: 
-      0 8px 32px rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  }
+.slide-up {
+  animation: slideUp 250ms ease-out;
+}
 
-  .solo-button {
-    background: var(--gradient-primary);
-    border: none;
-    color: white;
-    font-weight: 600;
-    padding: 0.75rem 1.5rem;
-    border-radius: var(--radius);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
 
-  .solo-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 
-      0 0 20px rgba(0, 212, 255, 0.4),
-      0 8px 25px rgba(0, 0, 0, 0.3);
+@keyframes slideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
   }
-
-  .solo-button:active {
+  100% {
+    opacity: 1;
     transform: translateY(0);
   }
-
-  .solo-input {
-    background: rgba(19, 19, 35, 0.8);
-    border: 1px solid rgba(0, 212, 255, 0.3);
-    border-radius: var(--radius);
-    color: white;
-    padding: 0.75rem 1rem;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
-  }
-
-  .solo-input:focus {
-    border-color: var(--solo-blue);
-    box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
-    outline: none;
-  }
-
-  .glass-effect {
-    background: rgba(19, 19, 35, 0.6);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  .glow-text {
-    color: var(--solo-blue);
-    text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
-  }
-
-  .shadow-glow {
-    box-shadow: 
-      0 0 20px rgba(0, 212, 255, 0.3),
-      0 8px 32px rgba(0, 0, 0, 0.3);
-  }
-
-  /* Animations */
-  .animate-float {
-    animation: float 6s ease-in-out infinite;
-  }
-
-  .animate-pulse-glow {
-    animation: pulseGlow 2s ease-in-out infinite;
-  }
-
-  .animate-slide-up {
-    animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .animate-fade-in {
-    animation: fadeIn 0.6s ease-out;
-  }
-
-  @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
-  }
-
-  @keyframes pulseGlow {
-    0%, 100% { 
-      box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
-    }
-    50% { 
-      box-shadow: 0 0 30px rgba(0, 212, 255, 0.6);
-    }
-  }
-
-  @keyframes slideUp {
-    from {
-      opacity: 0;
-      transform: translateY(30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-
-  /* Mobile Optimizations */
-  @media (max-width: 768px) {
-    .solo-card {
-      margin: 0.5rem;
-      border-radius: 1rem;
-    }
-
-    .font-rajdhani {
-      font-size: 0.95rem;
-    }
-  }
-
-  /* PWA Optimizations */
-  @media (display-mode: standalone) {
-    body {
-      padding-top: env(safe-area-inset-top);
-      padding-bottom: env(safe-area-inset-bottom);
-    }
-  }
 }
 
-/* Scrollbar Styling */
-::-webkit-scrollbar {
-  width: 8px;
+/* Remove loading state once app loads */
+.loading-screen {
+  display: none;
 }
 
-::-webkit-scrollbar-track {
-  background: hsl(240, 3.7%, 15.9%);
-}
-
-::-webkit-scrollbar-thumb {
-  background: hsl(240, 5%, 34%);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: hsl(240, 5%, 44%);
-}
-
-/* Progress component styling */
-.progress-root {
-  background-color: hsl(240, 3.7%, 15.9%);
-}
-
-.progress-indicator {
-  background: linear-gradient(to right, var(--solo-blue), var(--solo-violet));
-}
-
-/* Custom checkbox styling for Solo Leveling theme */
-.checkbox-root[data-state="checked"] {
-  background: linear-gradient(to right, var(--solo-blue), var(--solo-violet));
-  border-color: var(--solo-blue);
-}
-
-/* Button enhancements */
-.btn-solo {
-  background: linear-gradient(to right, var(--solo-blue), var(--solo-violet));
-  border: none;
-  color: white;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.btn-solo:hover {
-  box-shadow: 0 0 20px rgba(6, 182, 212, 0.4);
-  transform: translateY(-1px);
-}
-
-/* Card glow effects */
-.card-glow {
-  box-shadow: 0 0 0 1px var(--solo-blue), 0 0 20px rgba(6, 182, 212, 0.1);
-}
-
-/* Modal backdrop blur */
-.modal-backdrop {
-  backdrop-filter: blur(8px);
-  background: rgba(0, 0, 0, 0.8);
-}
-
-/* Level progression bar */
-.level-progress {
-  background: linear-gradient(to right, var(--solo-blue), var(--solo-violet));
-  box-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
-}
-
-/* Category specific colors */
-.category-main-mission {
-  --category-color: hsl(0, 84%, 60%);
-  --category-bg: hsla(0, 84%, 60%, 0.1);
-  --category-border: hsla(0, 84%, 60%, 0.3);
-}
-
-.category-training {
-  --category-color: hsl(217, 91%, 60%);
-  --category-bg: hsla(217, 91%, 60%, 0.1);
-  --category-border: hsla(217, 91%, 60%, 0.3);
-}
-
-.category-side-quests {
-  --category-color: hsl(142, 71%, 45%);
-  --category-bg: hsla(142, 71%, 45%, 0.1);
-  --category-border: hsla(142, 71%, 45%, 0.3);
-}
-
-/* Notification bell animation */
-@keyframes bellRing {
-  0%, 100% { transform: rotate(0deg); }
-  10%, 30%, 50%, 70%, 90% { transform: rotate(-10deg); }
-  20%, 40%, 60%, 80% { transform: rotate(10deg); }
-}
-
-.animate-bell-ring {
-  animation: bellRing 2s ease-in-out infinite;
-}
-
-/* Calendar day states */
-.calendar-day-completed {
-  background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.1));
-  border: 1px solid rgba(34, 197, 94, 0.5);
-}
-
-.calendar-day-partial {
-  background: linear-gradient(135deg, rgba(234, 179, 8, 0.2), rgba(234, 179, 8, 0.1));
-  border: 1px solid rgba(234, 179, 8, 0.5);
-}
-
-.calendar-day-today {
-  background: linear-gradient(135deg, var(--solo-blue), var(--solo-violet));
-  border: 2px solid var(--solo-blue);
-  box-shadow: 0 0 15px rgba(6, 182, 212, 0.3);
-}
-
-/* Analytics progress bars */
-.analytics-bar {
-  background: linear-gradient(to right, var(--solo-blue), var(--solo-violet));
-  height: 8px;
-  border-radius: 4px;
-  transition: width 0.3s ease;
-}
-
-/* Goal item hover effects */
-.goal-item:hover {
-  background: rgba(107, 114, 128, 0.5);
-  transform: translateX(4px);
-  transition: all 0.2s ease;
-}
-
-/* Streak fire effect */
-.streak-fire {
-  filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.6));
-}
-
-/* Rank badge styling */
-.rank-badge {
-  background: linear-gradient(135deg, var(--solo-violet), var(--solo-indigo));
-  color: white;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-}
-
-/* XP gain animation */
-@keyframes xpGain {
-  0% { transform: translateY(0) scale(1); opacity: 1; }
-  100% { transform: translateY(-20px) scale(1.2); opacity: 0; }
-}
-
-.xp-gain-animation {
-  animation: xpGain 1s ease-out forwards;
-}
-
-/* Mobile responsive adjustments */
-@media (max-width: 768px) {
-  .sidebar-mobile {
-    transform: translateX(-100%);
-    transition: transform 0.3s ease;
-  }
-  
-  .sidebar-mobile.open {
-    transform: translateX(0);
-  }
+/* Smooth scrolling for better UX */
+html {
+  scroll-behavior: smooth;
 }
