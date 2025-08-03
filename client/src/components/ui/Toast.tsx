@@ -24,10 +24,10 @@ const toastIcons = {
 };
 
 const toastColors = {
-  success: 'from-green-500/20 to-emerald-500/20 border-green-500/50 text-green-400',
-  error: 'from-red-500/20 to-pink-500/20 border-red-500/50 text-red-400',
-  warning: 'from-yellow-500/20 to-orange-500/20 border-yellow-500/50 text-yellow-400',
-  info: 'from-cyan-500/20 to-blue-500/20 border-cyan-500/50 text-cyan-400'
+  success: 'from-green-500/80 to-emerald-500/80 border-green-500 text-green-100',
+  error: 'from-red-500/80 to-pink-500/80 border-red-500 text-red-100',
+  warning: 'from-yellow-500/80 to-orange-500/80 border-yellow-500 text-yellow-100',
+  info: 'from-cyan-500/80 to-blue-500/80 border-cyan-500 text-cyan-100'
 };
 
 function ToastItem({ toast, onClose }: ToastProps) {
@@ -42,18 +42,18 @@ function ToastItem({ toast, onClose }: ToastProps) {
   }, [toast.id, toast.duration, onClose]);
 
   return (
-    <div className={`mystical-card bg-gradient-to-r ${toastColors[toast.type]} p-4 mb-3 shadow-lg border backdrop-blur-sm animate-in slide-in-from-right-full`}>
+    <div className={`bg-gradient-to-r ${toastColors[toast.type]} p-4 mb-3 shadow-xl border-2 rounded-lg backdrop-blur-md animate-in slide-in-from-right-full`}>
       <div className="flex items-start space-x-3">
         <Icon className="w-5 h-5 mt-0.5 flex-shrink-0" />
         <div className="flex-1">
-          <h4 className="font-semibold text-white">{toast.title}</h4>
+          <h4 className="font-bold text-white">{toast.title}</h4>
           {toast.message && (
-            <p className="text-sm text-gray-300 mt-1">{toast.message}</p>
+            <p className="text-sm text-white/90 mt-1">{toast.message}</p>
           )}
         </div>
         <button
           onClick={() => onClose(toast.id)}
-          className="text-gray-400 hover:text-white transition-colors"
+          className="text-white/70 hover:text-white transition-colors"
         >
           <X className="w-4 h-4" />
         </button>

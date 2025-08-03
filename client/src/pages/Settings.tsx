@@ -64,14 +64,15 @@ export function Settings() {
   ];
 
   useEffect(() => {
-    // Apply saved theme on component mount
+    // Apply saved theme on component mount (without showing toast)
     const savedTheme = localStorage.getItem('hunter-theme');
     if (savedTheme && savedTheme !== 'default') {
-      applyTheme(savedTheme);
+      applySilentTheme(savedTheme);
     }
   }, []);
 
-  const applyTheme = (themeId: string) => {
+  // Silent theme application (without toast) for initialization
+  const applySilentTheme = (themeId: string) => {
     const theme = colorThemes.find(t => t.id === themeId);
     if (theme) {
       const root = document.documentElement;
@@ -126,7 +127,15 @@ export function Settings() {
       
       setCurrentTheme(themeId);
       localStorage.setItem('hunter-theme', themeId);
-      
+    }
+  };
+
+  // Theme application with toast notification (for manual selection)
+  const applyTheme = (themeId: string) => {
+    applySilentTheme(themeId);
+    
+    const theme = colorThemes.find(t => t.id === themeId);
+    if (theme) {
       showToast({
         type: 'success',
         title: 'Theme Applied!',
