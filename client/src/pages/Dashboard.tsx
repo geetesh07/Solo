@@ -6,6 +6,7 @@ import { GoalCategory } from "@/components/goals/GoalCategory";
 import { MorningModal } from "@/components/goals/MorningModal";
 import { CalendarView } from "@/components/calendar/CalendarView";
 import { AnalyticsView } from "@/components/analytics/AnalyticsView";
+import { SettingsView } from "@/components/settings/SettingsView";
 import { useAuth } from "@/hooks/useAuth";
 import { useGoals } from "@/hooks/useGoals";
 import { useUserProfile } from "@/hooks/useUserProfile";
@@ -16,6 +17,7 @@ export default function Dashboard() {
   const { profile } = useUserProfile();
   const [currentView, setCurrentView] = useState('dashboard');
   const [isMorningModalOpen, setIsMorningModalOpen] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   // Show morning modal automatically at 7 AM (can be customized)
   useEffect(() => {
@@ -81,6 +83,8 @@ export default function Dashboard() {
         return <CalendarView />;
       case 'analytics':
         return <AnalyticsView />;
+      case 'settings':
+        return <SettingsView />;
       default:
         return (
           <div className="space-y-6">
@@ -173,20 +177,39 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-solo-dark text-white font-inter flex">
-      <AppSidebar
-        currentView={currentView}
-        onViewChange={setCurrentView}
-        userLevel={level}
-        currentXP={currentXP}
-        maxXP={maxXP}
-        rank={rank}
-      />
+    <div className="min-h-screen bg-solo-dark text-white font-inter flex relative">
+      {/* Mobile Sidebar Overlay */}
+      {isMobileSidebarOpen && (
+        <div 
+          className="md:hidden fixed inset-0 bg-black/50 z-40"
+          onClick={() => setIsMobileSidebarOpen(false)}
+        />
+      )}
+      
+      {/* Sidebar */}
+      <div className={`
+        md:relative md:translate-x-0 md:block
+        fixed left-0 top-0 z-50 h-full transition-transform duration-300
+        ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+      `}>
+        <AppSidebar
+          currentView={currentView}
+          onViewChange={(view) => {
+            setCurrentView(view);
+            setIsMobileSidebarOpen(false);
+          }}
+          userLevel={level}
+          currentXP={currentXP}
+          maxXP={maxXP}
+          rank={rank}
+        />
+      </div>
       
       <main className="flex-1 overflow-hidden">
         <TopBar 
           user={user}
           onOpenMorningModal={() => setIsMorningModalOpen(true)}
+          onToggleMobileSidebar={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
         />
         
         <div className="p-6 h-full overflow-y-auto">

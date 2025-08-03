@@ -92,7 +92,15 @@ export function AppSidebar({
             <span>Progress Analytics</span>
           </button>
           
-          <button className="flex items-center space-x-3 px-4 py-3 rounded-lg w-full text-left hover:bg-gray-800/50 text-gray-300 hover:text-white transition-colors">
+          <button 
+            onClick={() => onViewChange('settings')}
+            className={cn(
+              "flex items-center space-x-3 px-4 py-3 rounded-lg w-full text-left transition-colors",
+              currentView === 'settings'
+                ? "bg-solo-indigo/20 border border-solo-indigo/30 text-solo-blue"
+                : "hover:bg-gray-800/50 text-gray-300 hover:text-white"
+            )}
+          >
             <Settings className="w-4 h-4" />
             <span>System Settings</span>
           </button>
