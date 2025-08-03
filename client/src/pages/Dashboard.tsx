@@ -345,7 +345,7 @@ function Dashboard() {
                             {goal.dueDate && (
                               <span className="flex items-center bg-gray-700/50 px-2 py-1 rounded">
                                 <Calendar className="w-3 h-3 mr-1" />
-                                {new Date(goal.dueDate).toLocaleDateString()}
+                                {new Date(goal.dueDate).toLocaleDateString('en-GB')}
                               </span>
                             )}
                           </div>

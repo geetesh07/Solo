@@ -308,7 +308,7 @@ export function Settings() {
 
   return (
     <div className="w-full h-full bg-gradient-to-b from-gray-900 to-black overflow-y-auto">
-      <div className="max-w-full p-4 md:p-6 space-y-8">
+      <div className="w-full p-4 md:p-6 space-y-8">
         {/* Header */}
         <div className="bg-gradient-to-r from-purple-900/50 to-blue-900/50 border-b border-purple-500/30 p-6 rounded-lg">
           <div className="flex items-center space-x-4">

@@ -131,11 +131,6 @@ export function NotificationSystem({ isOpen, onClose }: NotificationSystemProps)
           title: 'Notification Failed',
           message: 'Could not send test notification. Please check browser settings.'
         });
-        showToast({
-          type: 'error',
-          title: 'Notification Failed',
-          message: 'Failed to send test notification. Please check your browser settings'
-        });
       }
     } else {
       showToast({
@@ -191,7 +186,7 @@ export function NotificationSystem({ isOpen, onClose }: NotificationSystemProps)
                 </p>
                 <p className="text-gray-300 text-sm mt-1">
                   {permission === 'granted' ? 'You will receive quest reminders and alerts' :
-                   permission === 'denied' ? 'Please enable notifications in your browser settings' :
+                   permission === 'denied' ? 'Go to browser settings > Site Settings > Notifications and allow for this site' :
                    'Click to enable browser notifications for reminders'}
                 </p>
               </div>
@@ -265,6 +260,21 @@ export function NotificationSystem({ isOpen, onClose }: NotificationSystemProps)
             <p>• Weekly check-ins to assess progress and adjust goals</p>
             <p>• All reminders respect your device's Do Not Disturb settings</p>
           </div>
+
+          {permission === 'denied' && (
+            <div className="mt-4 p-4 bg-red-900/20 border border-red-500/30 rounded-lg">
+              <h4 className="text-red-400 font-semibold mb-2">How to Enable Notifications:</h4>
+              <div className="text-gray-300 text-sm space-y-2">
+                <p><strong>Chrome:</strong> Click the 🔒 lock icon next to the URL → Notifications → Allow</p>
+                <p><strong>Firefox:</strong> Click the shield icon → Turn off blocking for Notifications</p>
+                <p><strong>Safari:</strong> Safari menu → Preferences → Websites → Notifications → Allow</p>
+                <p><strong>Edge:</strong> Click the 🔒 icon → Notifications → Allow</p>
+                <div className="mt-3 p-2 bg-blue-900/30 rounded border border-blue-500/30">
+                  <p className="text-blue-300"><strong>Mobile:</strong> Notifications work best on desktop browsers. Mobile support varies by browser.</p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

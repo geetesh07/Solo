@@ -467,6 +467,7 @@ export function CalendarView({ goals = [] }: CalendarViewProps) {
                 value={newEventDate}
                 onChange={(e) => setNewEventDate(e.target.value)}
                 className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-cyan-400 focus:outline-none"
+                placeholder="DD/MM/YYYY"
               />
               <select
                 value={newEventType}
