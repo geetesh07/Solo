@@ -1,0 +1,91 @@
+I want to build a Solo Leveling-themed personal productivity app — both website (React or Next.js) and Android app (Flutter or React Native) — that acts as my personal goal manager. Here's what I want in detail:
+
+🌅 Morning Routine & Notifications
+Every morning at 7 AM, the app should:
+
+Show the current date on top in a cool Solo Leveling font.
+
+Prompt me with a "What goals do you want to crush today, hunter?" message.
+
+Ask for my goals for the day via notification and open a goal entry interface.
+
+Let me snooze or skip the morning prompt.
+
+🗃️ Goal Organization & Categories
+I should be able to:
+
+Add goals under custom categories like: Training, Side Quests, Main Mission, etc.
+
+Collapse/expand categories for focus.
+
+Toggle categories on/off per day to declutter the view.
+
+Tag each goal as:
+
+Pending, In Progress, Completed, Failed.
+
+Optionally assign difficulty or XP points.
+
+🗓️ Smart Calendar View
+A calendar interface should:
+
+Show which days I set and completed goals.
+
+Let me plan goals ahead of time (e.g., add something for 15 August).
+
+Display each day's XP and streaks like a progression tracker.
+
+Have a "Daily Dungeon Cleared" indicator if all goals are done.
+
+📊 Personal Analytics
+Track:
+
+How many goals I finish daily, weekly, monthly.
+
+Streaks of successful days.
+
+Optional leveling system (e.g., Lv. 23 | Shadow Monarch, XP bar).
+
+🔥 Interface & UX
+Design in full Solo Leveling theme:
+
+Dark mode with purples, blacks, and glowing neon blues.
+
+Font, buttons, and animations like system UI popups from the anime.
+
+Minimal but powerful — think RPG quest menu with cool status effects.
+
+🔄 Real-time Sync
+Realtime data sync between:
+
+Android app and website.
+
+Use Firebase Realtime Database or Firestore.
+
+Offline support: changes sync when back online.
+
+✍️ Other Features
+Ability to:
+
+Set recurring goals (e.g., "Workout every Mon-Wed-Fri").
+
+Receive motivational quotes from Solo Leveling before goal entry.
+
+Set reminders for specific tasks/goals with optional voice notes.
+
+Export data as .csv or .pdf report for personal tracking.
+
+Backup & restore from cloud (Google Drive or Firebase Auth).
+
+💾 Tech Stack Suggestions (Optional)
+Frontend Web: Next.js + TailwindCSS + Firebase
+
+Mobile App: Flutter (or React Native) + Firebase
+
+Database & Auth: Firebase Firestore + Firebase Auth
+
+Notifications: Firebase Cloud Messaging (FCM) for Android, Web Push API for web
+
+Design: Solo Leveling theme using custom fonts, animations, and icons
+
+Make sure the codebase is modular, with reusable components for categories, goal cards, calendar, stats, etc. Also, prepare it for future scalability (maybe even a PWA version or iOS support later). Clean UI/UX with Solo Leveling-inspired aesthetics is crucial.
