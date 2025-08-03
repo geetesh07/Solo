@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Bell, Settings, X, Check } from "lucide-react";
+import { showToast } from "@/components/ui/Toast";
 
 interface NotificationSystemProps {
   isOpen: boolean;
@@ -33,14 +34,26 @@ export function NotificationSystem({ isOpen, onClose }: NotificationSystemProps)
             badge: '/favicon.ico'
           });
         } else if (result === 'denied') {
-          alert('Notifications were denied. Please enable them in your browser settings to receive quest reminders.');
+          showToast({
+            type: 'warning',
+            title: 'Notifications Denied',
+            message: 'Please enable notifications in your browser settings to receive quest reminders'
+          });
         }
       } catch (error) {
         console.error('Error requesting notification permission:', error);
-        alert('Could not request notification permission. Please check your browser settings.');
+        showToast({
+          type: 'error',
+          title: 'Permission Error',
+          message: 'Could not request notification permission. Please check your browser settings'
+        });
       }
     } else {
-      alert('This browser does not support notifications.');
+      showToast({
+        type: 'warning',
+        title: 'Notifications Not Supported',
+        message: 'Your browser does not support notifications'
+      });
     }
   };
 
@@ -60,10 +73,18 @@ export function NotificationSystem({ isOpen, onClose }: NotificationSystemProps)
         });
       } catch (error) {
         console.error('Error sending test notification:', error);
-        alert('Failed to send test notification. Please check your browser settings.');
+        showToast({
+          type: 'error',
+          title: 'Notification Failed',
+          message: 'Failed to send test notification. Please check your browser settings'
+        });
       }
     } else {
-      alert('Please enable notifications first by clicking "Enable Notifications" above.');
+      showToast({
+        type: 'info',
+        title: 'Permission Required',
+        message: 'Please enable notifications first by clicking "Enable Notifications" above'
+      });
     }
   };
 

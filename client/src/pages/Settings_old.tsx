@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Save, User, Palette, Bell, Shield, Trash2 } from "lucide-react";
+import { showToast } from "@/components/ui/Toast";
+import { useConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 export function Settings() {
   const [categoryNames, setCategoryNames] = useState({
@@ -16,6 +18,8 @@ export function Settings() {
     autoSave: true
   });
 
+  const { showConfirm, confirmDialog } = useConfirmDialog();
+
   const handleCategoryNameChange = (category: string, newName: string) => {
     setCategoryNames(prev => ({
       ...prev,
@@ -31,15 +35,29 @@ export function Settings() {
   };
 
   const saveSettings = () => {
-    // Save settings logic here
+    showToast({
+      type: 'success',
+      title: 'Settings Saved',
+      message: 'Your Hunter configuration has been updated'
+    });
     console.log("Settings saved:", { categoryNames, userSettings });
   };
 
   const resetProgress = () => {
-    if (confirm("Are you sure you want to reset all progress? This cannot be undone.")) {
-      // Reset progress logic here
-      console.log("Progress reset");
-    }
+    showConfirm(
+      'Reset All Progress',
+      'Are you sure you want to reset all progress? This action cannot be undone and will delete all your quests, achievements, and statistics.',
+      () => {
+        // Reset progress logic here
+        console.log("Progress reset");
+        showToast({
+          type: 'success',
+          title: 'Progress Reset',
+          message: 'All Hunter data has been cleared. You can start fresh!'
+        });
+      },
+      'danger'
+    );
   };
 
   return (
@@ -248,6 +266,7 @@ export function Settings() {
           </button>
         </div>
       </div>
+      {confirmDialog}
     </div>
   );
 }
