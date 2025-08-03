@@ -117,153 +117,141 @@ function Dashboard() {
   };
 
   const renderDashboard = () => (
-    <div className="space-y-8 slide-up">
-      {/* Hunter Status Panel */}
-      <div className="hunter-status-window p-8">
-        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between mb-8">
-          <div className="flex items-center space-x-6 mb-4 lg:mb-0">
-            <div className="relative">
-              <div className="w-20 h-20 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-full flex items-center justify-center shadow-2xl">
-                <Crown className="w-10 h-10 text-white" />
-              </div>
-              <div className="absolute -bottom-2 -right-2 bg-amber-500 text-black text-xs font-bold px-2 py-1 rounded-full">
-                {rank}
-              </div>
+    <div className="space-y-4">
+      {/* Compact Header */}
+      <div className="bg-gray-900/50 border border-gray-700/50 rounded-lg p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center">
+              <Crown className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-white font-['Orbitron'] mb-2">
-                <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
-                  HUNTER LEVEL {level}
-                </span>
-              </h1>
-              <p className="text-gray-300 text-lg">Welcome back, {user?.displayName || 'Hunter'}</p>
+              <h1 className="text-lg font-bold text-white">HUNTER LEVEL {level}</h1>
+              <p className="text-cyan-400 text-sm">Welcome, {user?.displayName || 'Hunter'}</p>
             </div>
           </div>
-          
-          <div className="flex items-center space-x-6">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-cyan-400">{completedGoals}</div>
-              <div className="text-gray-400 text-sm">Completed</div>
+          <div className="flex space-x-4 text-center">
+            <div>
+              <div className="text-lg font-bold text-green-400">{completedGoals}</div>
+              <div className="text-xs text-gray-400">Done</div>
             </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-amber-400">{streak}</div>
-              <div className="text-gray-400 text-sm">Day Streak</div>
+            <div>
+              <div className="text-lg font-bold text-yellow-400">{streak}</div>
+              <div className="text-xs text-gray-400">Streak</div>
             </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-400">{totalGoals - completedGoals}</div>
-              <div className="text-gray-400 text-sm">Active</div>
+            <div>
+              <div className="text-lg font-bold text-blue-400">{totalGoals - completedGoals}</div>
+              <div className="text-xs text-gray-400">Active</div>
             </div>
           </div>
         </div>
 
-        {/* XP Progress System */}
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-3">
-            <span className="text-gray-300 font-semibold">EXPERIENCE POINTS</span>
-            <span className="text-cyan-400 font-bold text-lg">{currentLevelXP.toLocaleString()} / {100}</span>
+        {/* Compact XP Bar */}
+        <div className="mt-3 space-y-1">
+          <div className="flex justify-between text-xs text-gray-400">
+            <span>EXPERIENCE POINTS</span>
+            <span>{currentLevelXP} / 100</span>
           </div>
-          <div className="relative h-4 bg-gray-800 rounded-full overflow-hidden border border-gray-700">
+          <div className="w-full bg-gray-700 rounded-full h-2">
             <div 
-              className="h-full bg-gradient-to-r from-blue-500 via-cyan-400 to-amber-400 rounded-full transition-all duration-1000 power-surge"
+              className="h-full bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full transition-all duration-1000"
               style={{ width: `${(currentLevelXP / 100) * 100}%` }}
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse" />
           </div>
-          <div className="flex justify-between mt-2 text-xs text-gray-500">
-            <span>Level {level}</span>
-            <span>Next: Level {level + 1}</span>
-          </div>
-        </div>
-
-        {/* Quick Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {[
-            { label: 'COMPLETED TODAY', value: completedGoals, icon: CheckCircle, color: 'text-green-400' },
-            { label: 'CURRENT STREAK', value: streak, icon: Star, color: 'text-amber-400' },
-            { label: 'THIS WEEK', value: categories.flatMap(cat => cat.goals).filter(g => g.completed).length, icon: Calendar, color: 'text-blue-400' },
-            { label: 'EFFICIENCY', value: totalGoals > 0 ? Math.round((completedGoals / totalGoals) * 100) : 0, icon: BarChart3, color: 'text-purple-400', suffix: '%' }
-          ].map((stat, index) => (
-            <div key={index} className="mystical-card p-6 text-center transition-all duration-200">
-              <stat.icon className={`w-8 h-8 mx-auto mb-3 ${stat.color}`} />
-              <div className="text-2xl font-bold text-white mb-1">
-                {stat.value}{stat.suffix || ''}
-              </div>
-              <div className="text-gray-400 text-sm font-medium">{stat.label}</div>
-            </div>
-          ))}
         </div>
       </div>
 
-      {/* Quest Categories */}
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-white font-['Orbitron']">
-            <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-              ACTIVE QUESTS
-            </span>
-          </h2>
-          <button 
-            onClick={() => setIsOnboardingOpen(true)}
-            className="text-cyan-400 hover:text-cyan-300 text-sm transition-colors"
-          >
-            📖 Tutorial
-          </button>
-        </div>
+      {/* Compact Stats */}
+      <div className="grid grid-cols-4 gap-2">
+        {[
+          { label: 'COMPLETED TODAY', value: completedGoals, icon: CheckCircle, color: 'text-green-400' },
+          { label: 'CURRENT STREAK', value: streak, icon: Star, color: 'text-yellow-400' },
+          { label: 'THIS WEEK', value: categories.flatMap(cat => cat.goals).filter(g => g.completed).length, icon: Calendar, color: 'text-blue-400' },
+          { label: 'EFFICIENCY', value: totalGoals > 0 ? Math.round((completedGoals / totalGoals) * 100) : 0, icon: BarChart3, color: 'text-purple-400', suffix: '%' }
+        ].map((stat, index) => (
+          <div key={index} className="bg-gray-800/40 border border-gray-700/50 rounded-lg p-3 text-center">
+            <stat.icon className={`w-5 h-5 mx-auto mb-2 ${stat.color}`} />
+            <div className="text-lg font-bold text-white">
+              {stat.value}{stat.suffix || ''}
+            </div>
+            <div className="text-xs text-gray-400">{stat.label}</div>
+          </div>
+        ))}
+      </div>
 
+      {/* Active Quests Header */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-bold text-white">
+          <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+            ACTIVE QUESTS
+          </span>
+        </h2>
+        <button 
+          onClick={() => setIsOnboardingOpen(true)}
+          className="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs transition-colors"
+        >
+          Tutorial
+        </button>
+      </div>
+
+      {/* Quest Categories */}
+      <div className="space-y-3">
         {categories.map((category) => (
-          <div key={category.id} className={`hunter-status-window p-6 border-l-4 ${
-            category.id === 'main-mission' ? 'border-red-500 bg-gradient-to-r from-red-900/10 to-gray-900' :
-            category.id === 'training' ? 'border-blue-500 bg-gradient-to-r from-blue-900/10 to-gray-900' :
-            'border-green-500 bg-gradient-to-r from-green-900/10 to-gray-900'
+          <div key={category.id} className={`bg-gray-800/40 border border-gray-700/50 rounded-lg overflow-hidden ${
+            category.id === 'main-mission' ? 'border-l-4 border-l-red-500' :
+            category.id === 'training' ? 'border-l-4 border-l-blue-500' :
+            'border-l-4 border-l-green-500'
           }`}>
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center space-x-4">
-                <span className="text-3xl">{category.icon}</span>
-                <div>
-                  <h3 className={`text-xl font-bold font-['Orbitron'] ${
-                    category.id === 'main-mission' ? 'text-red-400' :
-                    category.id === 'training' ? 'text-blue-400' :
-                    'text-green-400'
-                  }`}>{category.name}</h3>
-                  <span className="text-gray-400 text-sm">({category.goals.length} goals)</span>
+            {/* Category Header */}
+            <div className="p-3 border-b border-gray-700/50">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <span className="text-lg">{category.icon}</span>
+                  <div>
+                    <h3 className={`font-bold text-sm ${
+                      category.id === 'main-mission' ? 'text-red-400' :
+                      category.id === 'training' ? 'text-blue-400' :
+                      'text-green-400'
+                    }`}>{category.name}</h3>
+                    <span className="text-xs text-gray-400">({category.goals.length} goals)</span>
+                  </div>
                 </div>
+                <button
+                  onClick={() => setIsAddingGoal(category.id)}
+                  className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
+                    category.id === 'main-mission' ? 'bg-red-600 hover:bg-red-700 text-white' :
+                    category.id === 'training' ? 'bg-blue-600 hover:bg-blue-700 text-white' :
+                    'bg-green-600 hover:bg-green-700 text-white'
+                  }`}
+                >
+                  + Add Goal
+                </button>
               </div>
-              <button
-                onClick={() => setIsAddingGoal(category.id)}
-                className={`px-3 py-2 rounded-lg font-medium text-sm transition-colors ${
-                  category.id === 'main-mission' ? 'bg-red-600 hover:bg-red-700 text-white' :
-                  category.id === 'training' ? 'bg-blue-600 hover:bg-blue-700 text-white' :
-                  'bg-green-600 hover:bg-green-700 text-white'
-                }`}
-              >
-                <Plus className="w-4 h-4 mr-1" />
-                Add Goal
-              </button>
             </div>
 
             {/* Add Goal Form */}
             {isAddingGoal === category.id && (
-              <div className="bg-gray-800/50 border border-gray-600 rounded-lg p-4 mb-4">
-                <div className="space-y-3">
+              <div className="p-3 bg-gray-800/50 border-b border-gray-700/50">
+                <div className="space-y-2">
                   <input
                     type="text"
                     placeholder="Enter your goal..."
                     value={newGoal.title}
                     onChange={(e) => setNewGoal(prev => ({ ...prev, title: e.target.value }))}
-                    className="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:border-cyan-400 focus:outline-none text-sm"
+                    className="w-full bg-gray-700 border border-gray-600 rounded px-2 py-1.5 text-white text-sm placeholder-gray-400 focus:border-cyan-400 focus:outline-none"
                     onKeyPress={(e) => e.key === 'Enter' && handleAddGoal(category.id)}
                   />
-                  <div className="flex gap-3">
+                  <div className="flex gap-2">
                     <input
                       type="date"
                       value={newGoal.dueDate}
                       onChange={(e) => setNewGoal(prev => ({ ...prev, dueDate: e.target.value }))}
-                      className="flex-1 bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-cyan-400 focus:outline-none text-sm"
+                      className="flex-1 bg-gray-700 border border-gray-600 rounded px-2 py-1.5 text-white text-sm focus:border-cyan-400 focus:outline-none"
                     />
                     <select
                       value={newGoal.priority}
                       onChange={(e) => setNewGoal(prev => ({ ...prev, priority: e.target.value as 'low' | 'medium' | 'high' }))}
-                      className="bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-cyan-400 focus:outline-none text-sm"
+                      className="bg-gray-700 border border-gray-600 rounded px-2 py-1.5 text-white text-sm focus:border-cyan-400 focus:outline-none"
                     >
                       <option value="low">Low</option>
                       <option value="medium">Medium</option>
@@ -273,13 +261,13 @@ function Dashboard() {
                   <div className="flex space-x-2">
                     <button
                       onClick={() => handleAddGoal(category.id)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg font-medium transition-colors text-sm"
+                      className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs transition-colors"
                     >
-                      Add
+                      Save
                     </button>
                     <button
                       onClick={() => setIsAddingGoal(null)}
-                      className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded-lg transition-colors text-sm"
+                      className="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1 rounded text-xs transition-colors"
                     >
                       Cancel
                     </button>
@@ -289,57 +277,59 @@ function Dashboard() {
             )}
 
             {/* Goals List */}
-            {category.goals.length === 0 ? (
-              <div className="text-center py-6 text-gray-400 bg-gray-800/30 rounded-lg">
-                <Target className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-                <p className="text-sm">No goals yet. Add your first quest to get started!</p>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {category.goals.map((goal) => (
-                  <div key={goal.id} className="bg-gray-800/40 border border-gray-700 rounded-lg p-3 flex items-center justify-between group">
-                    <div className="flex items-center space-x-3 flex-1">
-                      <button
-                        onClick={() => handleToggleGoal(category.id, goal.id)}
-                        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
-                          goal.completed
-                            ? 'bg-green-500 border-green-500 text-white'
-                            : 'border-gray-500 hover:border-green-400'
-                        }`}
-                      >
-                        {goal.completed && <Check className="w-3 h-3" />}
-                      </button>
-                      <div className="flex-1">
-                        <h4 className={`font-medium text-sm ${goal.completed ? 'text-gray-500 line-through' : 'text-white'}`}>
-                          {goal.title}
-                        </h4>
-                        <div className="flex items-center space-x-3 text-xs text-gray-400 mt-1">
-                          <span className={`px-2 py-1 rounded text-xs ${
-                            goal.priority === 'high' ? 'bg-red-900/30 text-red-400' :
-                            goal.priority === 'medium' ? 'bg-yellow-900/30 text-yellow-400' :
-                            'bg-green-900/30 text-green-400'
-                          }`}>
-                            {goal.priority}
-                          </span>
-                          {goal.dueDate && (
-                            <span className="flex items-center">
-                              <Calendar className="w-3 h-3 mr-1" />
-                              {new Date(goal.dueDate).toLocaleDateString()}
+            <div className="p-3">
+              {category.goals.length === 0 ? (
+                <div className="text-center py-4 text-gray-400">
+                  <Target className="w-8 h-8 text-gray-600 mx-auto mb-2" />
+                  <p className="text-xs">No goals yet. Add your first quest!</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {category.goals.map((goal) => (
+                    <div key={goal.id} className="bg-gray-800/50 border border-gray-700/30 rounded p-2 flex items-center justify-between group">
+                      <div className="flex items-center space-x-2 flex-1">
+                        <button
+                          onClick={() => handleToggleGoal(category.id, goal.id)}
+                          className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors ${
+                            goal.completed
+                              ? 'bg-green-500 border-green-500 text-white'
+                              : 'border-gray-500 hover:border-green-400'
+                          }`}
+                        >
+                          {goal.completed && <Check className="w-2.5 h-2.5" />}
+                        </button>
+                        <div className="flex-1">
+                          <h4 className={`font-medium text-sm ${goal.completed ? 'text-gray-500 line-through' : 'text-white'}`}>
+                            {goal.title}
+                          </h4>
+                          <div className="flex items-center space-x-2 text-xs text-gray-400 mt-0.5">
+                            <span className={`px-1.5 py-0.5 rounded text-xs ${
+                              goal.priority === 'high' ? 'bg-red-900/30 text-red-400' :
+                              goal.priority === 'medium' ? 'bg-yellow-900/30 text-yellow-400' :
+                              'bg-green-900/30 text-green-400'
+                            }`}>
+                              {goal.priority}
                             </span>
-                          )}
+                            {goal.dueDate && (
+                              <span className="flex items-center">
+                                <Calendar className="w-3 h-3 mr-1" />
+                                {new Date(goal.dueDate).toLocaleDateString()}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
+                      <button
+                        onClick={() => handleDeleteGoal(category.id, goal.id)}
+                        className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-400 transition-all"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
                     </div>
-                    <button
-                      onClick={() => handleDeleteGoal(category.id, goal.id)}
-                      className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-400 transition-all duration-200"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         ))}
       </div>
