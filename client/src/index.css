@@ -4,35 +4,34 @@
 @tailwind utilities;
 
 :root {
-  /* Solo Leveling Premium Colors */
-  --background: 220 25% 7%;
+  /* Professional Dark Theme */
+  --background: 215 28% 9%;
   --foreground: 210 40% 98%;
-  --card: 225 25% 12%;
+  --card: 215 28% 11%;
   --card-foreground: 210 40% 98%;
-  --popover: 225 25% 12%;
+  --popover: 215 28% 11%;
   --popover-foreground: 210 40% 98%;
-  --primary: 200 100% 55%;
-  --primary-foreground: 220 25% 7%;
-  --secondary: 240 60% 45%;
+  --primary: 200 98% 50%;
+  --primary-foreground: 215 28% 9%;
+  --secondary: 215 28% 16%;
   --secondary-foreground: 210 40% 98%;
-  --muted: 225 25% 18%;
-  --muted-foreground: 215 20% 65%;
-  --accent: 225 25% 18%;
+  --muted: 215 28% 16%;
+  --muted-foreground: 215 20% 70%;
+  --accent: 215 28% 16%;
   --accent-foreground: 210 40% 98%;
-  --destructive: 0 72% 51%;
+  --destructive: 0 62% 50%;
   --destructive-foreground: 210 40% 98%;
-  --border: 225 25% 18%;
-  --input: 225 25% 15%;
-  --ring: 200 100% 55%;
-  --radius: 0.75rem;
+  --border: 215 28% 18%;
+  --input: 215 28% 16%;
+  --ring: 200 98% 50%;
+  --radius: 0.5rem;
   
-  /* Solo Leveling Specific Colors */
-  --neon-blue: #00d4ff;
-  --neon-purple: #8b5cf6;
-  --neon-cyan: #06ffff;
-  --electric-blue: #0099ff;
-  --dark-purple: #1a0d2e;
-  --shadow-dark: #0a0a0f;
+  /* Refined Colors */
+  --accent-blue: #3b82f6;
+  --accent-cyan: #06b6d4;
+  --accent-purple: #8b5cf6;
+  --success-green: #10b981;
+  --warning-orange: #f59e0b;
 }
 
 * {
@@ -43,12 +42,12 @@
 body {
   background: hsl(var(--background));
   background-image: 
-    radial-gradient(circle at 20% 50%, rgba(0, 212, 255, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
     radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.03) 0%, transparent 50%);
   color: hsl(var(--foreground));
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   font-weight: 400;
-  line-height: 1.5;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   margin: 0;
@@ -56,130 +55,96 @@ body {
 }
 
 @layer components {
-  /* Premium Neon Box */
-  .neon-box {
-    background: linear-gradient(145deg, rgba(0, 212, 255, 0.1), rgba(139, 92, 246, 0.05));
-    border: 1px solid rgba(0, 212, 255, 0.3);
-    border-radius: 12px;
+  /* Professional Card */
+  .professional-card {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
     box-shadow: 
-      0 0 20px rgba(0, 212, 255, 0.1),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(12px);
-    position: relative;
-    overflow: hidden;
+      0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition: all 0.2s ease;
   }
   
-  .neon-box::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(0, 212, 255, 0.1), transparent);
-    animation: shimmer 3s infinite;
-  }
-  
-  /* Premium Card with Glow */
-  .premium-card {
-    background: linear-gradient(145deg, 
-      rgba(34, 34, 46, 0.8), 
-      rgba(25, 25, 35, 0.9)
-    );
-    border: 1px solid rgba(0, 212, 255, 0.2);
-    border-radius: 16px;
+  .professional-card:hover {
+    border-color: hsl(var(--primary) / 0.3);
     box-shadow: 
-      0 8px 32px rgba(0, 0, 0, 0.3),
-      0 0 0 1px rgba(0, 212, 255, 0.1),
-      inset 0 1px 0 rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(16px);
-    transition: all 0.3s ease;
-  }
-  
-  .premium-card:hover {
-    border-color: rgba(0, 212, 255, 0.4);
-    box-shadow: 
-      0 12px 40px rgba(0, 0, 0, 0.4),
-      0 0 0 1px rgba(0, 212, 255, 0.2),
-      0 0 20px rgba(0, 212, 255, 0.1),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    transform: translateY(-2px);
-  }
-  
-  /* Glowing Button */
-  .glow-button {
-    background: linear-gradient(135deg, var(--neon-blue), var(--electric-blue));
-    border: 1px solid rgba(0, 212, 255, 0.5);
-    border-radius: 8px;
-    color: #000;
-    font-weight: 600;
-    font-family: 'Orbitron', monospace;
-    padding: 12px 24px;
-    position: relative;
-    overflow: hidden;
-    transition: all 0.3s ease;
-    box-shadow: 
-      0 0 20px rgba(0, 212, 255, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  }
-  
-  .glow-button:hover {
-    box-shadow: 
-      0 0 30px rgba(0, 212, 255, 0.5),
-      0 5px 15px rgba(0, 212, 255, 0.2),
-      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      0 10px 15px -3px rgba(0, 0, 0, 0.1),
+      0 4px 6px -2px rgba(0, 0, 0, 0.05),
+      0 0 0 1px hsl(var(--primary) / 0.1);
     transform: translateY(-1px);
   }
   
-  /* Status Window */
-  .status-window {
-    background: linear-gradient(145deg, 
-      rgba(26, 13, 46, 0.9), 
-      rgba(20, 20, 35, 0.9)
-    );
-    border: 2px solid rgba(139, 92, 246, 0.3);
-    border-radius: 16px;
+  /* Enhanced Button */
+  .enhanced-button {
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    border: 1px solid hsl(var(--primary));
+    border-radius: var(--radius);
+    font-weight: 500;
+    padding: 10px 20px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .enhanced-button:hover {
+    background: hsl(var(--primary) / 0.9);
     box-shadow: 
-      0 0 40px rgba(139, 92, 246, 0.2),
-      inset 0 2px 0 rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(20px);
-    position: relative;
+      0 4px 8px rgba(0, 0, 0, 0.15),
+      0 0 0 2px hsl(var(--primary) / 0.2);
+    transform: translateY(-1px);
   }
   
-  .status-window::after {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
-    background: linear-gradient(45deg, 
-      var(--neon-blue), 
-      var(--neon-purple), 
-      var(--neon-cyan)
+  /* Status Panel */
+  .status-panel {
+    background: linear-gradient(145deg, 
+      hsl(var(--card)), 
+      hsl(var(--muted) / 0.5)
     );
-    border-radius: 16px;
-    z-index: -1;
-    opacity: 0;
-    transition: opacity 0.3s ease;
+    border: 1px solid hsl(var(--border));
+    border-radius: calc(var(--radius) * 1.5);
+    box-shadow: 
+      0 8px 25px rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
   }
   
-  .status-window:hover::after {
-    opacity: 0.3;
+  /* Category Card */
+  .category-card {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
+    transition: all 0.2s ease;
+  }
+  
+  .category-card:hover {
+    border-color: hsl(var(--primary) / 0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Goal Item */
+  .goal-item {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
+    padding: 12px;
+    transition: all 0.2s ease;
+  }
+  
+  .goal-item:hover {
+    background: hsl(var(--accent));
+    border-color: hsl(var(--primary) / 0.2);
+    transform: translateX(2px);
   }
 }
 
 /* Smooth animations */
 .fade-in {
-  animation: fadeIn 400ms ease-out;
+  animation: fadeIn 300ms ease-out;
 }
 
 .slide-up {
-  animation: slideUp 500ms ease-out;
-}
-
-.neon-pulse {
-  animation: neonPulse 2s ease-in-out infinite alternate;
+  animation: slideUp 400ms ease-out;
 }
 
 @keyframes fadeIn {
@@ -190,25 +155,11 @@ body {
 @keyframes slideUp {
   0% {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(12px);
   }
   100% {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@keyframes shimmer {
-  0% { left: -100%; }
-  100% { left: 100%; }
-}
-
-@keyframes neonPulse {
-  0% {
-    box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
-  }
-  100% {
-    box-shadow: 0 0 30px rgba(0, 212, 255, 0.6);
   }
 }
 

@@ -91,46 +91,47 @@ function Dashboard() {
   };
 
   const renderDashboard = () => (
-    <div className="space-y-8 slide-up">
+    <div className="space-y-6 slide-up">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold font-['Orbitron'] bg-gradient-to-r from-[#00d4ff] to-[#8b5cf6] bg-clip-text text-transparent">
-          HUNTER STATUS
-        </h1>
+        <div>
+          <h1 className="text-2xl font-semibold text-foreground">Dashboard</h1>
+          <p className="text-muted-foreground mt-1">Manage your goals and track progress</p>
+        </div>
         <button
           onClick={() => setIsMorningModalOpen(true)}
-          className="glow-button"
+          className="enhanced-button"
         >
-          DAILY BRIEFING
+          Daily Briefing
         </button>
       </div>
 
-      {/* Status Window */}
-      <div className="status-window p-6">
+      {/* Status Panel */}
+      <div className="status-panel p-6">
         <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-r from-[#00d4ff] to-[#8b5cf6] flex items-center justify-center">
-              <Crown className="w-6 h-6 text-black font-bold" />
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center">
+              <Crown className="w-6 h-6 text-primary-foreground" />
             </div>
             <div>
-              <h2 className="text-xl font-bold font-['Orbitron']">{user?.displayName || 'HUNTER'}</h2>
-              <p className="text-[#00d4ff] font-semibold">{rank} • Shadow Monarch</p>
+              <h2 className="text-xl font-semibold">{user?.displayName || 'User'}</h2>
+              <p className="text-muted-foreground">{rank} • Level {level}</p>
             </div>
           </div>
           <div className="text-right">
-            <p className="text-4xl font-bold font-['Orbitron'] text-[#00d4ff]">{level}</p>
-            <p className="text-sm text-gray-400">LEVEL</p>
+            <p className="text-3xl font-bold text-primary">{level}</p>
+            <p className="text-sm text-muted-foreground">Current Level</p>
           </div>
         </div>
 
         {/* XP Progress Bar */}
         <div className="mb-6">
           <div className="flex justify-between text-sm mb-2">
-            <span className="text-gray-400">EXP</span>
-            <span className="text-[#00d4ff] font-semibold">{currentXP.toLocaleString()} / {maxXP.toLocaleString()}</span>
+            <span className="text-muted-foreground">Experience Points</span>
+            <span className="text-primary font-medium">{currentXP.toLocaleString()} / {maxXP.toLocaleString()}</span>
           </div>
-          <div className="h-3 bg-gray-800 rounded-full overflow-hidden">
+          <div className="h-2 bg-muted rounded-full overflow-hidden">
             <div 
-              className="h-full bg-gradient-to-r from-[#00d4ff] to-[#06ffff] rounded-full transition-all duration-500 neon-pulse"
+              className="h-full bg-primary rounded-full transition-all duration-500"
               style={{ width: `${(currentXP / maxXP) * 100}%` }}
             />
           </div>
@@ -138,42 +139,39 @@ function Dashboard() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="premium-card p-4">
+          <div className="professional-card p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[#00d4ff] text-sm font-semibold">STR</p>
-                <p className="text-2xl font-bold font-['Orbitron']">239</p>
-                <p className="text-xs text-green-400">(+50)</p>
+                <p className="text-muted-foreground text-sm">Completed Today</p>
+                <p className="text-2xl font-semibold">4</p>
               </div>
-              <Star className="w-5 h-5 text-[#00d4ff]" />
+              <CheckCircle className="w-5 h-5 text-green-500" />
             </div>
           </div>
-          <div className="premium-card p-4">
+          <div className="professional-card p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[#8b5cf6] text-sm font-semibold">VIT</p>
-                <p className="text-2xl font-bold font-['Orbitron']">211</p>
-                <p className="text-xs text-green-400">(+35)</p>
+                <p className="text-muted-foreground text-sm">Current Streak</p>
+                <p className="text-2xl font-semibold">{streak}</p>
               </div>
-              <CheckCircle className="w-5 h-5 text-[#8b5cf6]" />
+              <Star className="w-5 h-5 text-orange-500" />
             </div>
           </div>
-          <div className="premium-card p-4">
+          <div className="professional-card p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[#06ffff] text-sm font-semibold">STREAK</p>
-                <p className="text-2xl font-bold font-['Orbitron']">{streak}</p>
-                <p className="text-xs text-yellow-400">DAYS</p>
+                <p className="text-muted-foreground text-sm">Total XP</p>
+                <p className="text-2xl font-semibold">{currentXP.toLocaleString()}</p>
               </div>
-              <Crown className="w-5 h-5 text-[#06ffff]" />
+              <Crown className="w-5 h-5 text-primary" />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Quest Categories */}
-      <div className="space-y-6">
-        <h2 className="text-xl font-bold font-['Orbitron'] text-[#00d4ff] mb-4">ACTIVE QUESTS</h2>
+      {/* Goal Categories */}
+      <div className="space-y-4">
+        <h2 className="text-lg font-semibold">Goal Categories</h2>
         {categories.map((category) => (
           <GoalCategory
             key={category.id}
@@ -271,49 +269,48 @@ function Dashboard() {
 
       {/* Morning Modal */}
       {isMorningModalOpen && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-4 fade-in">
-          <div className="status-window p-8 w-full max-w-lg slide-up">
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 fade-in">
+          <div className="status-panel p-6 w-full max-w-md slide-up">
             <div className="text-center mb-6">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-[#00d4ff] to-[#8b5cf6] flex items-center justify-center">
-                <Crown className="w-8 h-8 text-black font-bold" />
+              <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-primary flex items-center justify-center">
+                <Crown className="w-6 h-6 text-primary-foreground" />
               </div>
-              <h2 className="text-2xl font-bold font-['Orbitron'] text-[#00d4ff] mb-2">⚠️ ALERT</h2>
-              <p className="text-white font-semibold text-lg mb-1">[WELCOME, HUNTER.]</p>
-              <p className="text-gray-400">
-                Your daily quest briefing is ready. Begin your hunter journey and gain valuable experience points.
+              <h2 className="text-xl font-semibold mb-2">Daily Briefing</h2>
+              <p className="text-muted-foreground">
+                Ready to start your productive day? Plan your goals and track your progress.
               </p>
             </div>
 
-            <div className="premium-card p-4 mb-6 bg-gradient-to-r from-[#00d4ff]/10 to-[#8b5cf6]/10">
-              <h3 className="font-bold text-[#00d4ff] mb-2 font-['Orbitron']">TODAY'S OBJECTIVES</h3>
-              <ul className="space-y-2 text-sm text-gray-300">
+            <div className="professional-card p-4 mb-6">
+              <h3 className="font-medium text-foreground mb-3">Today's Focus Areas</h3>
+              <ul className="space-y-2 text-sm text-muted-foreground">
                 <li className="flex items-center space-x-2">
-                  <span className="text-[#00d4ff]">•</span>
-                  <span>Complete your main mission tasks</span>
+                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                  <span>Complete main mission goals</span>
                 </li>
                 <li className="flex items-center space-x-2">
-                  <span className="text-[#8b5cf6]">•</span>
-                  <span>Train your skills and abilities</span>
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <span>Continue training and skill development</span>
                 </li>
                 <li className="flex items-center space-x-2">
-                  <span className="text-[#06ffff]">•</span>
-                  <span>Take on side quests for bonus XP</span>
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span>Tackle side quests for extra progress</span>
                 </li>
               </ul>
             </div>
 
-            <div className="flex space-x-4">
+            <div className="flex space-x-3">
               <button
                 onClick={() => setIsMorningModalOpen(false)}
-                className="glow-button flex-1"
+                className="enhanced-button flex-1"
               >
-                BEGIN HUNT
+                Let's Start
               </button>
               <button
                 onClick={() => setIsMorningModalOpen(false)}
-                className="premium-card px-6 py-3 text-gray-300 hover:text-white transition-colors duration-200"
+                className="px-4 py-2 border border-border rounded hover:bg-accent transition-colors"
               >
-                LATER
+                Later
               </button>
             </div>
           </div>
