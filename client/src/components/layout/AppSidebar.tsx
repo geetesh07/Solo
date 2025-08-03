@@ -1,4 +1,4 @@
-import { Home, Calendar, BarChart3, Settings, User } from "lucide-react";
+import { Home, Calendar, BarChart3, Settings, User, BookOpen } from "lucide-react";
 
 interface AppSidebarProps {
   currentView: string;
@@ -22,6 +22,7 @@ export function AppSidebar({
     { id: 'dashboard', label: 'Dashboard', icon: Home },
     { id: 'calendar', label: 'Calendar', icon: Calendar },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+    { id: 'notes', label: 'Shadow Archives', icon: BookOpen },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
 

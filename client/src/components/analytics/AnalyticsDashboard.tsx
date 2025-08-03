@@ -1,26 +1,53 @@
 import { Calendar, BarChart3, TrendingUp, Clock } from "lucide-react";
 
 interface AnalyticsDashboardProps {
-  // Analytics data props would go here
+  categories?: Array<{
+    id: string;
+    name: string;
+    goals: Array<{
+      id: string;
+      title: string;
+      completed: boolean;
+      dueDate?: string;
+    }>;
+  }>;
 }
 
-export function AnalyticsDashboard({ }: AnalyticsDashboardProps) {
-  // Mock data for demonstration - replace with real data
-  const weeklyData = [
-    { day: 'Mon', completed: 8, total: 10 },
-    { day: 'Tue', completed: 12, total: 15 },
-    { day: 'Wed', completed: 6, total: 8 },
-    { day: 'Thu', completed: 15, total: 18 },
-    { day: 'Fri', completed: 10, total: 12 },
-    { day: 'Sat', completed: 7, total: 9 },
-    { day: 'Sun', completed: 5, total: 6 },
-  ];
+export function AnalyticsDashboard({ categories = [] }: AnalyticsDashboardProps) {
+  // Calculate real analytics from actual data
+  const today = new Date();
+  const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+  
+  // Generate weekly data from actual goals
+  const weeklyData = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date(weekAgo.getTime() + i * 24 * 60 * 60 * 1000);
+    const dateStr = date.toISOString().split('T')[0];
+    
+    const dayGoals = categories.flatMap(cat => cat.goals).filter(goal => 
+      goal.dueDate === dateStr
+    );
+    
+    return {
+      day: date.toLocaleDateString('en', { weekday: 'short' }),
+      completed: dayGoals.filter(g => g.completed).length,
+      total: dayGoals.length
+    };
+  });
 
-  const categoryStats = [
-    { name: 'Main Mission', completed: 15, total: 20, color: 'from-red-500 to-red-400' },
-    { name: 'Training', completed: 22, total: 25, color: 'from-blue-500 to-blue-400' },
-    { name: 'Side Quests', completed: 10, total: 15, color: 'from-green-500 to-green-400' },
-  ];
+  // Calculate category stats from real data
+  const categoryStats = categories.map(category => {
+    const completed = category.goals.filter(g => g.completed).length;
+    const total = category.goals.length;
+    
+    return {
+      name: category.name,
+      completed,
+      total,
+      color: category.name.toLowerCase().includes('main') ? 'from-red-500 to-red-400' :
+             category.name.toLowerCase().includes('training') ? 'from-blue-500 to-blue-400' :
+             'from-green-500 to-green-400'
+    };
+  });
 
   return (
     <div className="space-y-8">
@@ -146,15 +173,23 @@ export function AnalyticsDashboard({ }: AnalyticsDashboardProps) {
           <div className="space-y-3">
             <div className="flex justify-between items-center">
               <span className="text-gray-400">Goals Completed</span>
-              <span className="text-green-400 font-semibold">127</span>
+              <span className="text-green-400 font-semibold">
+                {categories.flatMap(c => c.goals).filter(g => g.completed).length}
+              </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-gray-400">Success Rate</span>
-              <span className="text-green-400 font-semibold">89%</span>
+              <span className="text-green-400 font-semibold">
+                {categories.flatMap(c => c.goals).length > 0 
+                  ? Math.round((categories.flatMap(c => c.goals).filter(g => g.completed).length / categories.flatMap(c => c.goals).length) * 100)
+                  : 0}%
+              </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-gray-400">Streak Record</span>
-              <span className="text-green-400 font-semibold">21 days</span>
+              <span className="text-gray-400">Active Goals</span>
+              <span className="text-green-400 font-semibold">
+                {categories.flatMap(c => c.goals).filter(g => !g.completed).length}
+              </span>
             </div>
           </div>
         </div>

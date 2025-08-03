@@ -10,21 +10,29 @@ interface CalendarEvent {
 }
 
 interface CalendarViewProps {
-  // Calendar props would go here
+  goals?: Array<{
+    id: string;
+    title: string;
+    dueDate?: string;
+    completed: boolean;
+    category: string;
+  }>;
 }
 
-export function CalendarView({ }: CalendarViewProps) {
+export function CalendarView({ goals = [] }: CalendarViewProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
-  // Mock events data - replace with real data
-  const events: CalendarEvent[] = [
-    { id: '1', title: 'Complete project proposal', date: '2025-01-05', type: 'main-mission', completed: true },
-    { id: '2', title: 'Learn React hooks', date: '2025-01-05', type: 'training', completed: false },
-    { id: '3', title: 'Organize desk', date: '2025-01-06', type: 'side-quest', completed: false },
-    { id: '4', title: 'Team meeting prep', date: '2025-01-07', type: 'main-mission', completed: false },
-    { id: '5', title: 'Exercise routine', date: '2025-01-08', type: 'training', completed: true },
-  ];
+  // Convert goals to calendar events
+  const events: CalendarEvent[] = goals
+    .filter(goal => goal.dueDate)
+    .map(goal => ({
+      id: goal.id,
+      title: goal.title,
+      date: goal.dueDate!,
+      type: goal.category.toLowerCase().replace(' ', '-') as 'main-mission' | 'training' | 'side-quest',
+      completed: goal.completed
+    }));
 
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();

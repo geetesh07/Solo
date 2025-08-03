@@ -1,253 +1,263 @@
 import { useState } from "react";
-import { Save, User, Palette, Bell, Shield, Trash2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { Bell, Palette, User, Shield, RefreshCw } from "lucide-react";
+import { NotificationSystem } from "../components/features/NotificationSystem";
 
 export function Settings() {
-  const [categoryNames, setCategoryNames] = useState({
-    mainMission: "Main Mission",
-    training: "Training", 
-    sideQuest: "Side Quest"
-  });
-  
-  const [userSettings, setUserSettings] = useState({
-    displayName: "Hunter",
-    avatar: "👤",
-    theme: "dark",
-    notifications: true,
-    autoSave: true
-  });
+  const { signOut, user } = useAuth();
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [currentTheme, setCurrentTheme] = useState('default');
 
-  const handleCategoryNameChange = (category: string, newName: string) => {
-    setCategoryNames(prev => ({
-      ...prev,
-      [category]: newName
-    }));
-  };
+  const colorThemes = [
+    { 
+      id: 'default', 
+      name: 'Hunter Blue', 
+      colors: ['#0ea5e9', '#06b6d4', '#3b82f6'],
+      description: 'Classic Solo Leveling theme'
+    },
+    { 
+      id: 'shadow', 
+      name: 'Shadow Monarch', 
+      colors: ['#7c3aed', '#8b5cf6', '#a855f7'],
+      description: 'Purple shadow energy'
+    },
+    { 
+      id: 'flame', 
+      name: 'Flame Emperor', 
+      colors: ['#ef4444', '#f97316', '#fbbf24'],
+      description: 'Fire and gold elements'
+    },
+    { 
+      id: 'ice', 
+      name: 'Ice Bearer', 
+      colors: ['#06b6d4', '#0891b2', '#0284c7'],
+      description: 'Cool ice magic theme'
+    },
+    { 
+      id: 'nature', 
+      name: 'Beast Lord', 
+      colors: ['#10b981', '#059669', '#047857'],
+      description: 'Nature and forest vibes'
+    }
+  ];
 
-  const handleUserSettingChange = (setting: string, value: any) => {
-    setUserSettings(prev => ({
-      ...prev,
-      [setting]: value
-    }));
-  };
-
-  const saveSettings = () => {
-    // Save settings logic here
-    console.log("Settings saved:", { categoryNames, userSettings });
-  };
-
-  const resetProgress = () => {
-    if (confirm("Are you sure you want to reset all progress? This cannot be undone.")) {
-      // Reset progress logic here
-      console.log("Progress reset");
+  const applyTheme = (themeId: string) => {
+    const theme = colorThemes.find(t => t.id === themeId);
+    if (theme) {
+      const root = document.documentElement;
+      root.style.setProperty('--neon-blue', theme.colors[0]);
+      root.style.setProperty('--neon-cyan', theme.colors[1]);
+      root.style.setProperty('--neon-purple', theme.colors[2]);
+      setCurrentTheme(themeId);
     }
   };
 
   return (
     <div className="space-y-8">
-      {/* Settings Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-white font-['Orbitron']">
-            <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-              HUNTER SETTINGS
-            </span>
-          </h2>
-          <p className="text-gray-400 mt-1">Customize your productivity system</p>
-        </div>
-        <button onClick={saveSettings} className="power-button">
-          <Save className="w-5 h-5 mr-2" />
-          Save Changes
-        </button>
-      </div>
-
-      {/* Profile Settings */}
-      <div className="mystical-card p-6">
-        <div className="flex items-center space-x-3 mb-6">
-          <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
+      {/* Profile Section */}
+      <div className="hunter-status-window p-6">
+        <div className="flex items-center space-x-4 mb-6">
+          <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
             <User className="w-6 h-6 text-white" />
           </div>
-          <h3 className="text-xl font-bold text-white font-['Orbitron']">Profile Settings</h3>
+          <h2 className="text-2xl font-bold text-white font-['Orbitron']">
+            <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+              HUNTER PROFILE
+            </span>
+          </h2>
         </div>
-
+        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Display Name
-            </label>
-            <input
-              type="text"
-              value={userSettings.displayName}
-              onChange={(e) => handleUserSettingChange('displayName', e.target.value)}
-              className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white focus:border-cyan-500 focus:outline-none"
-              placeholder="Enter your hunter name"
-            />
-          </div>
-          
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Avatar
-            </label>
-            <div className="flex space-x-2">
-              {['👤', '🦸', '🥷', '⚔️', '🛡️'].map(emoji => (
-                <button
-                  key={emoji}
-                  onClick={() => handleUserSettingChange('avatar', emoji)}
-                  className={`w-12 h-12 text-2xl rounded-lg border-2 transition-all duration-200 ${
-                    userSettings.avatar === emoji 
-                      ? 'border-cyan-500 bg-cyan-500/20' 
-                      : 'border-gray-600 hover:border-gray-500'
-                  }`}
-                >
-                  {emoji}
-                </button>
-              ))}
+          <div className="mystical-card p-4">
+            <h3 className="text-white font-semibold mb-3">Hunter Information</h3>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-400">Name:</span>
+                <span className="text-white">{user?.displayName || 'Anonymous Hunter'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Email:</span>
+                <span className="text-white">{user?.email}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Registration:</span>
+                <span className="text-white">
+                  {user?.metadata?.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString() : 'Unknown'}
+                </span>
+              </div>
             </div>
           </div>
+          
+          <div className="mystical-card p-4">
+            <h3 className="text-white font-semibold mb-3">Hunter Stats</h3>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-400">Total Sessions:</span>
+                <span className="text-cyan-400">42</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Goals Created:</span>
+                <span className="text-cyan-400">156</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-400">Avg. Completion:</span>
+                <span className="text-cyan-400">87%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Notification Settings */}
+      <div className="hunter-status-window p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
+              <Bell className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-white font-['Orbitron']">NOTIFICATION CENTER</h2>
+              <p className="text-gray-400 text-sm">Manage quest reminders and alerts</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setIsNotificationOpen(true)}
+            className="power-button"
+          >
+            Configure
+          </button>
+        </div>
+        
+        <div className="mystical-card p-4">
+          <p className="text-gray-300 mb-4">
+            Set up browser notifications to stay on track with your productivity goals. 
+            Get reminders for daily planning sessions, goal deadlines, and weekly reviews.
+          </p>
+          <div className="flex items-center space-x-4">
+            <div className="w-3 h-3 bg-yellow-500 rounded-full animate-pulse"></div>
+            <span className="text-yellow-400 text-sm">Click Configure to set up notifications</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Theme Customization */}
+      <div className="hunter-status-window p-6">
+        <div className="flex items-center space-x-4 mb-6">
+          <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+            <Palette className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-white font-['Orbitron']">APPEARANCE CUSTOMIZATION</h2>
+            <p className="text-gray-400 text-sm">Personalize your hunter interface</p>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {colorThemes.map(theme => (
+            <div
+              key={theme.id}
+              className={`mystical-card p-4 cursor-pointer transition-all duration-200 ${
+                currentTheme === theme.id 
+                  ? 'ring-2 ring-cyan-400 bg-cyan-900/20' 
+                  : 'hover:bg-gray-800/50'
+              }`}
+              onClick={() => applyTheme(theme.id)}
+            >
+              <div className="flex items-center space-x-3 mb-3">
+                <div className="flex space-x-1">
+                  {theme.colors.map((color, index) => (
+                    <div
+                      key={index}
+                      className="w-4 h-4 rounded-full"
+                      style={{ backgroundColor: color }}
+                    />
+                  ))}
+                </div>
+                <h3 className="text-white font-semibold">{theme.name}</h3>
+              </div>
+              <p className="text-gray-400 text-sm">{theme.description}</p>
+              {currentTheme === theme.id && (
+                <div className="mt-2 text-cyan-400 text-sm font-semibold">✓ Active</div>
+              )}
+            </div>
+          ))}
         </div>
       </div>
 
       {/* Category Customization */}
-      <div className="mystical-card p-6">
-        <div className="flex items-center space-x-3 mb-6">
-          <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-            <Palette className="w-6 h-6 text-white" />
-          </div>
-          <h3 className="text-xl font-bold text-white font-['Orbitron']">Category Names</h3>
-        </div>
-
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-red-400 mb-2">
-              Main Mission Category
-            </label>
-            <input
-              type="text"
-              value={categoryNames.mainMission}
-              onChange={(e) => handleCategoryNameChange('mainMission', e.target.value)}
-              className="w-full px-4 py-3 bg-gray-800 border border-red-500/30 rounded-lg text-white focus:border-red-500 focus:outline-none"
-              placeholder="e.g., Work Tasks, Career Goals"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-blue-400 mb-2">
-              Training Category
-            </label>
-            <input
-              type="text"
-              value={categoryNames.training}
-              onChange={(e) => handleCategoryNameChange('training', e.target.value)}
-              className="w-full px-4 py-3 bg-gray-800 border border-blue-500/30 rounded-lg text-white focus:border-blue-500 focus:outline-none"
-              placeholder="e.g., Learning, Skill Development"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-green-400 mb-2">
-              Side Quest Category
-            </label>
-            <input
-              type="text"
-              value={categoryNames.sideQuest}
-              onChange={(e) => handleCategoryNameChange('sideQuest', e.target.value)}
-              className="w-full px-4 py-3 bg-gray-800 border border-green-500/30 rounded-lg text-white focus:border-green-500 focus:outline-none"
-              placeholder="e.g., Personal Tasks, Hobbies"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* System Settings */}
-      <div className="mystical-card p-6">
-        <div className="flex items-center space-x-3 mb-6">
-          <div className="w-10 h-10 bg-gradient-to-r from-amber-500 to-orange-500 rounded-lg flex items-center justify-center">
-            <Bell className="w-6 h-6 text-white" />
-          </div>
-          <h3 className="text-xl font-bold text-white font-['Orbitron']">System Preferences</h3>
-        </div>
-
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="text-white font-semibold">Daily Briefing</h4>
-              <p className="text-gray-400 text-sm">Show morning quest briefing modal</p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={userSettings.notifications}
-                onChange={(e) => handleUserSettingChange('notifications', e.target.checked)}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
-            </label>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="text-white font-semibold">Auto-save Progress</h4>
-              <p className="text-gray-400 text-sm">Automatically save quest completion</p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={userSettings.autoSave}
-                onChange={(e) => handleUserSettingChange('autoSave', e.target.checked)}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
-            </label>
-          </div>
-        </div>
-      </div>
-
-      {/* Data Management */}
-      <div className="mystical-card p-6 border-2 border-red-500/30">
-        <div className="flex items-center space-x-3 mb-6">
-          <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-pink-500 rounded-lg flex items-center justify-center">
+      <div className="hunter-status-window p-6">
+        <div className="flex items-center space-x-4 mb-6">
+          <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
             <Shield className="w-6 h-6 text-white" />
           </div>
-          <h3 className="text-xl font-bold text-white font-['Orbitron']">Data Management</h3>
-        </div>
-
-        <div className="space-y-4">
-          <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4">
-            <h4 className="text-red-400 font-semibold mb-2">Reset All Progress</h4>
-            <p className="text-gray-400 text-sm mb-4">
-              This will permanently delete all your quests, progress, and statistics. This action cannot be undone.
-            </p>
-            <button 
-              onClick={resetProgress}
-              className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-colors duration-200"
-            >
-              <Trash2 className="w-4 h-4 mr-2 inline" />
-              Reset Progress
-            </button>
+          <div>
+            <h2 className="text-xl font-bold text-white font-['Orbitron']">QUEST CATEGORIES</h2>
+            <p className="text-gray-400 text-sm">Customize category names and icons</p>
           </div>
+        </div>
+        
+        <div className="space-y-4">
+          {[
+            { current: 'Main Mission', icon: '⚔️', suggestion: 'Critical Tasks' },
+            { current: 'Training', icon: '🛡️', suggestion: 'Learning & Growth' },
+            { current: 'Side Quest', icon: '⭐', suggestion: 'Personal Projects' }
+          ].map((category, index) => (
+            <div key={index} className="mystical-card p-4 flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <span className="text-2xl">{category.icon}</span>
+                <div>
+                  <h3 className="text-white font-semibold">{category.current}</h3>
+                  <p className="text-gray-400 text-sm">Suggested: {category.suggestion}</p>
+                </div>
+              </div>
+              <button className="text-cyan-400 hover:text-cyan-300 text-sm transition-colors">
+                Customize
+              </button>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Export/Import */}
-      <div className="mystical-card p-6">
-        <div className="flex items-center space-x-3 mb-6">
-          <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center">
-            <Save className="w-6 h-6 text-white" />
+      {/* System Actions */}
+      <div className="hunter-status-window p-6">
+        <div className="flex items-center space-x-4 mb-6">
+          <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-orange-500 rounded-lg flex items-center justify-center">
+            <RefreshCw className="w-6 h-6 text-white" />
           </div>
-          <h3 className="text-xl font-bold text-white font-['Orbitron']">Data Export</h3>
+          <h2 className="text-xl font-bold text-white font-['Orbitron']">SYSTEM ACTIONS</h2>
         </div>
-
-        <div className="space-y-4">
-          <button className="mystical-card p-4 w-full text-left hover:bg-white/5 transition-colors">
-            <h4 className="text-white font-semibold">Export Progress</h4>
-            <p className="text-gray-400 text-sm">Download your data as JSON file</p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <button className="mystical-card p-4 text-left hover:bg-gray-800/50 transition-colors">
+            <h3 className="text-white font-semibold mb-2">Reset All Data</h3>
+            <p className="text-gray-400 text-sm">Clear all goals and start fresh</p>
           </button>
           
-          <button className="mystical-card p-4 w-full text-left hover:bg-white/5 transition-colors">
-            <h4 className="text-white font-semibold">Share Statistics</h4>
-            <p className="text-gray-400 text-sm">Generate shareable progress report</p>
+          <button className="mystical-card p-4 text-left hover:bg-gray-800/50 transition-colors">
+            <h3 className="text-white font-semibold mb-2">Export Data</h3>
+            <p className="text-gray-400 text-sm">Download your productivity data</p>
+          </button>
+          
+          <button className="mystical-card p-4 text-left hover:bg-gray-800/50 transition-colors">
+            <h3 className="text-white font-semibold mb-2">Import Goals</h3>
+            <p className="text-gray-400 text-sm">Upload goals from another system</p>
+          </button>
+          
+          <button
+            onClick={signOut}
+            className="mystical-card p-4 text-left hover:bg-red-900/30 transition-colors border-red-500/30"
+          >
+            <h3 className="text-red-400 font-semibold mb-2">Sign Out</h3>
+            <p className="text-gray-400 text-sm">Log out of your hunter account</p>
           </button>
         </div>
       </div>
+
+      {/* Notification System Modal */}
+      <NotificationSystem 
+        isOpen={isNotificationOpen}
+        onClose={() => setIsNotificationOpen(false)}
+      />
     </div>
   );
 }
