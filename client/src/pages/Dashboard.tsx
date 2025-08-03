@@ -356,7 +356,7 @@ function Dashboard() {
   );
 
   const renderCalendar = () => (
-    <div className="slide-up">
+    <div className="slide-up p-4 md:p-6">
       <CalendarView goals={categories.flatMap(cat => 
         cat.goals.map(goal => ({
           ...goal,
@@ -367,19 +367,19 @@ function Dashboard() {
   );
 
   const renderAnalytics = () => (
-    <div className="slide-up">
+    <div className="slide-up p-4 md:p-6">
       <AnalyticsDashboard categories={categories} />
     </div>
   );
 
   const renderNotes = () => (
-    <div className="slide-up">
+    <div className="slide-up p-4 md:p-6">
       <NotesPanel />
     </div>
   );
 
   const renderSettings = () => (
-    <div className="slide-up">
+    <div className="slide-up p-4 md:p-6">
       <Settings />
     </div>
   );
@@ -432,7 +432,9 @@ function Dashboard() {
           onToggleMobileSidebar={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
         />
         
-        <div className="p-4 md:p-6 h-[calc(100vh-4rem)] overflow-y-auto">
+        <div className={`h-[calc(100vh-4rem)] overflow-y-auto ${
+          currentView === 'dashboard' ? 'p-4 md:p-6' : 'p-0'
+        }`}>
           <div className="fade-in">
             {renderCurrentView()}
           </div>
