@@ -3,6 +3,7 @@ import * as React from "react";
 import { Search, Plus, Tag, Calendar, Edit3, Trash2, Filter, Star } from "lucide-react";
 import { showToast } from "@/components/ui/Toast";
 import { useConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface Note {
   id: string;
@@ -16,21 +17,64 @@ interface Note {
 }
 
 export function NotesPanel() {
-  const [notes, setNotes] = useState<Note[]>(() => {
-    const saved = localStorage.getItem('hunter-notes');
-    return saved ? JSON.parse(saved).map((note: any) => ({
-      ...note,
-      createdAt: new Date(note.createdAt),
-      updatedAt: new Date(note.updatedAt)
-    })) : [];
-  });
-
+  const queryClient = useQueryClient();
   const { showConfirm, confirmDialog } = useConfirmDialog();
 
-  // Save notes to localStorage whenever notes change
-  React.useEffect(() => {
-    localStorage.setItem('hunter-notes', JSON.stringify(notes));
-  }, [notes]);
+  // Fetch notes from database
+  const { data: notes = [], isLoading } = useQuery({
+    queryKey: ['/api/notes'],
+    queryFn: async () => {
+      const response = await fetch('/api/notes');
+      if (!response.ok) throw new Error('Failed to fetch notes');
+      return response.json();
+    }
+  });
+
+  // Create note mutation
+  const createNoteMutation = useMutation({
+    mutationFn: async (noteData: any) => {
+      const response = await fetch('/api/notes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(noteData)
+      });
+      if (!response.ok) throw new Error('Failed to create note');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/notes'] });
+    }
+  });
+
+  // Update note mutation
+  const updateNoteMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      const response = await fetch(`/api/notes/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (!response.ok) throw new Error('Failed to update note');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/notes'] });
+    }
+  });
+
+  // Delete note mutation
+  const deleteNoteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/notes/${id}`, {
+        method: 'DELETE'
+      });
+      if (!response.ok) throw new Error('Failed to delete note');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/notes'] });
+    }
+  });
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -69,25 +113,30 @@ export function NotesPanel() {
       return;
     }
 
-    const note: Note = {
-      id: Date.now().toString(),
+    createNoteMutation.mutate({
       title: newNote.title,
       content: newNote.content,
       category: newNote.category,
       tags: newNote.tags,
-      createdAt: new Date(),
-      updatedAt: new Date(),
       starred: false
-    };
-
-    setNotes(prev => [note, ...prev]);
-    setNewNote({ title: '', content: '', category: 'plan', tags: [] });
-    setIsCreating(false);
-    
-    showToast({
-      type: 'success',
-      title: 'Archive Entry Created!',
-      message: `"${note.title}" has been added to your Hunter's Archive`
+    }, {
+      onSuccess: (note) => {
+        setNewNote({ title: '', content: '', category: 'plan', tags: [] });
+        setIsCreating(false);
+        
+        showToast({
+          type: 'success',
+          title: 'Archive Entry Created!',
+          message: `"${note.title}" has been added to your Hunter's Archive`
+        });
+      },
+      onError: () => {
+        showToast({
+          type: 'error',
+          title: 'Failed to Create Note',
+          message: 'Please try again'
+        });
+      }
     });
   };
 
@@ -99,11 +148,21 @@ export function NotesPanel() {
       'Delete Archive Entry',
       `Are you sure you want to delete "${note.title}"? This action cannot be undone.`,
       () => {
-        setNotes(prev => prev.filter(note => note.id !== noteId));
-        showToast({
-          type: 'success',
-          title: 'Entry Deleted',
-          message: `"${note.title}" has been removed from your archive`
+        deleteNoteMutation.mutate(noteId, {
+          onSuccess: () => {
+            showToast({
+              type: 'success',
+              title: 'Entry Deleted',
+              message: `"${note.title}" has been removed from your archive`
+            });
+          },
+          onError: () => {
+            showToast({
+              type: 'error',
+              title: 'Failed to Delete Note',
+              message: 'Please try again'
+            });
+          }
         });
       },
       'danger'
@@ -114,14 +173,24 @@ export function NotesPanel() {
     const note = notes.find(n => n.id === noteId);
     if (!note) return;
     
-    setNotes(prev => prev.map(note => 
-      note.id === noteId ? { ...note, starred: !note.starred } : note
-    ));
-    
-    showToast({
-      type: 'success',
-      title: !note.starred ? 'Entry Starred!' : 'Star Removed',
-      message: `"${note.title}" ${!note.starred ? 'added to' : 'removed from'} starred entries`
+    updateNoteMutation.mutate({
+      id: noteId,
+      data: { starred: !note.starred }
+    }, {
+      onSuccess: () => {
+        showToast({
+          type: 'success',
+          title: !note.starred ? 'Entry Starred!' : 'Star Removed',
+          message: `"${note.title}" ${!note.starred ? 'added to' : 'removed from'} starred entries`
+        });
+      },
+      onError: () => {
+        showToast({
+          type: 'error',
+          title: 'Failed to Update Note',
+          message: 'Please try again'
+        });
+      }
     });
   };
 

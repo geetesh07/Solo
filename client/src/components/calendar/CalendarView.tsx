@@ -3,6 +3,7 @@ import * as React from "react";
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Plus } from "lucide-react";
 import { showToast } from "@/components/ui/Toast";
 import { useConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface CalendarEvent {
   id: string;
@@ -35,16 +36,63 @@ export function CalendarView({ goals = [] }: CalendarViewProps) {
   
   const { showConfirm, confirmDialog } = useConfirmDialog();
   
-  // Load events from localStorage
-  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>(() => {
-    const saved = localStorage.getItem('calendar-events');
-    return saved ? JSON.parse(saved) : [];
+  const queryClient = useQueryClient();
+
+  // Fetch events from database
+  const { data: calendarEvents = [], isLoading } = useQuery({
+    queryKey: ['/api/calendar-events'],
+    queryFn: async () => {
+      const response = await fetch('/api/calendar-events');
+      if (!response.ok) throw new Error('Failed to fetch events');
+      return response.json();
+    }
   });
 
-  // Save events to localStorage whenever they change
-  React.useEffect(() => {
-    localStorage.setItem('calendar-events', JSON.stringify(calendarEvents));
-  }, [calendarEvents]);
+  // Create event mutation
+  const createEventMutation = useMutation({
+    mutationFn: async (eventData: any) => {
+      const response = await fetch('/api/calendar-events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(eventData)
+      });
+      if (!response.ok) throw new Error('Failed to create event');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/calendar-events'] });
+    }
+  });
+
+  // Update event mutation
+  const updateEventMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      const response = await fetch(`/api/calendar-events/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (!response.ok) throw new Error('Failed to update event');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/calendar-events'] });
+    }
+  });
+
+  // Delete event mutation
+  const deleteEventMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/calendar-events/${id}`, {
+        method: 'DELETE'
+      });
+      if (!response.ok) throw new Error('Failed to delete event');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/calendar-events'] });
+    }
+  });
 
   // Convert goals to calendar events and combine with stored events
   const goalEvents: CalendarEvent[] = goals
@@ -122,32 +170,36 @@ export function CalendarView({ goals = [] }: CalendarViewProps) {
       });
       return;
     }
-    
-    const newEvent: CalendarEvent = {
-      id: `event-${Date.now()}`,
+
+    createEventMutation.mutate({
       title: newEventTitle,
       date: newEventDate,
       type: newEventType,
       completed: false
-    };
-
-    const updatedEvents = [...calendarEvents, newEvent];
-    setCalendarEvents(updatedEvents);
-    localStorage.setItem('calendar-events', JSON.stringify(updatedEvents));
-    
-    // Schedule notification for the event
-    scheduleNotification(newEvent);
-    
-    setNewEventTitle('');
-    setIsAddingEvent(false);
-    setSelectedDate(null);
-    const today = new Date();
-    setNewEventDate(`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`);
-    
-    showToast({
-      type: 'success',
-      title: 'Quest Event Added!',
-      message: `"${newEvent.title}" scheduled for ${new Date(newEvent.date).toLocaleDateString()}`
+    }, {
+      onSuccess: (newEvent) => {
+        // Schedule notification for the event
+        scheduleNotification(newEvent);
+        
+        setNewEventTitle('');
+        setIsAddingEvent(false);
+        setSelectedDate(null);
+        const today = new Date();
+        setNewEventDate(`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`);
+        
+        showToast({
+          type: 'success',
+          title: 'Quest Event Added!',
+          message: `"${newEvent.title}" scheduled for ${new Date(newEvent.date).toLocaleDateString()}`
+        });
+      },
+      onError: () => {
+        showToast({
+          type: 'error',
+          title: 'Failed to Add Event',
+          message: 'Please try again'
+        });
+      }
     });
   };
 
@@ -177,13 +229,21 @@ export function CalendarView({ goals = [] }: CalendarViewProps) {
       'Delete Quest Event',
       `Are you sure you want to delete "${event.title}"? This action cannot be undone.`,
       () => {
-        const updatedEvents = calendarEvents.filter(event => event.id !== eventId);
-        setCalendarEvents(updatedEvents);
-        localStorage.setItem('calendar-events', JSON.stringify(updatedEvents));
-        showToast({
-          type: 'success',
-          title: 'Event Deleted',
-          message: `"${event.title}" has been removed from your calendar`
+        deleteEventMutation.mutate(eventId, {
+          onSuccess: () => {
+            showToast({
+              type: 'success',
+              title: 'Event Deleted',
+              message: `"${event.title}" has been removed from your calendar`
+            });
+          },
+          onError: () => {
+            showToast({
+              type: 'error',
+              title: 'Failed to Delete Event',
+              message: 'Please try again'
+            });
+          }
         });
       },
       'danger'
@@ -194,16 +254,24 @@ export function CalendarView({ goals = [] }: CalendarViewProps) {
     const event = calendarEvents.find(e => e.id === eventId);
     if (!event) return;
     
-    const updatedEvents = calendarEvents.map(event => 
-      event.id === eventId ? { ...event, completed: !event.completed } : event
-    );
-    setCalendarEvents(updatedEvents);
-    localStorage.setItem('calendar-events', JSON.stringify(updatedEvents));
-    
-    showToast({
-      type: 'success',
-      title: !event.completed ? 'Quest Completed!' : 'Quest Reopened',
-      message: `"${event.title}" marked as ${!event.completed ? 'completed' : 'pending'}`
+    updateEventMutation.mutate({
+      id: eventId,
+      data: { completed: !event.completed }
+    }, {
+      onSuccess: () => {
+        showToast({
+          type: 'success',
+          title: !event.completed ? 'Quest Completed!' : 'Quest Reopened',
+          message: `"${event.title}" marked as ${!event.completed ? 'completed' : 'pending'}`
+        });
+      },
+      onError: () => {
+        showToast({
+          type: 'error',
+          title: 'Failed to Update Event',
+          message: 'Please try again'
+        });
+      }
     });
   };
 
