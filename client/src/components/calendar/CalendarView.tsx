@@ -1,6 +1,8 @@
 import { useState } from "react";
 import * as React from "react";
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Plus } from "lucide-react";
+import { showToast } from "@/components/ui/Toast";
+import { useConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 interface CalendarEvent {
   id: string;
@@ -30,6 +32,8 @@ export function CalendarView({ goals = [] }: CalendarViewProps) {
     const today = new Date();
     return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
   });
+  
+  const { showConfirm, confirmDialog } = useConfirmDialog();
   
   // Load events from localStorage
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>(() => {
@@ -111,7 +115,11 @@ export function CalendarView({ goals = [] }: CalendarViewProps) {
 
   const handleAddEvent = () => {
     if (!newEventTitle.trim()) {
-      alert('Please enter an event title');
+      showToast({
+        type: 'warning',
+        title: 'Title Required',
+        message: 'Please enter an event title before adding'
+      });
       return;
     }
     
@@ -135,7 +143,12 @@ export function CalendarView({ goals = [] }: CalendarViewProps) {
     setSelectedDate(null);
     const today = new Date();
     setNewEventDate(`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`);
-    alert(`Event "${newEvent.title}" added successfully for ${new Date(newEvent.date).toLocaleDateString()}!`);
+    
+    showToast({
+      type: 'success',
+      title: 'Quest Event Added!',
+      message: `"${newEvent.title}" scheduled for ${new Date(newEvent.date).toLocaleDateString()}`
+    });
   };
 
   const scheduleNotification = (event: CalendarEvent) => {
@@ -157,19 +170,41 @@ export function CalendarView({ goals = [] }: CalendarViewProps) {
   };
 
   const handleDeleteEvent = (eventId: string) => {
-    if (confirm('Are you sure you want to delete this event?')) {
-      const updatedEvents = calendarEvents.filter(event => event.id !== eventId);
-      setCalendarEvents(updatedEvents);
-      localStorage.setItem('calendar-events', JSON.stringify(updatedEvents));
-    }
+    const event = calendarEvents.find(e => e.id === eventId);
+    if (!event) return;
+    
+    showConfirm(
+      'Delete Quest Event',
+      `Are you sure you want to delete "${event.title}"? This action cannot be undone.`,
+      () => {
+        const updatedEvents = calendarEvents.filter(event => event.id !== eventId);
+        setCalendarEvents(updatedEvents);
+        localStorage.setItem('calendar-events', JSON.stringify(updatedEvents));
+        showToast({
+          type: 'success',
+          title: 'Event Deleted',
+          message: `"${event.title}" has been removed from your calendar`
+        });
+      },
+      'danger'
+    );
   };
 
   const handleToggleEventComplete = (eventId: string) => {
+    const event = calendarEvents.find(e => e.id === eventId);
+    if (!event) return;
+    
     const updatedEvents = calendarEvents.map(event => 
       event.id === eventId ? { ...event, completed: !event.completed } : event
     );
     setCalendarEvents(updatedEvents);
     localStorage.setItem('calendar-events', JSON.stringify(updatedEvents));
+    
+    showToast({
+      type: 'success',
+      title: !event.completed ? 'Quest Completed!' : 'Quest Reopened',
+      message: `"${event.title}" marked as ${!event.completed ? 'completed' : 'pending'}`
+    });
   };
 
   const handleDateClick = (day: number) => {
@@ -392,6 +427,7 @@ export function CalendarView({ goals = [] }: CalendarViewProps) {
           </div>
         </div>
       )}
+      {confirmDialog}
     </div>
   );
 }

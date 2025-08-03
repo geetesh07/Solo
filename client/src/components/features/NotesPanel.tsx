@@ -1,6 +1,8 @@
 import { useState } from "react";
 import * as React from "react";
 import { Search, Plus, Tag, Calendar, Edit3, Trash2, Filter, Star } from "lucide-react";
+import { showToast } from "@/components/ui/Toast";
+import { useConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 interface Note {
   id: string;
@@ -22,6 +24,8 @@ export function NotesPanel() {
       updatedAt: new Date(note.updatedAt)
     })) : [];
   });
+
+  const { showConfirm, confirmDialog } = useConfirmDialog();
 
   // Save notes to localStorage whenever notes change
   React.useEffect(() => {
@@ -57,7 +61,11 @@ export function NotesPanel() {
 
   const handleCreateNote = () => {
     if (!newNote.title.trim()) {
-      alert('Please enter a title for your note');
+      showToast({
+        type: 'warning',
+        title: 'Title Required',
+        message: 'Please enter a title for your archive entry'
+      });
       return;
     }
 
@@ -75,17 +83,46 @@ export function NotesPanel() {
     setNotes(prev => [note, ...prev]);
     setNewNote({ title: '', content: '', category: 'plan', tags: [] });
     setIsCreating(false);
-    alert(`Note "${note.title}" created successfully!`);
+    
+    showToast({
+      type: 'success',
+      title: 'Archive Entry Created!',
+      message: `"${note.title}" has been added to your Hunter's Archive`
+    });
   };
 
   const handleDeleteNote = (noteId: string) => {
-    setNotes(prev => prev.filter(note => note.id !== noteId));
+    const note = notes.find(n => n.id === noteId);
+    if (!note) return;
+    
+    showConfirm(
+      'Delete Archive Entry',
+      `Are you sure you want to delete "${note.title}"? This action cannot be undone.`,
+      () => {
+        setNotes(prev => prev.filter(note => note.id !== noteId));
+        showToast({
+          type: 'success',
+          title: 'Entry Deleted',
+          message: `"${note.title}" has been removed from your archive`
+        });
+      },
+      'danger'
+    );
   };
 
   const handleToggleStar = (noteId: string) => {
+    const note = notes.find(n => n.id === noteId);
+    if (!note) return;
+    
     setNotes(prev => prev.map(note => 
       note.id === noteId ? { ...note, starred: !note.starred } : note
     ));
+    
+    showToast({
+      type: 'success',
+      title: !note.starred ? 'Entry Starred!' : 'Star Removed',
+      message: `"${note.title}" ${!note.starred ? 'added to' : 'removed from'} starred entries`
+    });
   };
 
   const handleAddTag = (tag: string) => {
@@ -375,6 +412,7 @@ export function NotesPanel() {
           ))
         )}
       </div>
+      {confirmDialog}
     </div>
   );
 }
