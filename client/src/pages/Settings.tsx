@@ -7,6 +7,7 @@ import { APKGenerator } from "../components/features/APKGenerator";
 import { CategoryCustomization } from "../components/features/CategoryCustomization";
 import { ServiceWorkerStatus } from "../components/features/ServiceWorkerStatus";
 import { DevNotifications } from "../components/features/DevNotifications";
+import { MobileNotifications } from "../components/features/MobileNotifications";
 import { showToast } from "@/components/ui/Toast";
 import { useConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -463,6 +464,9 @@ export function Settings() {
 
               {/* Service Worker Status */}
               <ServiceWorkerStatus />
+
+              {/* Mobile Notifications */}
+              <MobileNotifications />
 
               {/* Development Notifications */}
               <DevNotifications />

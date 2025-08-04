@@ -14,13 +14,33 @@ export function DevNotifications() {
     }
 
     try {
-      const permission = await Notification.requestPermission();
+      // Handle both promise and callback versions of requestPermission
+      let permission: NotificationPermission;
+      
+      if (typeof Notification.requestPermission === 'function') {
+        const result = Notification.requestPermission();
+        
+        // Check if it returns a promise or uses callback
+        if (result && typeof result.then === 'function') {
+          permission = await result;
+        } else {
+          // Fallback for older browsers that use callback
+          permission = await new Promise((resolve) => {
+            Notification.requestPermission((result) => resolve(result));
+          });
+        }
+      } else {
+        permission = 'denied';
+      }
+      
       setNotificationPermission(permission);
       
       if (permission === 'granted') {
         setLastNotification('Notification permission granted!');
-      } else {
+      } else if (permission === 'denied') {
         setLastNotification('Notification permission denied');
+      } else {
+        setLastNotification('Notification permission dismissed');
       }
     } catch (error) {
       setLastNotification('Failed to request notification permission');
@@ -40,21 +60,38 @@ export function DevNotifications() {
     }
 
     try {
+      // Use a simpler notification for better mobile compatibility
       const notification = new Notification('Solo Hunter Test', {
         body: 'Development notification test successful!',
-        icon: '/favicon.ico',
-        badge: '/favicon.ico',
-        tag: 'dev-test'
+        tag: 'dev-test',
+        silent: false,
+        requireInteraction: false
       });
 
+      // Add timeout to prevent blocking
+      setTimeout(() => {
+        if (notification) {
+          notification.close();
+        }
+      }, 5000);
+
       notification.onclick = () => {
-        window.focus();
-        notification.close();
+        try {
+          window.focus();
+          notification.close();
+        } catch (e) {
+          console.log('Notification click handled');
+        }
+      };
+
+      notification.onerror = (error) => {
+        console.error('Notification error:', error);
+        setLastNotification('Notification failed to display');
       };
 
       setLastNotification('Test notification sent successfully');
     } catch (error) {
-      setLastNotification('Failed to show notification');
+      setLastNotification('Failed to show notification: ' + error.message);
       console.error('Notification error:', error);
     }
   };
