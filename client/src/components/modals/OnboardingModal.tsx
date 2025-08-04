@@ -249,19 +249,28 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
 
   const currentStepData = steps[currentStep];
 
-  const nextStep = () => {
+  const nextStep = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Next button clicked, current step:', currentStep);
     if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1);
+      setCurrentStep(prev => prev + 1);
     }
   };
 
-  const prevStep = () => {
+  const prevStep = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Previous button clicked, current step:', currentStep);
     if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
+      setCurrentStep(prev => prev - 1);
     }
   };
 
-  const handleClose = () => {
+  const handleClose = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Close button clicked');
     setCurrentStep(0);
     onClose();
   };
@@ -287,8 +296,10 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
             </div>
           </div>
           <button
+            type="button"
             onClick={handleClose}
-            className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+            className="p-2 hover:bg-gray-700 rounded-lg transition-colors cursor-pointer"
+            data-testid="button-close-header"
           >
             <X className="w-6 h-6 text-gray-400" />
           </button>
@@ -313,20 +324,22 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
         <div className="flex items-center justify-between p-6 border-t border-gray-700">
           <div className="flex space-x-3">
             <button
+              type="button"
               onClick={handleClose}
-              className="flex items-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+              className="flex items-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors font-semibold"
               data-testid="button-cancel-tutorial"
             >
               <X className="w-4 h-4" />
               <span>Cancel</span>
             </button>
             <button
-              onClick={prevStep}
+              type="button"
+              onClick={currentStep === 0 ? undefined : prevStep}
               disabled={currentStep === 0}
               className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
                 currentStep === 0
                   ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                  : 'bg-gray-700 hover:bg-gray-600 text-white'
+                  : 'bg-gray-700 hover:bg-gray-600 text-white cursor-pointer'
               }`}
               data-testid="button-previous-tutorial"
             >
@@ -339,8 +352,14 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
             {steps.map((_, index) => (
               <button
                 key={index}
-                onClick={() => setCurrentStep(index)}
-                className={`w-3 h-3 rounded-full transition-all duration-200 hover:scale-125 ${
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  console.log('Step dot clicked:', index);
+                  setCurrentStep(index);
+                }}
+                className={`w-3 h-3 rounded-full transition-all duration-200 hover:scale-125 cursor-pointer ${
                   index === currentStep
                     ? 'bg-cyan-400 ring-2 ring-cyan-400/50'
                     : index < currentStep
@@ -354,16 +373,18 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
 
           {currentStep === steps.length - 1 ? (
             <button
+              type="button"
               onClick={handleClose}
-              className="px-6 py-3 bg-gradient-to-r from-green-600 to-cyan-600 hover:from-green-700 hover:to-cyan-700 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-105"
+              className="px-6 py-3 bg-gradient-to-r from-green-600 to-cyan-600 hover:from-green-700 hover:to-cyan-700 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-105 cursor-pointer"
               data-testid="button-start-hunting"
             >
               <span>Start Hunting!</span>
             </button>
           ) : (
             <button
+              type="button"
               onClick={nextStep}
-              className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-105"
+              className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-105 cursor-pointer"
               data-testid="button-next-tutorial"
             >
               <span>Next</span>
