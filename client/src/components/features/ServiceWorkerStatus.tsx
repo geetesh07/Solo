@@ -17,7 +17,9 @@ export function ServiceWorkerStatus() {
     serviceWorkerManager.onOnlineStatusChange(setIsOnline);
     
     // Check notification permission
-    setNotificationPermission(Notification.permission);
+    if ('Notification' in window) {
+      setNotificationPermission(Notification.permission);
+    }
     
     // Get service worker version
     serviceWorkerManager.getVersion().then(setVersion);
@@ -155,14 +157,19 @@ export function ServiceWorkerStatus() {
 
         {/* Features List */}
         <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-          <h3 className="text-blue-300 text-sm font-medium mb-2">Active Features:</h3>
+          <h3 className="text-blue-300 text-sm font-medium mb-2">Available Features:</h3>
           <ul className="text-xs text-blue-200 space-y-1">
-            <li>✓ Offline functionality with cached content</li>
-            <li>✓ Background data synchronization</li>
-            <li>✓ Push notifications for reminders</li>
-            <li>✓ Automatic app updates</li>
-            <li>✓ Quest reminder scheduling</li>
+            <li>{serviceWorkerReady ? '✓' : '⚠'} Offline functionality with cached content</li>
+            <li>{serviceWorkerReady ? '✓' : '⚠'} Background data synchronization</li>
+            <li>{notificationPermission === 'granted' ? '✓' : '⚠'} Push notifications for reminders</li>
+            <li>{serviceWorkerReady ? '✓' : '⚠'} Automatic app updates</li>
+            <li>{serviceWorkerReady ? '✓' : '⚠'} Quest reminder scheduling</li>
           </ul>
+          {!serviceWorkerReady && (
+            <p className="text-xs text-yellow-400 mt-2">
+              Service Worker disabled in development environment for security
+            </p>
+          )}
         </div>
       </div>
     </div>

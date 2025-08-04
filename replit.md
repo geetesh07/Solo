@@ -4,6 +4,16 @@
 
 This is a Solo Leveling-themed personal productivity application that gamifies goal management and daily task completion. The application features a React frontend with TypeScript, a Node.js/Express backend, and Firebase integration for authentication and data storage. The app allows users to create and manage goals across different categories, track their progress, and level up their virtual character based on completion rates. The design emphasizes the Solo Leveling anime/manga aesthetic with dark themes, gradients, and gaming elements.
 
+## Recent Updates (January 2025)
+
+- **URL Routing System**: Implemented proper browser navigation with Wouter router, allowing natural back/forward button usage on mobile devices. Each section now has dedicated URLs (/dashboard, /settings, /calendar, /analytics, /notes, /streaks).
+
+- **Service Worker Implementation**: Added comprehensive PWA functionality with offline support, background sync, and push notifications. Service Worker is properly configured for production deployment while being disabled in development environments to avoid security errors.
+
+- **Enhanced Mobile Experience**: Complete category customization system allowing users to rename quest categories and Shadow Archive labels. Mobile-optimized layouts with responsive design patterns.
+
+- **Development Notification System**: Created fallback browser notification system for development environments, ensuring notification functionality works across all deployment stages.
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.

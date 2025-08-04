@@ -6,6 +6,7 @@ import { PhoneNotifications } from "../components/features/PhoneNotifications";
 import { APKGenerator } from "../components/features/APKGenerator";
 import { CategoryCustomization } from "../components/features/CategoryCustomization";
 import { ServiceWorkerStatus } from "../components/features/ServiceWorkerStatus";
+import { DevNotifications } from "../components/features/DevNotifications";
 import { showToast } from "@/components/ui/Toast";
 import { useConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -462,6 +463,9 @@ export function Settings() {
 
               {/* Service Worker Status */}
               <ServiceWorkerStatus />
+
+              {/* Development Notifications */}
+              <DevNotifications />
 
               {/* APK Generator Section */}
               <div className="mystical-card p-4 sm:p-6">

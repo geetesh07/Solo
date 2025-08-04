@@ -30,11 +30,18 @@ class ServiceWorkerManager {
       console.warn('Service Worker not supported');
       return false;
     }
+
+    // Skip service worker in development or localhost
+    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.protocol !== 'https:') {
+      console.log('Skipping Service Worker registration in development environment');
+      return false;
+    }
     
     try {
       // Register service worker
       this.registration = await navigator.serviceWorker.register('/sw.js', {
-        scope: '/'
+        scope: '/',
+        updateViaCache: 'none'
       });
       
       console.log('Service Worker registered:', this.registration);
