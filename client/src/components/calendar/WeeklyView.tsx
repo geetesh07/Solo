@@ -230,35 +230,37 @@ export function WeeklyView({ goals = [] }: WeeklyViewProps) {
         </button>
       </div>
 
-      {/* Week Navigation */}
-      <div className="mystical-card p-4">
-        <div className="flex items-center justify-between mb-3 md:mb-4">
+      {/* Week Navigation - Mobile Optimized */}
+      <div className="mystical-card p-2 md:p-4">
+        <div className="flex items-center justify-between mb-2 md:mb-4">
           <button 
             onClick={() => navigateWeek('prev')}
-            className="p-1.5 md:p-2 hover:bg-gray-700 rounded-lg transition-colors"
+            className="p-2 md:p-2 hover:bg-gray-700 rounded-lg transition-colors touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center"
+            data-testid="button-prev-week"
           >
-            <ChevronLeft className="w-4 h-4 md:w-5 md:h-5 text-cyan-400" />
+            <ChevronLeft className="w-5 h-5 text-cyan-400" />
           </button>
           
-          <div className="text-center">
-            <h3 className="text-base md:text-lg font-bold text-white font-['Orbitron']">
+          <div className="text-center flex-1 px-2">
+            <h3 className="text-sm md:text-lg font-bold text-white font-['Orbitron'] leading-tight">
               {weekDates[0].toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
             </h3>
-            <p className="text-gray-400 text-xs md:text-sm">
+            <p className="text-gray-400 text-xs md:text-sm leading-tight mt-1">
               {weekDates[0].toLocaleDateString()} - {weekDates[6].toLocaleDateString()}
             </p>
           </div>
           
           <button 
             onClick={() => navigateWeek('next')}
-            className="p-1.5 md:p-2 hover:bg-gray-700 rounded-lg transition-colors"
+            className="p-2 md:p-2 hover:bg-gray-700 rounded-lg transition-colors touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center"
+            data-testid="button-next-week"
           >
-            <ChevronRight className="w-4 h-4 md:w-5 md:h-5 text-cyan-400" />
+            <ChevronRight className="w-5 h-5 text-cyan-400" />
           </button>
         </div>
 
-        {/* Week Grid - Mobile Optimized */}
-        <div className="grid grid-cols-7 gap-0.5 md:gap-2">
+        {/* Innovative Mobile-First Week Grid */}
+        <div className="grid grid-cols-7 gap-px md:gap-2 bg-gray-800/20 p-px md:p-0 rounded-lg md:rounded-none">
           {weekDates.map((date, index) => {
             const isToday = date.toDateString() === today.toDateString();
             const dayEvents = getEventsForDate(date);
@@ -266,38 +268,65 @@ export function WeeklyView({ goals = [] }: WeeklyViewProps) {
             return (
               <div
                 key={date.toISOString()}
-                className={`p-1 md:p-2 rounded-lg min-h-[70px] md:min-h-[100px] transition-all duration-200 ${
-                  isToday 
-                    ? 'bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/50' 
-                    : 'hover:bg-white/5 border border-gray-700/30'
-                }`}
+                className={`
+                  bg-gray-900/80 md:bg-transparent
+                  p-1.5 md:p-3 rounded-md md:rounded-lg 
+                  min-h-[90px] md:min-h-[120px] 
+                  transition-all duration-200 
+                  flex flex-col
+                  ${isToday 
+                    ? 'bg-gradient-to-br from-cyan-500/30 to-blue-500/20 border-2 border-cyan-400/60 shadow-lg shadow-cyan-500/10' 
+                    : 'hover:bg-white/5 md:border md:border-gray-700/30 hover:border-gray-600/50'
+                  }
+                `}
               >
-                {/* Day Header */}
-                <div className="text-center mb-1 md:mb-2">
-                  <div className="text-[10px] md:text-xs text-gray-400 font-semibold">
-                    {dayNames[index].substring(0, 3)}
+                {/* Day Header - Improved */}
+                <div className="text-center mb-2 flex-shrink-0">
+                  <div className="text-[10px] md:text-xs text-gray-400 font-semibold uppercase tracking-wide">
+                    {dayNames[index]}
                   </div>
-                  <div className={`text-xs md:text-sm font-bold ${isToday ? 'text-cyan-400' : 'text-white'}`}>
+                  <div className={`
+                    text-sm md:text-base font-bold mt-0.5
+                    ${isToday 
+                      ? 'text-cyan-300 bg-cyan-500/20 rounded-full w-6 h-6 md:w-7 md:h-7 flex items-center justify-center mx-auto' 
+                      : 'text-white'
+                    }
+                  `}>
                     {date.getDate()}
                   </div>
                 </div>
 
-                {/* Events */}
-                <div className="space-y-0.5 md:space-y-1">
-                  {dayEvents.slice(0, 2).map(event => (
+                {/* Events - Better Mobile Layout */}
+                <div className="space-y-1 flex-1 overflow-hidden">
+                  {dayEvents.slice(0, 3).map(event => (
                     <div
                       key={event.id}
-                      className={`text-[9px] md:text-xs px-1 py-0.5 md:py-1 rounded ${getEventTypeColor(event.type)} ${
-                        event.completed ? 'opacity-60 line-through' : ''
-                      } cursor-pointer`}
+                      className={`
+                        text-[9px] md:text-xs px-1.5 py-1 rounded-md
+                        ${getEventTypeColor(event.type)} 
+                        ${event.completed ? 'opacity-60 line-through' : ''} 
+                        cursor-pointer transition-all duration-150
+                        hover:scale-105 active:scale-95
+                        border border-white/10
+                        backdrop-blur-sm
+                      `}
                       onClick={() => !event.id.startsWith('goal-') && handleToggleEventComplete(event.id)}
                       title={event.title}
                     >
-                      {event.title.length > 6 ? event.title.substring(0, 6) + '...' : event.title}
+                      <div className="truncate leading-tight">
+                        {event.title.length > 8 ? event.title.substring(0, 8) + '...' : event.title}
+                      </div>
                     </div>
                   ))}
-                  {dayEvents.length > 2 && (
-                    <div className="text-[8px] md:text-xs text-gray-400 text-center">+{dayEvents.length - 2}</div>
+                  {dayEvents.length > 3 && (
+                    <div className="text-[8px] md:text-xs text-gray-400 text-center py-1 bg-gray-800/30 rounded-md">
+                      +{dayEvents.length - 3} more
+                    </div>
+                  )}
+                  {dayEvents.length === 0 && (
+                    <div className="text-[8px] md:text-xs text-gray-600 text-center py-2 border border-dashed border-gray-700/30 rounded-md">
+                      No events
+                    </div>
                   )}
                 </div>
               </div>

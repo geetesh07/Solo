@@ -473,18 +473,20 @@ export function ShadowArchives() {
                             </span>
                           ))}
                         </div>
-                        <div className="flex space-x-2">
+                        <div className="flex flex-col md:flex-row gap-2">
                           <input
                             type="text"
                             placeholder="Add tag..."
                             value={newTagInput}
                             onChange={(e) => setNewTagInput(e.target.value)}
                             onKeyPress={(e) => e.key === 'Enter' && addTagToEditNote()}
-                            className="flex-1 bg-gray-700 border border-gray-600 rounded px-2 py-1 text-white text-xs"
+                            className="flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white text-sm min-h-[44px]"
+                            data-testid="input-edit-tag"
                           />
                           <button
                             onClick={addTagToEditNote}
-                            className="bg-purple-500 hover:bg-purple-600 text-white px-2 py-1 rounded text-xs"
+                            className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors min-h-[44px] touch-manipulation"
+                            data-testid="button-edit-add-tag"
                           >
                             Add
                           </button>
@@ -586,18 +588,20 @@ export function ShadowArchives() {
                     </span>
                   ))}
                 </div>
-                <div className="flex space-x-2">
+                <div className="flex flex-col md:flex-row gap-2 md:gap-2">
                   <input
                     type="text"
                     placeholder="Add tag..."
                     value={newTagInput}
                     onChange={(e) => setNewTagInput(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && addTagToNewNote()}
-                    className="flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:border-purple-400 focus:outline-none"
+                    className="flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-3 md:py-2 text-white placeholder-gray-400 focus:border-purple-400 focus:outline-none min-h-[44px]"
+                    data-testid="input-add-tag"
                   />
                   <button
                     onClick={addTagToNewNote}
-                    className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                    className="bg-purple-500 hover:bg-purple-600 text-white px-4 py-3 md:py-2 rounded-lg font-medium transition-colors min-h-[44px] md:min-w-[100px] touch-manipulation"
+                    data-testid="button-add-tag"
                   >
                     Add Tag
                   </button>

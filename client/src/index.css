@@ -626,22 +626,32 @@ html {
 }
 /* Enhanced Mobile Optimization for Solo Hunter App */
 @media (max-width: 768px) {
+  /* Prevent horizontal overflow */
+  body, html {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+  }
+  
   /* Card spacing improvements */
   .mystical-card {
     padding: 0.75rem !important;
     margin-bottom: 0.75rem !important;
+    max-width: calc(100vw - 1rem) !important;
+    word-wrap: break-word !important;
   }
   
   /* Button improvements */
   .power-button {
     padding: 0.5rem 0.75rem !important;
     font-size: 0.875rem !important;
+    white-space: nowrap !important;
   }
   
   /* Touch target improvements */
   button, a, [role="button"] {
     min-height: 44px;
     min-width: 44px;
+    touch-action: manipulation;
   }
   
   /* Mobile typography */
@@ -653,6 +663,20 @@ html {
   input, textarea, select {
     font-size: 16px !important;
     padding: 0.75rem !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Grid layouts */
+  .grid {
+    max-width: 100% !important;
+    overflow: hidden !important;
+  }
+  
+  /* Ensure grid items don't overflow */
+  .grid > * {
+    min-width: 0 !important;
+    word-wrap: break-word !important;
   }
   
   /* Calendar grid spacing */
@@ -663,6 +687,20 @@ html {
   .grid-cols-7 > div {
     min-height: 70px !important;
     padding: 0.25rem !important;
+    min-width: 0 !important;
+  }
+  
+  /* Stats grid mobile optimization */
+  .grid-cols-2 > div {
+    min-width: 0 !important;
+    overflow: hidden !important;
+  }
+  
+  /* Text truncation for mobile */
+  .truncate-mobile {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
   }
 }
 
@@ -673,4 +711,20 @@ html {
     -webkit-touch-callout: none;
     -webkit-tap-highlight-color: transparent;
   }
+}
+
+/* Animation for PWA install banner */
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
 }

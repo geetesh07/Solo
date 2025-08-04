@@ -13,6 +13,7 @@ import { OnboardingModal } from "@/components/modals/OnboardingModal";
 import { MotivationalGreeting } from "@/components/ui/MotivationalGreeting";
 import { StreakTracker } from "@/components/features/StreakTracker";
 import { showToast } from "@/components/ui/Toast";
+import { PWAInstall } from "@/components/features/PWAInstall";
 
 interface Goal {
   id: string;
@@ -34,6 +35,7 @@ function Dashboard() {
   const { user } = useAuth();
   const [currentView, setCurrentView] = useState('dashboard');
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] = useState(false);
   const [isMorningModalOpen, setIsMorningModalOpen] = useState(false);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [showGreeting, setShowGreeting] = useState(false);
@@ -269,20 +271,20 @@ function Dashboard() {
         </div>
       </div>
 
-      {/* Enhanced Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      {/* Enhanced Stats Grid - Mobile Optimized */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
         {[
-          { label: 'COMPLETED TODAY', value: completedGoals, icon: CheckCircle, color: 'text-green-400', bg: 'from-green-900/20 to-green-800/10' },
-          { label: 'CURRENT STREAK', value: streak, icon: Star, color: 'text-amber-400', bg: 'from-amber-900/20 to-amber-800/10' },
+          { label: 'COMPLETED', value: completedGoals, icon: CheckCircle, color: 'text-green-400', bg: 'from-green-900/20 to-green-800/10' },
+          { label: 'STREAK', value: streak, icon: Star, color: 'text-amber-400', bg: 'from-amber-900/20 to-amber-800/10' },
           { label: 'THIS WEEK', value: categories.flatMap(cat => cat.goals).filter(g => g.completed).length, icon: Calendar, color: 'text-blue-400', bg: 'from-blue-900/20 to-blue-800/10' },
           { label: 'EFFICIENCY', value: totalGoals > 0 ? Math.round((completedGoals / totalGoals) * 100) : 0, icon: BarChart3, color: 'text-purple-400', bg: 'from-purple-900/20 to-purple-800/10', suffix: '%' }
         ].map((stat, index) => (
-          <div key={index} className={`bg-gradient-to-br ${stat.bg} border border-gray-700/30 rounded-lg p-4 text-center shadow-lg backdrop-blur-sm`}>
-            <stat.icon className={`w-6 h-6 mx-auto mb-2 ${stat.color}`} />
-            <div className="text-xl font-bold text-white mb-1">
+          <div key={index} className={`bg-gradient-to-br ${stat.bg} border border-gray-700/30 rounded-lg p-2 md:p-4 text-center shadow-lg backdrop-blur-sm min-h-[80px] flex flex-col justify-center`}>
+            <stat.icon className={`w-4 h-4 md:w-6 md:h-6 mx-auto mb-1 md:mb-2 ${stat.color}`} />
+            <div className="text-lg md:text-xl font-bold text-white mb-0.5 md:mb-1">
               {stat.value}{stat.suffix || ''}
             </div>
-            <div className="text-xs text-gray-400 font-medium">{stat.label}</div>
+            <div className="text-[10px] md:text-xs text-gray-400 font-medium leading-tight">{stat.label}</div>
           </div>
         ))}
       </div>
@@ -354,33 +356,35 @@ function Dashboard() {
                     className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:border-cyan-400 focus:outline-none shadow-inner"
                     onKeyPress={(e) => e.key === 'Enter' && handleAddGoal(category.id)}
                   />
-                  <div className="flex gap-3">
+                  <div className="flex flex-col md:flex-row gap-3">
                     <input
                       type="date"
                       value={newGoal.dueDate}
                       onChange={(e) => setNewGoal(prev => ({ ...prev, dueDate: e.target.value }))}
-                      className="flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-cyan-400 focus:outline-none"
+                      className="flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-cyan-400 focus:outline-none min-h-[44px]"
                     />
                     <select
                       value={newGoal.priority}
                       onChange={(e) => setNewGoal(prev => ({ ...prev, priority: e.target.value as 'low' | 'medium' | 'high' }))}
-                      className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-cyan-400 focus:outline-none"
+                      className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-cyan-400 focus:outline-none min-h-[44px] md:min-w-[140px]"
                     >
                       <option value="low">Low Priority</option>
                       <option value="medium">Medium Priority</option>
                       <option value="high">High Priority</option>
                     </select>
                   </div>
-                  <div className="flex space-x-3">
+                  <div className="flex flex-col md:flex-row gap-3">
                     <button
                       onClick={() => handleAddGoal(category.id)}
-                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors shadow-lg"
+                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-medium transition-colors shadow-lg min-h-[44px] flex-1 md:flex-none"
+                      data-testid="button-create-quest"
                     >
                       Create Quest
                     </button>
                     <button
                       onClick={() => setIsAddingGoal(null)}
-                      className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-colors"
+                      className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-3 rounded-lg transition-colors min-h-[44px] flex-1 md:flex-none"
+                      data-testid="button-cancel-quest"
                     >
                       Cancel
                     </button>
@@ -516,8 +520,10 @@ function Dashboard() {
       
       {/* Sidebar */}
       <div className={`
+        transition-all duration-300 ease-out
+        ${isDesktopSidebarCollapsed ? 'md:w-0 md:overflow-hidden' : 'md:w-64'}
         md:relative md:translate-x-0 md:block
-        fixed left-0 top-0 z-50 h-full transition-transform duration-300 ease-out
+        fixed left-0 top-0 z-50 h-full w-64
         ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
       `}>
         <AppSidebar
@@ -539,10 +545,12 @@ function Dashboard() {
           user={user}
           onOpenMorningModal={() => setIsMorningModalOpen(true)}
           onToggleMobileSidebar={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
+          onToggleDesktopSidebar={() => setIsDesktopSidebarCollapsed(!isDesktopSidebarCollapsed)}
+          isDesktopSidebarCollapsed={isDesktopSidebarCollapsed}
         />
         
-        <div className={`h-[calc(100vh-4rem)] overflow-y-auto pb-16 md:pb-6 ${
-          currentView === 'dashboard' ? 'p-3 md:p-6' : 'p-0'
+        <div className={`h-[calc(100vh-4rem)] overflow-y-auto overflow-x-hidden pb-20 md:pb-6 ${
+          currentView === 'dashboard' ? 'p-2 md:p-6' : 'p-0'
         }`}>
           <div className="fade-in">
             {renderCurrentView()}
@@ -569,6 +577,9 @@ function Dashboard() {
           onClose={() => setShowGreeting(false)}
         />
       )}
+
+      {/* PWA Install Prompt */}
+      <PWAInstall />
     </div>
   );
 }

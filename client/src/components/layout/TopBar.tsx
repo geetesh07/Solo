@@ -5,17 +5,31 @@ interface TopBarProps {
   user?: any;
   onOpenMorningModal: () => void;
   onToggleMobileSidebar?: () => void;
+  onToggleDesktopSidebar?: () => void;
+  isDesktopSidebarCollapsed?: boolean;
 }
 
-export function TopBar({ user, onOpenMorningModal, onToggleMobileSidebar }: TopBarProps) {
+export function TopBar({ user, onOpenMorningModal, onToggleMobileSidebar, onToggleDesktopSidebar, isDesktopSidebarCollapsed }: TopBarProps) {
   const { signOut } = useAuth();
 
   return (
     <header className="h-16 border-b border-border bg-background/80 backdrop-blur-sm px-4 flex items-center justify-between">
       <div className="flex items-center space-x-4">
+        {/* Mobile hamburger */}
         <button 
           onClick={onToggleMobileSidebar}
-          className="md:hidden p-2 hover:bg-accent rounded-md"
+          className="md:hidden p-2 hover:bg-accent rounded-md z-50"
+          data-testid="button-mobile-menu"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+        
+        {/* Desktop sidebar toggle */}
+        <button 
+          onClick={onToggleDesktopSidebar}
+          className="hidden md:block p-2 hover:bg-accent rounded-md"
+          data-testid="button-desktop-sidebar-toggle"
+          title={isDesktopSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           <Menu className="w-5 h-5" />
         </button>
