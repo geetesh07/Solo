@@ -55,6 +55,28 @@ app.use((req, res, next) => {
     res.sendFile(path.resolve('public/manifest.json'));
   });
 
+  // Serve PWA icons with correct MIME types
+  app.get('/icon-*.png', (req, res) => {
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Cache-Control', 'public, max-age=86400'); // 24 hours
+    res.sendFile(path.resolve(`public${req.path}`));
+  });
+
+  // Serve static assets from public folder
+  app.use(express.static(path.resolve('public'), {
+    setHeaders: (res, path) => {
+      if (path.endsWith('.js')) {
+        res.setHeader('Content-Type', 'application/javascript');
+      } else if (path.endsWith('.png')) {
+        res.setHeader('Content-Type', 'image/png');
+      } else if (path.endsWith('.ico')) {  
+        res.setHeader('Content-Type', 'image/x-icon');
+      } else if (path.endsWith('.json')) {
+        res.setHeader('Content-Type', 'application/json');
+      }
+    }
+  }));
+
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";

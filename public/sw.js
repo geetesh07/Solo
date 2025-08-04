@@ -1,5 +1,5 @@
 // Solo Leveling Productivity App - Service Worker
-const CACHE_NAME = 'solo-hunter-v1.1.0';
+const CACHE_NAME = 'solo-hunter-v1.2.0';
 const OFFLINE_URL = '/offline.html';
 
 // Assets to cache for offline functionality
@@ -13,7 +13,9 @@ const CACHE_URLS = [
   '/streaks',
   '/offline.html',
   '/manifest.json',
-  '/favicon.ico'
+  '/favicon.ico',
+  '/icon-192x192.png',
+  '/icon-512x512.png'
 ];
 
 // Install event - cache critical resources
@@ -24,9 +26,19 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_NAME)
       .then((cache) => {
         console.log('Service Worker: Caching critical resources');
-        return cache.addAll(CACHE_URLS);
+        // Cache resources individually to avoid failures
+        const cachePromises = CACHE_URLS.map(url => {
+          return cache.add(url).catch(err => {
+            console.warn(`Failed to cache ${url}:`, err);
+            return Promise.resolve(); // Continue with other resources
+          });
+        });
+        return Promise.all(cachePromises);
       })
-      .then(() => self.skipWaiting())
+      .then(() => {
+        console.log('Service Worker: Installation complete');
+        self.skipWaiting();
+      })
       .catch((error) => {
         console.error('Service Worker: Cache installation failed', error);
       })

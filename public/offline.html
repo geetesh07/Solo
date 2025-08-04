@@ -5,145 +5,94 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Solo Hunter - Offline</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
-            color: white;
-            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
         }
-        
-        .offline-container {
+        .container {
             text-align: center;
-            max-width: 400px;
+            max-width: 500px;
             padding: 40px;
-            background: rgba(26, 26, 46, 0.8);
-            border-radius: 16px;
-            border: 1px solid rgba(29, 233, 182, 0.3);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
-        .hunter-logo {
+        .icon { font-size: 4rem; margin-bottom: 20px; }
+        h1 {
             font-family: 'Orbitron', monospace;
-            font-size: 1.8rem;
-            font-weight: 800;
-            background: linear-gradient(45deg, #64ffda, #1de9b6);
+            font-size: 2rem;
+            margin-bottom: 16px;
+            background: linear-gradient(45deg, #1de9b6, #00bcd4);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 20px;
         }
-        
-        .offline-icon {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(45deg, #64ffda, #1de9b6);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-            font-size: 24px;
-        }
-        
-        h1 {
-            font-size: 1.5rem;
-            margin-bottom: 10px;
-            color: #1de9b6;
-        }
-        
         p {
-            color: #a0a0a0;
-            line-height: 1.6;
+            color: #b0bec5;
             margin-bottom: 30px;
+            line-height: 1.6;
         }
-        
-        .retry-button {
-            background: linear-gradient(45deg, #1de9b6, #64ffda);
-            color: #0f0f23;
+        .retry-btn {
+            background: linear-gradient(45deg, #1de9b6, #00bcd4);
             border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
             font-weight: 600;
             cursor: pointer;
             transition: transform 0.2s;
         }
-        
-        .retry-button:hover {
-            transform: translateY(-2px);
-        }
-        
+        .retry-btn:hover { transform: translateY(-2px); }
         .features {
             margin-top: 30px;
             text-align: left;
         }
-        
-        .features h3 {
-            color: #64ffda;
-            font-size: 1rem;
-            margin-bottom: 15px;
-        }
-        
-        .feature-item {
+        .feature {
             display: flex;
             align-items: center;
-            margin-bottom: 8px;
-            color: #a0a0a0;
+            margin-bottom: 10px;
             font-size: 0.9rem;
+            color: #90a4ae;
         }
-        
-        .feature-item::before {
-            content: "⚡";
-            margin-right: 8px;
-            color: #1de9b6;
-        }
+        .feature-icon { margin-right: 10px; }
     </style>
 </head>
 <body>
-    <div class="offline-container">
-        <div class="hunter-logo">SOLO HUNTER</div>
+    <div class="container">
+        <div class="icon">📱</div>
+        <h1>Hunter Offline</h1>
+        <p>You're currently offline, but your Solo Hunter app is still partially functional!</p>
         
-        <div class="offline-icon">
-            📡
-        </div>
-        
-        <h1>Hunter Goes Offline</h1>
-        <p>
-            You're currently offline, but don't worry! Your solo leveling progress is safely cached. 
-            Some features may be limited until you reconnect to the network.
-        </p>
-        
-        <button class="retry-button" onclick="window.location.reload()">
-            Retry Connection
+        <button class="retry-btn" onclick="window.location.reload()">
+            Try Again
         </button>
         
         <div class="features">
-            <h3>Available Offline:</h3>
-            <div class="feature-item">View your cached quests and progress</div>
-            <div class="feature-item">Access your saved notes and achievements</div>
-            <div class="feature-item">Review your hunter statistics</div>
-            <div class="feature-item">Browse completed missions</div>
+            <div class="feature">
+                <span class="feature-icon">✅</span>
+                <span>View cached data</span>
+            </div>
+            <div class="feature">
+                <span class="feature-icon">📝</span>
+                <span>Add offline notes</span>
+            </div>
+            <div class="feature">
+                <span class="feature-icon">🔄</span>
+                <span>Sync when back online</span>
+            </div>
         </div>
     </div>
     
     <script>
-        // Auto-retry connection every 30 seconds
-        setInterval(() => {
-            if (navigator.onLine) {
-                window.location.reload();
-            }
-        }, 30000);
-        
-        // Listen for online event
+        // Auto-retry when online
         window.addEventListener('online', () => {
             window.location.reload();
         });
