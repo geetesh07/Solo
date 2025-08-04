@@ -1,5 +1,5 @@
 // Solo Leveling Productivity App - Service Worker
-const CACHE_NAME = 'solo-hunter-v1.0.2';
+const CACHE_NAME = 'solo-hunter-v1.1.0';
 const OFFLINE_URL = '/offline.html';
 
 // Assets to cache for offline functionality
@@ -12,7 +12,8 @@ const CACHE_URLS = [
   '/notes',
   '/streaks',
   '/offline.html',
-  '/manifest.json'
+  '/manifest.json',
+  '/favicon.ico'
 ];
 
 // Install event - cache critical resources

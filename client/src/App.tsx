@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "@/hooks/useAuth";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import { ToastContainer } from "@/components/ui/Toast";
+import { PWAInstallPrompt } from "@/components/features/PWAInstallPrompt";
 import Dashboard from "@/pages/Dashboard";
 import "@/index.css";
 
@@ -34,6 +35,7 @@ function App() {
             </Switch>
           </Router>
           <ToastContainer />
+          <PWAInstallPrompt />
         </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>

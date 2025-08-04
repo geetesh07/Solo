@@ -31,14 +31,15 @@ class ServiceWorkerManager {
       return false;
     }
 
-    // Enable service worker for production deployment
-    const isProduction = import.meta.env.PROD || location.protocol === 'https:';
-    const isReplit = location.hostname.includes('replit.dev') || location.hostname.includes('replit.app');
+    // Enable service worker for deployed app
+    const isDeployed = location.protocol === 'https:' || location.hostname.includes('replit.app');
     
-    if (!isProduction && !isReplit) {
-      console.log('Service Worker disabled in development - will enable in production');
+    if (!isDeployed) {
+      console.log('Service Worker requires HTTPS deployment - enabling in production');
       return false;
     }
+    
+    console.log('Deployed environment detected - enabling Service Worker');
     
     try {
       // Register service worker
