@@ -1,0 +1,49 @@
+hunter-quest-geeteshpatil.replit.app/:1 Unchecked runtime.lastError: The message port closed before a response was received.Understand this error
+sw.js:288 Service Worker: Script loaded successfully
+sw.js:21 Service Worker: Installing...
+sw.js:26 Service Worker: Caching critical resources
+index-DLt4QfsC.js:2270 Service Worker registered: ServiceWorkerRegistration
+index-DLt4QfsC.js:2332 Service Worker initialized successfully
+index-DLt4QfsC.js:2332 Notifications enabled
+index-DLt4QfsC.js:2270 Background sync registration failed: InvalidStateError: Failed to execute 'register' on 'SyncManager': Registration failed - no active Service Worker
+    at ST.enableBackgroundSync (index-DLt4QfsC.js:2270:50071)
+    at index-DLt4QfsC.js:2332:67306
+enableBackgroundSync @ index-DLt4QfsC.js:2270Understand this error
+index-DLt4QfsC.js:2270 Failed to subscribe to push notifications: AbortError: Failed to execute 'subscribe' on 'PushManager': Subscription failed - no active Service Worker
+    at ST.subscribeToPushNotifications (index-DLt4QfsC.js:2270:49171)
+    at index-DLt4QfsC.js:2332:67332
+subscribeToPushNotifications @ index-DLt4QfsC.js:2270Understand this error
+hunter-quest-geeteshpatil.replit.app/:1 Error while trying to use the following icon from the Manifest: https://hunter-quest-geeteshpatil.replit.app/icon-192x192.png (Download error or resource isn't a valid image)Understand this error
+sw.js:38 Service Worker: Activating...
+sw.js:51 Service Worker: Activated
+sw.js:243 Service Worker: Message received Object
+VM55:21 SW registered:  ServiceWorkerRegistration
+sw.js:243 Service Worker: Message received Object
+index-DLt4QfsC.js:2270 Service Worker registered: ServiceWorkerRegistration
+index-DLt4QfsC.js:2270 Push notification registration failed: InvalidAccessError: Failed to execute 'subscribe' on 'PushManager': The provided applicationServerKey is not valid.
+    at m (index-DLt4QfsC.js:2270:25373)
+    at async h (index-DLt4QfsC.js:2270:24889)
+m @ index-DLt4QfsC.js:2270Understand this error
+index-DLt4QfsC.js:40 Error: Minified React error #130; visit https://reactjs.org/docs/error-decoder.html?invariant=130&args[]=undefined&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+    at xl (index-DLt4QfsC.js:40:49311)
+    at y (index-DLt4QfsC.js:38:7878)
+    at C (index-DLt4QfsC.js:38:9255)
+    at D (index-DLt4QfsC.js:38:11331)
+    at et (index-DLt4QfsC.js:40:1475)
+    at Yx (index-DLt4QfsC.js:40:45668)
+    at Gx (index-DLt4QfsC.js:40:39727)
+    at s2 (index-DLt4QfsC.js:40:39655)
+    at Yl (index-DLt4QfsC.js:40:39508)
+    at Vd (index-DLt4QfsC.js:40:35875)
+Pd @ index-DLt4QfsC.js:40Understand this error
+index-DLt4QfsC.js:40 Uncaught Error: Minified React error #130; visit https://reactjs.org/docs/error-decoder.html?invariant=130&args[]=undefined&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+    at xl (index-DLt4QfsC.js:40:49311)
+    at y (index-DLt4QfsC.js:38:7878)
+    at C (index-DLt4QfsC.js:38:9255)
+    at D (index-DLt4QfsC.js:38:11331)
+    at et (index-DLt4QfsC.js:40:1475)
+    at Yx (index-DLt4QfsC.js:40:45668)
+    at Gx (index-DLt4QfsC.js:40:39727)
+    at s2 (index-DLt4QfsC.js:40:39655)
+    at Yl (index-DLt4QfsC.js:40:39508)
+    at Vd (index-DLt4QfsC.js:40:35875)

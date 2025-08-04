@@ -178,6 +178,9 @@ class ServiceWorkerManager {
       return null;
     }
     
+    // Wait for service worker to be ready
+    await navigator.serviceWorker.ready;
+    
     try {
       // Check if push messaging is supported
       if (!('PushManager' in window)) {
@@ -185,12 +188,16 @@ class ServiceWorkerManager {
         return null;
       }
       
+      // Check if service worker is active
+      if (!this.registration.active) {
+        console.warn('Service worker not active yet');
+        return null;
+      }
+      
+      // For basic notifications, we don't need VAPID keys
+      // Using simple push subscription
       const subscription = await this.registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: this.urlBase64ToUint8Array(
-          // Default VAPID public key - replace with your own
-          'BEl62iUYgUivxIkv69yViEuiBIa40HI0RcCqOhRmjX_cL7-E_9_l0_K7Hd-gV1rp5QQ0Q9Q8gQz2gOIgB0JhRBw'
-        )
+        userVisibleOnly: true
       });
       
       console.log('Push subscription:', subscription);
@@ -200,7 +207,7 @@ class ServiceWorkerManager {
       
       return subscription;
     } catch (error) {
-      console.error('Failed to subscribe to push notifications:', error);
+      console.error('Push notification registration failed:', error);
       return null;
     }
   }
@@ -237,10 +244,19 @@ class ServiceWorkerManager {
   async enableBackgroundSync(): Promise<boolean> {
     if (!this.registration) return false;
     
+    // Wait for service worker to be active
+    await navigator.serviceWorker.ready;
+    
     try {
       // Check if background sync is supported
       if (!('sync' in this.registration)) {
         console.warn('Background sync not supported');
+        return false;
+      }
+      
+      // Check if service worker is active
+      if (!this.registration.active) {
+        console.warn('Service worker not active yet');
         return false;
       }
       

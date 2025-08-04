@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Bell, BellRing, CheckCircle, AlertCircle, Smartphone } from 'lucide-react';
 
 export function MobileNotifications() {
