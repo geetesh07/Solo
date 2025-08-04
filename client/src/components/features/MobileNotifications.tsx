@@ -31,8 +31,9 @@ export function MobileNotifications() {
         try {
           // Use a timeout to prevent hanging
           const timeoutId = setTimeout(() => {
+            console.log('Notification permission request timed out');
             resolve('denied');
-          }, 10000); // 10 second timeout
+          }, 8000); // 8 second timeout
 
           const handlePermission = (result: NotificationPermission) => {
             clearTimeout(timeoutId);
@@ -91,10 +92,9 @@ export function MobileNotifications() {
 
     try {
       // Create simple, mobile-friendly notification
-      const notification = new Notification('🎯 Solo Hunter', {
-        body: 'Notification system is working perfectly!',
+      const notification = new Notification('Solo Hunter Test', {
+        body: 'Notification system working!',
         tag: 'test-notification',
-        icon: '/favicon.ico',
         silent: false,
         requireInteraction: false
       });
