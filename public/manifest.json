@@ -1,38 +1,63 @@
 {
-  "name": "Solo Hunter - Productivity App",
+  "name": "Solo Hunter - Leveling Productivity",
   "short_name": "Solo Hunter",
-  "description": "Solo Leveling themed productivity and goal tracking app with notifications",
+  "description": "Solo Leveling themed productivity app with gamified quest management",
   "start_url": "/",
-  "scope": "/",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#0ea5e9",
+  "background_color": "#0f0f23",
+  "theme_color": "#1de9b6",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["productivity", "lifestyle", "games"],
   "icons": [
     {
-      "src": "/icon-192x192.png",
+      "src": "/favicon.ico",
+      "sizes": "72x72",
+      "type": "image/x-icon",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icon-512x512.png", 
+      "src": "/icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
-    }
-  ],
-  "orientation": "portrait-primary",
-  "categories": ["productivity", "lifestyle", "utilities"],
-  "lang": "en",
-  "dir": "ltr",
-  "prefer_related_applications": false,
-  "related_applications": [],
-  "screenshots": [
-    {
-      "src": "/screenshot-mobile.png",
-      "sizes": "390x844",
-      "type": "image/png",
-      "form_factor": "narrow"
     }
   ],
   "shortcuts": [
@@ -40,23 +65,31 @@
       "name": "Add Quest",
       "short_name": "Add Quest",
       "description": "Quickly add a new quest",
-      "url": "/?action=add-quest",
-      "icons": [
-        {
-          "src": "/icon-192x192.png",
-          "sizes": "192x192"
-        }
-      ]
+      "url": "/dashboard"
+    },
+    {
+      "name": "View Calendar", 
+      "short_name": "Calendar",
+      "description": "Check quest calendar",
+      "url": "/calendar"
+    },
+    {
+      "name": "Hunter Stats",
+      "short_name": "Stats", 
+      "description": "View hunter statistics",
+      "url": "/analytics"
     }
   ],
-  "protocol_handlers": [],
-  "share_target": {
-    "action": "/share",
-    "method": "GET",
-    "params": {
-      "title": "title",
-      "text": "text",
-      "url": "url"
+  "screenshots": [],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "protocol_handlers": [
+    {
+      "protocol": "web+solohunter",
+      "url": "/?action=%s"
     }
-  }
+  ]
 }

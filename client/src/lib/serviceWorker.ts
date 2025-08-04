@@ -31,9 +31,12 @@ class ServiceWorkerManager {
       return false;
     }
 
-    // Skip service worker in development or localhost
-    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.protocol !== 'https:') {
-      console.log('Skipping Service Worker registration in development environment');
+    // Enable service worker for production deployment
+    const isProduction = import.meta.env.PROD || location.protocol === 'https:';
+    const isReplit = location.hostname.includes('replit.dev') || location.hostname.includes('replit.app');
+    
+    if (!isProduction && !isReplit) {
+      console.log('Service Worker disabled in development - will enable in production');
       return false;
     }
     

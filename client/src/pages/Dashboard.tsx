@@ -86,6 +86,8 @@ function Dashboard() {
         
         // Subscribe to push notifications
         serviceWorkerManager.subscribeToPushNotifications();
+      } else {
+        console.log('Service Worker not available, using fallback notifications');
       }
     });
   }, []);

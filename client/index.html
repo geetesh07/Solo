@@ -2,68 +2,139 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta name="theme-color" content="#00d4ff" />
-    <meta name="description" content="Solo Leveling-themed personal productivity app with quest management and XP progression" />
-    <meta name="keywords" content="productivity, tasks, goals, solo leveling, anime, gaming, quest, hunter" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Solo Hunter - Leveling Productivity</title>
     
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="/manifest.json" />
-    
-    <!-- Apple Touch Icons -->
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Solo Leveling themed productivity app with gamified quest management" />
+    <meta name="theme-color" content="#1de9b6" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Solo Hunter" />
+    <meta name="mobile-web-app-capable" content="yes" />
     
-    <!-- Preload critical fonts -->
+    <!-- Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.png" />
+    
+    <!-- Splash Screens -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    
+    <!-- Microsoft Tiles -->
+    <meta name="msapplication-TileColor" content="#1de9b6" />
+    <meta name="msapplication-TileImage" content="/icons/icon-144x144.png" />
+    
+    <!-- Preconnect for performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     
-    <!-- Critical CSS for faster loading -->
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    
+    <!-- Prevent zoom on mobile -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    
     <style>
-      #root {
-        min-height: 100vh;
-        background: #0a0a0a;
-        background-image: 
-          radial-gradient(circle at 20% 50%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
-          radial-gradient(circle at 80% 20%, rgba(83, 52, 131, 0.1) 0%, transparent 50%);
-      }
-      
-      .loading-screen {
+      /* Loading screen styles */
+      #loading-screen {
         position: fixed;
-        inset: 0;
-        background: #0a0a0a;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
         z-index: 9999;
+        font-family: 'Orbitron', monospace;
+        color: white;
+      }
+      
+      .hunter-logo {
+        font-size: 2rem;
+        font-weight: 800;
+        background: linear-gradient(45deg, #64ffda, #1de9b6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 2rem;
+        text-align: center;
       }
       
       .loading-spinner {
         width: 40px;
         height: 40px;
-        border: 3px solid rgba(0, 212, 255, 0.3);
-        border-top: 3px solid #00d4ff;
+        border: 3px solid rgba(29, 233, 182, 0.3);
+        border-top: 3px solid #1de9b6;
         border-radius: 50%;
         animation: spin 1s linear infinite;
       }
       
       @keyframes spin {
-        to { transform: rotate(360deg); }
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      
+      .loading-text {
+        margin-top: 1rem;
+        font-size: 0.9rem;
+        opacity: 0.8;
+        animation: pulse 2s infinite;
+      }
+      
+      @keyframes pulse {
+        0%, 100% { opacity: 0.5; }
+        50% { opacity: 1; }
       }
     </style>
-    
-    <title>Solo Hunter - Productivity System</title>
   </head>
   <body>
-    <div id="root">
-      <!-- Loading screen while JavaScript loads -->
-      <div class="loading-screen">
-        <div class="loading-spinner"></div>
-      </div>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+      <div class="hunter-logo">SOLO HUNTER</div>
+      <div class="loading-spinner"></div>
+      <div class="loading-text">Initializing Hunter System...</div>
     </div>
+    
+    <div id="root"></div>
+    
     <script type="module" src="/src/main.tsx"></script>
-    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
-    <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>
+    
+    <script>
+      // Hide loading screen when app is ready
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          const loadingScreen = document.getElementById('loading-screen');
+          if (loadingScreen) {
+            loadingScreen.style.opacity = '0';
+            loadingScreen.style.transition = 'opacity 0.5s ease-out';
+            setTimeout(() => {
+              loadingScreen.style.display = 'none';
+            }, 500);
+          }
+        }, 1000);
+      });
+      
+      // Service Worker registration
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+              console.log('SW registered: ', registration);
+            })
+            .catch((registrationError) => {
+              console.log('SW registration failed: ', registrationError);
+            });
+        });
+      }
+    </script>
   </body>
 </html>
