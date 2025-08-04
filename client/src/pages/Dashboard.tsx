@@ -15,6 +15,7 @@ import { MotivationalGreeting } from "@/components/ui/MotivationalGreeting";
 import { StreakTracker } from "../components/features/StreakTracker";
 import { showToast } from "@/components/ui/Toast";
 import { PWAInstall } from "@/components/features/PWAInstall";
+import { serviceWorkerManager, HunterNotifications } from "@/lib/serviceWorker";
 
 interface Goal {
   id: string;
@@ -50,7 +51,7 @@ function Dashboard() {
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [showGreeting, setShowGreeting] = useState(false);
 
-  // Show greeting on first visit of the day
+  // Initialize service worker and show greeting on first visit of the day
   useEffect(() => {
     const lastGreeting = localStorage.getItem('last-greeting-date');
     const today = new Date().toDateString();
@@ -59,6 +60,34 @@ function Dashboard() {
       setShowGreeting(true);
       localStorage.setItem('last-greeting-date', today);
     }
+    
+    // Initialize service worker
+    serviceWorkerManager.init().then((success) => {
+      if (success) {
+        console.log('Service Worker initialized successfully');
+        
+        // Request notification permission
+        serviceWorkerManager.requestNotificationPermission().then((permission) => {
+          if (permission === 'granted') {
+            console.log('Notifications enabled');
+            
+            // Send daily motivation if it's morning
+            const hour = new Date().getHours();
+            if (hour >= 8 && hour <= 10 && lastGreeting !== today) {
+              setTimeout(() => {
+                HunterNotifications.dailyMotivation();
+              }, 3000); // 3 second delay
+            }
+          }
+        });
+        
+        // Enable background sync
+        serviceWorkerManager.enableBackgroundSync();
+        
+        // Subscribe to push notifications
+        serviceWorkerManager.subscribeToPushNotifications();
+      }
+    });
   }, []);
 
   // Categories with goals state - load from localStorage
