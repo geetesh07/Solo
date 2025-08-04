@@ -14,10 +14,20 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 
-// Connect to Firestore emulator in development
+// Debug Firebase configuration
+console.log('Firebase Config Debug:', {
+  hasApiKey: !!import.meta.env.VITE_FIREBASE_API_KEY,
+  hasProjectId: !!import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  hasAppId: !!import.meta.env.VITE_FIREBASE_APP_ID,
+  isDev: import.meta.env.DEV,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'NOT_SET'
+});
+
+// Connect to Firestore emulator in development only if no real Firebase is configured
 if (import.meta.env.DEV && !import.meta.env.VITE_FIREBASE_PROJECT_ID) {
   try {
     connectFirestoreEmulator(db, 'localhost', 8080);
+    console.log('Using Firestore emulator - authentication will be mocked');
   } catch (error) {
     console.log('Firestore emulator already connected');
   }

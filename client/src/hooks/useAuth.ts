@@ -16,7 +16,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('AuthProvider: Setting up auth state listener');
     const unsubscribe = onAuthStateChange((user) => {
+      console.log('AuthProvider: Auth state changed', { user: user ? user.email : 'null' });
       setUser(user);
       setLoading(false);
     });
@@ -26,10 +28,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async () => {
     try {
+      console.log('AuthProvider: Attempting Google sign in');
       const user = await signInWithGoogle();
+      console.log('AuthProvider: Sign in successful', { user: user ? user.email : 'null' });
       return user;
     } catch (error) {
-      console.error('Sign in error:', error);
+      console.error('AuthProvider: Sign in error:', error);
       throw error;
     }
   };
