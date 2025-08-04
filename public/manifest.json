@@ -1,27 +1,62 @@
 {
   "name": "Solo Hunter - Productivity App",
   "short_name": "Solo Hunter",
-  "description": "Solo Leveling themed productivity and goal tracking app",
+  "description": "Solo Leveling themed productivity and goal tracking app with notifications",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#0ea5e9",
   "icons": [
     {
-      "src": "/icon-192.png",
+      "src": "/icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icon-512.png", 
+      "src": "/icon-512x512.png", 
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     }
   ],
-  "orientation": "portrait",
-  "categories": ["productivity", "lifestyle"],
+  "orientation": "portrait-primary",
+  "categories": ["productivity", "lifestyle", "utilities"],
   "lang": "en",
-  "dir": "ltr"
+  "dir": "ltr",
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "screenshots": [
+    {
+      "src": "/screenshot-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Add Quest",
+      "short_name": "Add Quest",
+      "description": "Quickly add a new quest",
+      "url": "/?action=add-quest",
+      "icons": [
+        {
+          "src": "/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "protocol_handlers": [],
+  "share_target": {
+    "action": "/share",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
 }
