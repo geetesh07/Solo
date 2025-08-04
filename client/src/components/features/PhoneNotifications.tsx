@@ -1,467 +1,308 @@
 import { useState, useEffect } from 'react';
-import { Bell, BellOff, Smartphone, Check, X, Settings } from 'lucide-react';
+import { Bell, BellOff, Clock, Plus, Trash2, Check, X } from 'lucide-react';
 import { showToast } from '@/components/ui/Toast';
 
-interface NotificationSettings {
+interface ReminderTime {
+  id: string;
+  time: string;
+  label: string;
   enabled: boolean;
-  reminders: boolean;
-  dailyGoals: boolean;
-  streakAlerts: boolean;
-  sound: boolean;
-  vibration: boolean;
-  quietHours: {
-    enabled: boolean;
-    start: string;
-    end: string;
-  };
 }
 
 export function PhoneNotifications() {
   const [permission, setPermission] = useState<NotificationPermission>('default');
-  const [settings, setSettings] = useState<NotificationSettings>(() => {
-    const saved = localStorage.getItem('phone-notification-settings');
-    return saved ? JSON.parse(saved) : {
-      enabled: false,
-      reminders: true,
-      dailyGoals: true,
-      streakAlerts: true,
-      sound: true,
-      vibration: true,
-      quietHours: {
-        enabled: false,
-        start: '22:00',
-        end: '08:00'
-      }
-    };
+  const [reminderTimes, setReminderTimes] = useState<ReminderTime[]>(() => {
+    const saved = localStorage.getItem('hunter-reminder-times');
+    return saved ? JSON.parse(saved) : [
+      { id: '1', time: '09:00', label: 'Morning Quest Check', enabled: true },
+      { id: '2', time: '13:00', label: 'Afternoon Reminder', enabled: true },
+      { id: '3', time: '18:00', label: 'Evening Review', enabled: true }
+    ];
   });
-  const [isRegistering, setIsRegistering] = useState(false);
-  const [serviceWorkerReady, setServiceWorkerReady] = useState(false);
+  const [newTime, setNewTime] = useState('');
+  const [newLabel, setNewLabel] = useState('');
+  const [isAddingNew, setIsAddingNew] = useState(false);
 
   useEffect(() => {
-    // Check current permission status
     if ('Notification' in window) {
       setPermission(Notification.permission);
     }
-
-    // Register service worker for background notifications
-    registerServiceWorker();
-
-    // Set up periodic notification checks
     setupNotificationScheduler();
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('phone-notification-settings', JSON.stringify(settings));
-  }, [settings]);
-
-  const registerServiceWorker = async () => {
-    if ('serviceWorker' in navigator) {
-      try {
-        const registration = await navigator.serviceWorker.register('/sw.js');
-        console.log('Service Worker registered:', registration);
-        setServiceWorkerReady(true);
-
-        // Handle service worker updates
-        registration.addEventListener('updatefound', () => {
-          const newWorker = registration.installing;
-          if (newWorker) {
-            newWorker.addEventListener('statechange', () => {
-              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                showToast('App updated! Refresh to get the latest features.', 'info');
-              }
-            });
-          }
-        });
-      } catch (error) {
-        console.error('Service Worker registration failed:', error);
-      }
-    }
-  };
+    localStorage.setItem('hunter-reminder-times', JSON.stringify(reminderTimes));
+    setupNotificationScheduler();
+  }, [reminderTimes]);
 
   const requestPermission = async () => {
     if (!('Notification' in window)) {
       showToast('Notifications not supported on this device', 'error');
-      return false;
-    }
-
-    setIsRegistering(true);
-
-    try {
-      // Request basic notification permission
-      const permission = await Notification.requestPermission();
-      setPermission(permission);
-
-      if (permission === 'granted') {
-        // Test notification
-        await sendTestNotification();
-        
-        // Try to register for push notifications if available
-        await registerPushNotifications();
-        
-        setSettings(prev => ({ ...prev, enabled: true }));
-        showToast('Phone notifications enabled!', 'success');
-        return true;
-      } else {
-        showToast('Notification permission denied. Enable in browser settings.', 'error');
-        return false;
-      }
-    } catch (error) {
-      console.error('Permission request failed:', error);
-      showToast('Failed to enable notifications. Try manually in browser settings.', 'error');
-      return false;
-    } finally {
-      setIsRegistering(false);
-    }
-  };
-
-  const registerPushNotifications = async () => {
-    if (!serviceWorkerReady || !('PushManager' in window)) {
       return;
     }
 
     try {
-      const registration = await navigator.serviceWorker.ready;
+      const permission = await Notification.requestPermission();
+      setPermission(permission);
       
-      // Check if already subscribed
-      const existingSubscription = await registration.pushManager.getSubscription();
-      
-      if (!existingSubscription) {
-        // Create new subscription
-        const subscription = await registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: await getVapidKey()
-        });
-        
-        // Store subscription on server (if we had a backend endpoint)
-        console.log('Push subscription created:', subscription);
+      if (permission === 'granted') {
+        showToast('Notifications enabled successfully!', 'success');
+        setupNotificationScheduler();
+      } else {
+        showToast('Notification permission denied', 'error');
       }
     } catch (error) {
-      console.error('Push notification registration failed:', error);
+      showToast('Failed to request notification permission', 'error');
     }
-  };
-
-  const getVapidKey = async () => {
-    // In a real app, you'd get this from your server
-    // For now, we'll use a placeholder that would work with a proper backend
-    const vapidKey = 'BGxraCBJcyBhIHZhcGlkIGtleSBmb3IgZGVtbyBwdXJwb3Nlcw';
-    return Uint8Array.from(atob(vapidKey), c => c.charCodeAt(0));
-  };
-
-  const sendTestNotification = async () => {
-    if (permission !== 'granted') return;
-
-    const notification = new Notification('Solo Hunter Ready!', {
-      body: 'Your quest reminders are now active on this device.',
-      icon: '/icon-192x192.png',
-      badge: '/icon-192x192.png',
-      tag: 'test-notification',
-      requireInteraction: false,
-      silent: !settings.sound,
-      vibrate: settings.vibration ? [200, 100, 200] : []
-    });
-
-    notification.onclick = () => {
-      window.focus();
-      notification.close();
-    };
-
-    // Auto close after 5 seconds
-    setTimeout(() => notification.close(), 5000);
   };
 
   const setupNotificationScheduler = () => {
+    if (permission !== 'granted') return;
+
     // Clear existing intervals
-    const existingInterval = localStorage.getItem('notification-interval-id');
-    if (existingInterval) {
-      clearInterval(parseInt(existingInterval));
-    }
+    const intervals = (window as any).hunterIntervals || [];
+    intervals.forEach((id: number) => clearInterval(id));
+    (window as any).hunterIntervals = [];
 
-    if (!settings.enabled || permission !== 'granted') return;
+    // Set up new intervals for each enabled reminder
+    reminderTimes.forEach(reminder => {
+      if (!reminder.enabled) return;
 
-    // Set up periodic checks every 15 minutes
-    const intervalId = setInterval(() => {
-      checkForNotifications();
-    }, 15 * 60 * 1000);
+      const [hours, minutes] = reminder.time.split(':').map(Number);
+      
+      const scheduleNotification = () => {
+        const now = new Date();
+        const scheduledTime = new Date();
+        scheduledTime.setHours(hours, minutes, 0, 0);
 
-    localStorage.setItem('notification-interval-id', intervalId.toString());
-  };
-
-  const checkForNotifications = () => {
-    if (!settings.enabled || permission !== 'granted') return;
-
-    const now = new Date();
-    const currentTime = now.getHours() * 60 + now.getMinutes();
-
-    // Check quiet hours
-    if (settings.quietHours.enabled) {
-      const [startHour, startMin] = settings.quietHours.start.split(':').map(Number);
-      const [endHour, endMin] = settings.quietHours.end.split(':').map(Number);
-      const quietStart = startHour * 60 + startMin;
-      const quietEnd = endHour * 60 + endMin;
-
-      if (quietStart > quietEnd) {
-        // Overnight quiet hours (e.g., 22:00 to 08:00)
-        if (currentTime >= quietStart || currentTime <= quietEnd) return;
-      } else {
-        // Same day quiet hours
-        if (currentTime >= quietStart && currentTime <= quietEnd) return;
-      }
-    }
-
-    // Check for due goals and send notifications
-    checkDueGoals();
-    checkDailyStreaks();
-  };
-
-  const checkDueGoals = () => {
-    if (!settings.reminders) return;
-
-    const goals = JSON.parse(localStorage.getItem('hunter-categories-with-goals') || '[]');
-    const today = new Date().toISOString().split('T')[0];
-    
-    goals.forEach((category: any) => {
-      category.goals.forEach((goal: any) => {
-        if (!goal.completed && goal.dueDate === today) {
-          sendGoalReminder(goal.title, category.name);
+        // If the time has passed today, schedule for tomorrow
+        if (scheduledTime <= now) {
+          scheduledTime.setDate(scheduledTime.getDate() + 1);
         }
+
+        const timeUntilNotification = scheduledTime.getTime() - now.getTime();
+
+        const timeoutId = setTimeout(() => {
+          showNotification(reminder.label);
+          // Schedule next day
+          scheduleNotification();
+        }, timeUntilNotification);
+
+        (window as any).hunterIntervals = (window as any).hunterIntervals || [];
+        (window as any).hunterIntervals.push(timeoutId);
+      };
+
+      scheduleNotification();
+    });
+  };
+
+  const showNotification = (message: string) => {
+    if (permission !== 'granted') return;
+
+    try {
+      new Notification('🎯 Solo Hunter', {
+        body: message,
+        icon: '/icon-192x192.png',
+        tag: 'hunter-reminder',
+        requireInteraction: false
       });
-    });
-  };
-
-  const checkDailyStreaks = () => {
-    if (!settings.streakAlerts) return;
-
-    const lastStreakCheck = localStorage.getItem('last-streak-notification');
-    const today = new Date().toDateString();
-    
-    if (lastStreakCheck !== today) {
-      const now = new Date();
-      if (now.getHours() >= 20) { // Evening reminder
-        sendStreakReminder();
-        localStorage.setItem('last-streak-notification', today);
-      }
+    } catch (error) {
+      console.error('Failed to show notification:', error);
     }
   };
 
-  const sendGoalReminder = (goalTitle: string, categoryName: string) => {
-    if (permission !== 'granted') return;
-
-    new Notification(`Quest Due Today!`, {
-      body: `"${goalTitle}" in ${categoryName} needs your attention.`,
-      icon: '/icon-192x192.png',
-      tag: `goal-${goalTitle}`,
-      requireInteraction: true,
-      silent: !settings.sound,
-      vibrate: settings.vibration ? [300, 100, 300, 100, 300] : []
-    });
-  };
-
-  const sendStreakReminder = () => {
-    if (permission !== 'granted') return;
-
-    new Notification('Keep Your Streak Alive!', {
-      body: 'Complete your daily quests to maintain your Hunter streak.',
-      icon: '/icon-192x192.png',
-      tag: 'streak-reminder',
-      requireInteraction: false,
-      silent: !settings.sound,
-      vibrate: settings.vibration ? [200, 100, 200] : []
-    });
-  };
-
-  const disableNotifications = () => {
-    setSettings(prev => ({ ...prev, enabled: false }));
-    
-    // Clear scheduled intervals
-    const intervalId = localStorage.getItem('notification-interval-id');
-    if (intervalId) {
-      clearInterval(parseInt(intervalId));
-      localStorage.removeItem('notification-interval-id');
+  const addReminderTime = () => {
+    if (!newTime || !newLabel.trim()) {
+      showToast('Please enter both time and label', 'error');
+      return;
     }
-    
-    showToast('Phone notifications disabled', 'info');
+
+    const newReminder: ReminderTime = {
+      id: Date.now().toString(),
+      time: newTime,
+      label: newLabel,
+      enabled: true
+    };
+
+    setReminderTimes(prev => [...prev, newReminder]);
+    setNewTime('');
+    setNewLabel('');
+    setIsAddingNew(false);
+    showToast('Reminder added successfully!', 'success');
   };
 
-  const isQuietTime = () => {
-    if (!settings.quietHours.enabled) return false;
-    
-    const now = new Date();
-    const currentTime = now.getHours() * 60 + now.getMinutes();
-    const [startHour, startMin] = settings.quietHours.start.split(':').map(Number);
-    const [endHour, endMin] = settings.quietHours.end.split(':').map(Number);
-    const quietStart = startHour * 60 + startMin;
-    const quietEnd = endHour * 60 + endMin;
+  const toggleReminder = (id: string) => {
+    setReminderTimes(prev => prev.map(reminder => 
+      reminder.id === id ? { ...reminder, enabled: !reminder.enabled } : reminder
+    ));
+  };
 
-    if (quietStart > quietEnd) {
-      return currentTime >= quietStart || currentTime <= quietEnd;
-    } else {
-      return currentTime >= quietStart && currentTime <= quietEnd;
+  const deleteReminder = (id: string) => {
+    setReminderTimes(prev => prev.filter(reminder => reminder.id !== id));
+    showToast('Reminder deleted', 'success');
+  };
+
+  const testNotification = () => {
+    if (permission !== 'granted') {
+      showToast('Please enable notifications first', 'error');
+      return;
     }
+    showNotification('Test notification - everything is working!');
   };
 
   return (
-    <div className="bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-600 rounded-xl p-6">
-      <div className="flex items-center justify-between mb-6">
+    <div className="space-y-4">
+      {/* Permission Status */}
+      <div className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg border border-gray-700/50">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-            <Smartphone className="w-6 h-6 text-white" />
-          </div>
+          {permission === 'granted' ? (
+            <Bell className="w-5 h-5 text-green-400" />
+          ) : (
+            <BellOff className="w-5 h-5 text-red-400" />
+          )}
           <div>
-            <h3 className="text-lg font-semibold text-white">Phone Notifications</h3>
-            <p className="text-sm text-gray-400">
-              {permission === 'granted' && settings.enabled ? 'Active' : 
-               permission === 'denied' ? 'Blocked' : 'Not configured'}
-              {isQuietTime() && settings.enabled && ' • Quiet hours'}
-            </p>
+            <div className="text-white font-medium text-sm">Notification Status</div>
+            <div className={`text-xs ${
+              permission === 'granted' ? 'text-green-400' : 'text-red-400'
+            }`}>
+              {permission === 'granted' ? 'Enabled' : 'Disabled'}
+            </div>
           </div>
         </div>
-        
-        {permission === 'granted' && settings.enabled ? (
-          <button
-            onClick={disableNotifications}
-            className="p-2 text-gray-400 hover:text-red-400 transition-colors"
-            data-testid="button-disable-notifications"
-          >
-            <BellOff className="w-5 h-5" />
-          </button>
-        ) : (
+        {permission !== 'granted' && (
           <button
             onClick={requestPermission}
-            disabled={isRegistering || permission === 'denied'}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              permission === 'denied' 
-                ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                : 'bg-blue-600 hover:bg-blue-700 text-white'
-            }`}
+            className="px-3 py-1 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white text-xs rounded-lg transition-colors"
             data-testid="button-enable-notifications"
           >
-            {isRegistering ? 'Setting up...' : permission === 'denied' ? 'Blocked' : 'Enable'}
+            Enable
           </button>
         )}
       </div>
 
-      {permission === 'granted' && settings.enabled && (
-        <div className="space-y-4">
-          {/* Notification Types */}
-          <div className="space-y-3">
-            <h4 className="text-sm font-medium text-gray-300">Notification Types</h4>
-            {[
-              { key: 'reminders', label: 'Quest Reminders', desc: 'Due date alerts' },
-              { key: 'dailyGoals', label: 'Daily Goals', desc: 'Morning motivation' },
-              { key: 'streakAlerts', label: 'Streak Alerts', desc: 'Evening reminders' }
-            ].map(type => (
-              <label key={type.key} className="flex items-center justify-between p-3 bg-gray-700/30 rounded-lg cursor-pointer">
-                <div>
-                  <div className="text-sm text-white">{type.label}</div>
-                  <div className="text-xs text-gray-400">{type.desc}</div>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={settings[type.key as keyof NotificationSettings] as boolean}
-                  onChange={(e) => setSettings(prev => ({ ...prev, [type.key]: e.target.checked }))}
-                  className="w-4 h-4 text-blue-600 rounded"
-                />
-              </label>
-            ))}
-          </div>
+      {/* Test Notification */}
+      {permission === 'granted' && (
+        <button
+          onClick={testNotification}
+          className="w-full px-4 py-2 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white text-sm rounded-lg transition-colors"
+          data-testid="button-test-notification"
+        >
+          Send Test Notification
+        </button>
+      )}
 
-          {/* Sound & Vibration */}
-          <div className="space-y-3">
-            <h4 className="text-sm font-medium text-gray-300">Alerts</h4>
-            <div className="grid grid-cols-2 gap-3">
-              <label className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={settings.sound}
-                  onChange={(e) => setSettings(prev => ({ ...prev, sound: e.target.checked }))}
-                  className="w-4 h-4 text-blue-600 rounded"
-                />
-                <span className="text-sm text-white">Sound</span>
-              </label>
-              <label className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={settings.vibration}
-                  onChange={(e) => setSettings(prev => ({ ...prev, vibration: e.target.checked }))}
-                  className="w-4 h-4 text-blue-600 rounded"
-                />
-                <span className="text-sm text-white">Vibration</span>
-              </label>
-            </div>
-          </div>
-
-          {/* Quiet Hours */}
-          <div className="space-y-3">
-            <label className="flex items-center justify-between cursor-pointer">
-              <h4 className="text-sm font-medium text-gray-300">Quiet Hours</h4>
-              <input
-                type="checkbox"
-                checked={settings.quietHours.enabled}
-                onChange={(e) => setSettings(prev => ({ 
-                  ...prev, 
-                  quietHours: { ...prev.quietHours, enabled: e.target.checked }
-                }))}
-                className="w-4 h-4 text-blue-600 rounded"
-              />
-            </label>
-            
-            {settings.quietHours.enabled && (
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs text-gray-400 mb-1">From</label>
-                  <input
-                    type="time"
-                    value={settings.quietHours.start}
-                    onChange={(e) => setSettings(prev => ({
-                      ...prev,
-                      quietHours: { ...prev.quietHours, start: e.target.value }
-                    }))}
-                    className="w-full bg-gray-700 border border-gray-600 rounded px-2 py-1 text-white text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs text-gray-400 mb-1">To</label>
-                  <input
-                    type="time"
-                    value={settings.quietHours.end}
-                    onChange={(e) => setSettings(prev => ({
-                      ...prev,
-                      quietHours: { ...prev.quietHours, end: e.target.value }
-                    }))}
-                    className="w-full bg-gray-700 border border-gray-600 rounded px-2 py-1 text-white text-sm"
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Test Button */}
+      {/* Reminder Times */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="text-white font-medium text-sm">Scheduled Reminders</h3>
           <button
-            onClick={sendTestNotification}
-            className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-            data-testid="button-test-notification"
+            onClick={() => setIsAddingNew(true)}
+            className="p-1 text-blue-400 hover:text-blue-300 transition-colors"
+            data-testid="button-add-reminder"
           >
-            Send Test Notification
+            <Plus className="w-4 h-4" />
           </button>
         </div>
-      )}
 
-      {permission === 'denied' && (
-        <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
-          <div className="flex items-start space-x-3">
-            <X className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-            <div>
-              <h4 className="text-sm font-medium text-red-300">Notifications Blocked</h4>
-              <p className="text-xs text-red-200 mt-1">
-                Enable notifications in your browser settings, then refresh this page.
-              </p>
-              <p className="text-xs text-red-200 mt-2">
-                Chrome: Settings → Privacy → Notifications → Allow
-              </p>
+        {/* Add New Reminder */}
+        {isAddingNew && (
+          <div className="p-3 bg-gray-800/50 rounded-lg border border-gray-700/50 space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <input
+                type="time"
+                value={newTime}
+                onChange={(e) => setNewTime(e.target.value)}
+                className="bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:border-blue-400 focus:outline-none"
+                data-testid="input-reminder-time"
+              />
+              <input
+                type="text"
+                value={newLabel}
+                onChange={(e) => setNewLabel(e.target.value)}
+                placeholder="Reminder label"
+                className="bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm placeholder-gray-400 focus:border-blue-400 focus:outline-none"
+                data-testid="input-reminder-label"
+              />
+            </div>
+            <div className="flex space-x-2">
+              <button
+                onClick={addReminderTime}
+                className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-xs rounded transition-colors"
+                data-testid="button-save-reminder"
+              >
+                <Check className="w-3 h-3" />
+              </button>
+              <button
+                onClick={() => {
+                  setIsAddingNew(false);
+                  setNewTime('');
+                  setNewLabel('');
+                }}
+                className="px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white text-xs rounded transition-colors"
+                data-testid="button-cancel-reminder"
+              >
+                <X className="w-3 h-3" />
+              </button>
             </div>
           </div>
+        )}
+
+        {/* Existing Reminders */}
+        <div className="space-y-2">
+          {reminderTimes.map((reminder) => (
+            <div
+              key={reminder.id}
+              className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg border border-gray-700/50"
+              data-testid={`reminder-${reminder.id}`}
+            >
+              <div className="flex items-center space-x-3">
+                <Clock className="w-4 h-4 text-blue-400" />
+                <div>
+                  <div className="text-white text-sm font-medium">{reminder.time}</div>
+                  <div className="text-gray-400 text-xs">{reminder.label}</div>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => toggleReminder(reminder.id)}
+                  className={`w-10 h-5 rounded-full transition-colors ${
+                    reminder.enabled ? 'bg-green-500' : 'bg-gray-600'
+                  }`}
+                  data-testid={`toggle-reminder-${reminder.id}`}
+                >
+                  <div className={`w-4 h-4 bg-white rounded-full transition-transform ${
+                    reminder.enabled ? 'translate-x-5' : 'translate-x-0.5'
+                  }`} />
+                </button>
+                <button
+                  onClick={() => deleteReminder(reminder.id)}
+                  className="p-1 text-red-400 hover:text-red-300 transition-colors"
+                  data-testid={`delete-reminder-${reminder.id}`}
+                >
+                  <Trash2 className="w-3 h-3" />
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
-      )}
+
+        {reminderTimes.length === 0 && (
+          <div className="text-center py-4 text-gray-500 text-sm">
+            No reminders set. Click + to add your first reminder.
+          </div>
+        )}
+      </div>
+
+      {/* Mobile Tips */}
+      <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+        <h3 className="text-blue-300 text-sm font-medium mb-2">Tips:</h3>
+        <ul className="text-xs text-blue-200 space-y-1">
+          <li>• Notifications work even when the app is closed</li>
+          <li>• Enable notifications in your browser settings</li>
+          <li>• Install as PWA for best mobile experience</li>
+          <li>• Reminders will repeat daily at set times</li>
+        </ul>
+      </div>
     </div>
   );
 }

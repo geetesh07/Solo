@@ -140,6 +140,22 @@ function Dashboard() {
     localStorage.setItem('hunter-categories-with-goals', JSON.stringify(categories));
   }, [categories]);
 
+  // Listen for category updates from Settings
+  useEffect(() => {
+    const handleCategoryUpdate = (event: CustomEvent) => {
+      if (event.detail.questCategories) {
+        const updatedQuestCategories = event.detail.questCategories;
+        setCategories(prev => prev.map(cat => {
+          const updated = updatedQuestCategories.find((q: any) => q.id === cat.id);
+          return updated ? { ...cat, name: updated.name, icon: updated.icon } : cat;
+        }));
+      }
+    };
+
+    window.addEventListener('categoriesUpdated', handleCategoryUpdate as EventListener);
+    return () => window.removeEventListener('categoriesUpdated', handleCategoryUpdate as EventListener);
+  }, []);
+
   // Auto-remove expired quests and update efficiency
   useEffect(() => {
     const now = new Date();

@@ -61,11 +61,19 @@ export function CategoryCustomization() {
   const handleSaveQuestCategory = () => {
     if (!editForm.name.trim()) return;
 
-    setQuestCategories(prev => prev.map(cat => 
+    const updatedCategories = questCategories.map(cat => 
       cat.id === editingCategory 
         ? { ...cat, name: editForm.name, icon: editForm.icon || cat.icon }
         : cat
-    ));
+    );
+    
+    setQuestCategories(updatedCategories);
+    localStorage.setItem('hunter-quest-categories', JSON.stringify(updatedCategories));
+    
+    // Trigger a storage event for other components to listen to
+    window.dispatchEvent(new CustomEvent('categoriesUpdated', { 
+      detail: { questCategories: updatedCategories } 
+    }));
 
     setEditingCategory(null);
     setEditForm({ name: '', icon: '' });
@@ -82,11 +90,24 @@ export function CategoryCustomization() {
   const handleSaveArchiveCategory = () => {
     if (!archiveEditForm.name.trim()) return;
 
-    setArchiveCategories(prev => prev.map(cat => 
+    const updatedArchiveCategories = archiveCategories.map(cat => 
       cat.id === editingArchiveCategory 
-        ? { ...cat, name: archiveEditForm.name, icon: archiveEditForm.icon || cat.icon, description: archiveEditForm.description }
+        ? { 
+            ...cat, 
+            name: archiveEditForm.name, 
+            icon: archiveEditForm.icon || cat.icon,
+            description: archiveEditForm.description || cat.description
+          }
         : cat
-    ));
+    );
+    
+    setArchiveCategories(updatedArchiveCategories);
+    localStorage.setItem('hunter-archive-categories', JSON.stringify(updatedArchiveCategories));
+    
+    // Trigger a storage event for other components to listen to
+    window.dispatchEvent(new CustomEvent('categoriesUpdated', { 
+      detail: { archiveCategories: updatedArchiveCategories } 
+    }));
 
     setEditingArchiveCategory(null);
     setArchiveEditForm({ name: '', icon: '', description: '' });

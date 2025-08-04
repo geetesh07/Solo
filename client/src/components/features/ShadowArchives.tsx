@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   Search, 
   Plus, 
@@ -39,6 +39,29 @@ export function ShadowArchives() {
   const [editingNote, setEditingNote] = useState<string | null>(null);
   const [filterDropdownOpen, setFilterDropdownOpen] = useState(false);
   const [newTagInput, setNewTagInput] = useState('');
+  
+  // Archive categories - load from localStorage and listen for updates
+  const [archiveCategories, setArchiveCategories] = useState(() => {
+    const saved = localStorage.getItem('hunter-archive-categories');
+    return saved ? JSON.parse(saved) : [
+      { id: 'strategy', name: 'Battle Strategies', icon: '⚡', description: 'Combat tactics and planning' },
+      { id: 'reflection', name: 'Hunter Reflections', icon: '🧠', description: 'Personal thoughts and insights' },
+      { id: 'plan', name: 'Quest Plans', icon: '📋', description: 'Mission planning and preparation' },
+      { id: 'idea', name: 'Shadow Ideas', icon: '💡', description: 'Creative thoughts and concepts' }
+    ];
+  });
+
+  // Listen for category updates from Settings
+  useEffect(() => {
+    const handleCategoryUpdate = (event: CustomEvent) => {
+      if (event.detail.archiveCategories) {
+        setArchiveCategories(event.detail.archiveCategories);
+      }
+    };
+
+    window.addEventListener('categoriesUpdated', handleCategoryUpdate as EventListener);
+    return () => window.removeEventListener('categoriesUpdated', handleCategoryUpdate as EventListener);
+  }, []);
   
   const [newNote, setNewNote] = useState({
     title: '',
