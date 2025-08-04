@@ -541,8 +541,8 @@ function Dashboard() {
           onToggleMobileSidebar={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
         />
         
-        <div className={`h-[calc(100vh-4rem)] overflow-y-auto ${
-          currentView === 'dashboard' ? 'p-4 md:p-6' : 'p-0'
+        <div className={`h-[calc(100vh-4rem)] overflow-y-auto pb-16 md:pb-6 ${
+          currentView === 'dashboard' ? 'p-3 md:p-6' : 'p-0'
         }`}>
           <div className="fade-in">
             {renderCurrentView()}

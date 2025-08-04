@@ -232,33 +232,33 @@ export function WeeklyView({ goals = [] }: WeeklyViewProps) {
 
       {/* Week Navigation */}
       <div className="mystical-card p-4">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-3 md:mb-4">
           <button 
             onClick={() => navigateWeek('prev')}
-            className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+            className="p-1.5 md:p-2 hover:bg-gray-700 rounded-lg transition-colors"
           >
-            <ChevronLeft className="w-5 h-5 text-cyan-400" />
+            <ChevronLeft className="w-4 h-4 md:w-5 md:h-5 text-cyan-400" />
           </button>
           
           <div className="text-center">
-            <h3 className="text-lg font-bold text-white font-['Orbitron']">
+            <h3 className="text-base md:text-lg font-bold text-white font-['Orbitron']">
               {weekDates[0].toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
             </h3>
-            <p className="text-gray-400 text-sm">
+            <p className="text-gray-400 text-xs md:text-sm">
               {weekDates[0].toLocaleDateString()} - {weekDates[6].toLocaleDateString()}
             </p>
           </div>
           
           <button 
             onClick={() => navigateWeek('next')}
-            className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+            className="p-1.5 md:p-2 hover:bg-gray-700 rounded-lg transition-colors"
           >
-            <ChevronRight className="w-5 h-5 text-cyan-400" />
+            <ChevronRight className="w-4 h-4 md:w-5 md:h-5 text-cyan-400" />
           </button>
         </div>
 
         {/* Week Grid - Mobile Optimized */}
-        <div className="grid grid-cols-7 gap-1 sm:gap-2">
+        <div className="grid grid-cols-7 gap-0.5 md:gap-2">
           {weekDates.map((date, index) => {
             const isToday = date.toDateString() === today.toDateString();
             const dayEvents = getEventsForDate(date);
@@ -266,38 +266,38 @@ export function WeeklyView({ goals = [] }: WeeklyViewProps) {
             return (
               <div
                 key={date.toISOString()}
-                className={`p-2 rounded-lg min-h-[80px] sm:min-h-[100px] transition-all duration-200 ${
+                className={`p-1 md:p-2 rounded-lg min-h-[70px] md:min-h-[100px] transition-all duration-200 ${
                   isToday 
-                    ? 'bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border-2 border-cyan-500/50' 
+                    ? 'bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/50' 
                     : 'hover:bg-white/5 border border-gray-700/30'
                 }`}
               >
                 {/* Day Header */}
-                <div className="text-center mb-2">
-                  <div className="text-xs text-gray-400 font-semibold">
-                    {dayNames[index]}
+                <div className="text-center mb-1 md:mb-2">
+                  <div className="text-[10px] md:text-xs text-gray-400 font-semibold">
+                    {dayNames[index].substring(0, 3)}
                   </div>
-                  <div className={`text-sm font-bold ${isToday ? 'text-cyan-400' : 'text-white'}`}>
+                  <div className={`text-xs md:text-sm font-bold ${isToday ? 'text-cyan-400' : 'text-white'}`}>
                     {date.getDate()}
                   </div>
                 </div>
 
                 {/* Events */}
-                <div className="space-y-1">
+                <div className="space-y-0.5 md:space-y-1">
                   {dayEvents.slice(0, 2).map(event => (
                     <div
                       key={event.id}
-                      className={`text-xs px-1 py-1 rounded ${getEventTypeColor(event.type)} ${
+                      className={`text-[9px] md:text-xs px-1 py-0.5 md:py-1 rounded ${getEventTypeColor(event.type)} ${
                         event.completed ? 'opacity-60 line-through' : ''
                       } cursor-pointer`}
                       onClick={() => !event.id.startsWith('goal-') && handleToggleEventComplete(event.id)}
                       title={event.title}
                     >
-                      {event.title.length > 8 ? event.title.substring(0, 8) + '...' : event.title}
+                      {event.title.length > 6 ? event.title.substring(0, 6) + '...' : event.title}
                     </div>
                   ))}
                   {dayEvents.length > 2 && (
-                    <div className="text-xs text-gray-400 text-center">+{dayEvents.length - 2}</div>
+                    <div className="text-[8px] md:text-xs text-gray-400 text-center">+{dayEvents.length - 2}</div>
                   )}
                 </div>
               </div>

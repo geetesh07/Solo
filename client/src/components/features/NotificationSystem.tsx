@@ -64,10 +64,36 @@ export function NotificationSystem({ isOpen, onClose }: NotificationSystemProps)
       console.log('Device type:', isMobile ? 'Mobile' : 'Desktop');
       console.log('Notification permission:', Notification.permission);
       
-      // Try direct notification first for all devices
+      // For mobile devices, always use ServiceWorker approach
+      if (isMobile && 'serviceWorker' in navigator) {
+        try {
+          console.log('Mobile detected - using ServiceWorker approach...');
+          let registration = await navigator.serviceWorker.getRegistration();
+          if (!registration) {
+            console.log('No existing registration, creating new one...');
+            registration = await registerServiceWorker();
+          }
+          
+          if (registration && registration.showNotification) {
+            console.log('Showing notification via ServiceWorker (mobile optimized)');
+            await registration.showNotification(title, {
+              ...options,
+              requireInteraction: true, // Keep notification visible longer on mobile
+              badge: '/icon-192.png'
+            });
+            return true;
+          } else {
+            console.error('ServiceWorker registration failed or showNotification not available');
+          }
+        } catch (swError) {
+          console.error('ServiceWorker approach failed:', swError);
+        }
+      }
+      
+      // Fallback to direct notification for desktop
       if ('Notification' in window && Notification.permission === 'granted') {
         try {
-          console.log('Attempting direct notification...');
+          console.log('Using direct notification (desktop)...');
           const notification = new Notification(title, options);
           
           notification.onclick = () => {
@@ -87,25 +113,6 @@ export function NotificationSystem({ isOpen, onClose }: NotificationSystemProps)
           return true;
         } catch (directError) {
           console.error('Direct notification failed:', directError);
-          
-          // Only try ServiceWorker if direct method fails on mobile
-          if (isMobile && 'serviceWorker' in navigator) {
-            try {
-              console.log('Trying ServiceWorker method as fallback...');
-              let registration = await navigator.serviceWorker.getRegistration();
-              if (!registration) {
-                registration = await registerServiceWorker();
-              }
-              
-              if (registration && registration.showNotification) {
-                console.log('Showing notification via ServiceWorker fallback');
-                await registration.showNotification(title, options);
-                return true;
-              }
-            } catch (swError) {
-              console.error('ServiceWorker fallback also failed:', swError);
-            }
-          }
         }
       }
       
