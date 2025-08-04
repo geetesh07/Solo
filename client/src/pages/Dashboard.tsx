@@ -235,7 +235,7 @@ function Dashboard() {
               <p className="text-gray-300">Welcome back, {user?.displayName || 'Hunter'}</p>
             </div>
           </div>
-          <div className="flex space-x-5 text-center">
+          <div className={`flex space-x-5 text-center ${completedGoals === 0 && streak === 0 ? 'hidden md:flex' : 'flex'}`}>
             <div>
               <div className="text-xl font-bold text-green-400">{completedGoals}</div>
               <div className="text-xs text-gray-400">Completed</div>

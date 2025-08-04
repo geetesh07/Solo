@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Download, Smartphone, ExternalLink, CheckCircle } from 'lucide-react';
-import { showToast } from '@/components/ui/Toast';
+// import { showToast } from '@/components/ui/Toast';
 
 export function APKGenerator() {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -26,7 +26,7 @@ export function APKGenerator() {
     setGenerationStep(4);
     setIsGenerating(false);
 
-    showToast('APK generation complete! Check instructions below.', 'success');
+    console.log('APK generation complete! Check instructions below.');
   };
 
   const steps = [
@@ -109,7 +109,7 @@ export function APKGenerator() {
             <li>4. Enable notifications in app settings</li>
           </ol>
           <button
-            onClick={() => showToast('Install prompt should appear automatically in Chrome', 'info')}
+            onClick={() => console.log('Install prompt should appear automatically in Chrome')}
             className="text-blue-400 text-sm hover:text-blue-300 flex items-center space-x-1"
           >
             <ExternalLink className="w-3 h-3" />

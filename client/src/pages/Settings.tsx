@@ -4,6 +4,7 @@ import { Bell, Palette, User, Shield, RefreshCw, Download, Upload, Trash2, Setti
 import { NotificationSystem } from "../components/features/NotificationSystem";
 import { PhoneNotifications } from "../components/features/PhoneNotifications";
 import { APKGenerator } from "../components/features/APKGenerator";
+import { CategoryCustomization } from "../components/features/CategoryCustomization";
 import { showToast } from "@/components/ui/Toast";
 import { useConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -370,6 +371,9 @@ export function Settings() {
           {/* Settings Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
             <div className="space-y-6 sm:space-y-8">
+              {/* Category Customization */}
+              <CategoryCustomization />
+              
               {/* Hunter Profile Card */}
               <div className="mystical-card p-4 sm:p-6">
                 <div className="flex items-center space-x-3 mb-4">
