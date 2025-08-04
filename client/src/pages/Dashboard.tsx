@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { AppSidebar } from "../components/layout/AppSidebar";
 import { TopBar } from "../components/layout/TopBar";
@@ -11,7 +12,7 @@ import { MorningModal } from "@/components/modals/MorningModal";
 import { ShadowArchives } from "../components/features/ShadowArchives";
 import { OnboardingModal } from "@/components/modals/OnboardingModal";
 import { MotivationalGreeting } from "@/components/ui/MotivationalGreeting";
-import { StreakTracker } from "@/components/features/StreakTracker";
+import { StreakTracker } from "../components/features/StreakTracker";
 import { showToast } from "@/components/ui/Toast";
 import { PWAInstall } from "@/components/features/PWAInstall";
 
@@ -33,9 +34,18 @@ interface Category {
 
 function Dashboard() {
   const { user } = useAuth();
-  const [currentView, setCurrentView] = useState('dashboard');
+  const [location, setLocation] = useLocation();
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] = useState(false);
+  
+  // Extract current view from URL path
+  const getCurrentView = () => {
+    if (location === '/' || location === '/dashboard') return 'dashboard';
+    const view = location.replace('/', '');
+    return view || 'dashboard';
+  };
+  
+  const currentView = getCurrentView();
   const [isMorningModalOpen, setIsMorningModalOpen] = useState(false);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [showGreeting, setShowGreeting] = useState(false);
@@ -529,7 +539,8 @@ function Dashboard() {
         <AppSidebar
           currentView={currentView}
           onViewChange={(view) => {
-            setCurrentView(view);
+            const path = view === 'dashboard' ? '/' : `/${view}`;
+            setLocation(path);
             setIsMobileSidebarOpen(false);
           }}
           userLevel={level}
@@ -584,4 +595,5 @@ function Dashboard() {
   );
 }
 
+export { Dashboard };
 export default Dashboard;
