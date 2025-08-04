@@ -1,0 +1,32 @@
+hunter-quest-geeteshpatil.replit.app/:1 Unchecked runtime.lastError: The message port closed before a response was received.Understand this error
+index-CoimI0aY.js:2270 Service Worker registration failed: SecurityError: Failed to register a ServiceWorker for scope ('https://hunter-quest-geeteshpatil.replit.app/') with script ('https://hunter-quest-geeteshpatil.replit.app/sw.js'): The script has an unsupported MIME type ('text/html').
+init @ index-CoimI0aY.js:2270Understand this error
+index-CoimI0aY.js:2332 Service Worker not available, using fallback notifications
+(index):135 SW registration failed:  SecurityError: Failed to register a ServiceWorker for scope ('https://hunter-quest-geeteshpatil.replit.app/') with script ('https://hunter-quest-geeteshpatil.replit.app/sw.js'): The script has an unsupported MIME type ('text/html').
+hunter-quest-geeteshpatil.replit.app/:1 Error while trying to use the following icon from the Manifest: https://hunter-quest-geeteshpatil.replit.app/icons/icon-144x144.png (Download error or resource isn't a valid image)Understand this error
+index-CoimI0aY.js:2270 Service Worker registration failed: SecurityError: Failed to register a ServiceWorker for scope ('https://hunter-quest-geeteshpatil.replit.app/') with script ('https://hunter-quest-geeteshpatil.replit.app/sw.js'): The script has an unsupported MIME type ('text/html').
+u @ index-CoimI0aY.js:2270Understand this error
+index-CoimI0aY.js:2270 APK generation complete! Check instructions below.
+index-CoimI0aY.js:40 Error: Minified React error #130; visit https://reactjs.org/docs/error-decoder.html?invariant=130&args[]=undefined&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+    at gl (index-CoimI0aY.js:40:49311)
+    at v (index-CoimI0aY.js:38:7878)
+    at _ (index-CoimI0aY.js:38:9255)
+    at D (index-CoimI0aY.js:38:11331)
+    at et (index-CoimI0aY.js:40:1475)
+    at Kv (index-CoimI0aY.js:40:45668)
+    at qv (index-CoimI0aY.js:40:39727)
+    at s2 (index-CoimI0aY.js:40:39655)
+    at Ql (index-CoimI0aY.js:40:39508)
+    at Vd (index-CoimI0aY.js:40:35875)
+Pd @ index-CoimI0aY.js:40Understand this error
+index-CoimI0aY.js:40 Uncaught Error: Minified React error #130; visit https://reactjs.org/docs/error-decoder.html?invariant=130&args[]=undefined&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+    at gl (index-CoimI0aY.js:40:49311)
+    at v (index-CoimI0aY.js:38:7878)
+    at _ (index-CoimI0aY.js:38:9255)
+    at D (index-CoimI0aY.js:38:11331)
+    at et (index-CoimI0aY.js:40:1475)
+    at Kv (index-CoimI0aY.js:40:45668)
+    at qv (index-CoimI0aY.js:40:39727)
+    at s2 (index-CoimI0aY.js:40:39655)
+    at Ql (index-CoimI0aY.js:40:39508)
+    at Vd (index-CoimI0aY.js:40:35875)
