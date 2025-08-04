@@ -314,7 +314,7 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
           <div className="flex space-x-3">
             <button
               onClick={handleClose}
-              className="flex items-center space-x-2 px-4 py-2 border border-red-600 text-red-300 rounded-lg hover:bg-red-600/20 transition-colors"
+              className="flex items-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
               data-testid="button-cancel-tutorial"
             >
               <X className="w-4 h-4" />
@@ -325,8 +325,8 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
               disabled={currentStep === 0}
               className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
                 currentStep === 0
-                  ? 'text-gray-500 cursor-not-allowed'
-                  : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                  ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                  : 'bg-gray-700 hover:bg-gray-600 text-white'
               }`}
               data-testid="button-previous-tutorial"
             >
@@ -340,13 +340,14 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
               <button
                 key={index}
                 onClick={() => setCurrentStep(index)}
-                className={`w-3 h-3 rounded-full transition-all duration-200 ${
+                className={`w-3 h-3 rounded-full transition-all duration-200 hover:scale-125 ${
                   index === currentStep
-                    ? 'bg-cyan-400'
+                    ? 'bg-cyan-400 ring-2 ring-cyan-400/50'
                     : index < currentStep
-                    ? 'bg-blue-500'
-                    : 'bg-gray-600'
+                    ? 'bg-blue-500 hover:bg-blue-400'
+                    : 'bg-gray-600 hover:bg-gray-500'
                 }`}
+                data-testid={`button-step-${index}`}
               />
             ))}
           </div>
@@ -354,14 +355,16 @@ export function OnboardingModal({ isOpen, onClose }: OnboardingModalProps) {
           {currentStep === steps.length - 1 ? (
             <button
               onClick={handleClose}
-              className="power-button"
+              className="px-6 py-3 bg-gradient-to-r from-green-600 to-cyan-600 hover:from-green-700 hover:to-cyan-700 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-105"
+              data-testid="button-start-hunting"
             >
               <span>Start Hunting!</span>
             </button>
           ) : (
             <button
               onClick={nextStep}
-              className="flex items-center space-x-2 power-button"
+              className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold rounded-lg transition-all duration-200 transform hover:scale-105"
+              data-testid="button-next-tutorial"
             >
               <span>Next</span>
               <ChevronRight className="w-5 h-5" />
