@@ -6,13 +6,19 @@ import { useAuth } from "@/hooks/useAuth";
 export default function Login() {
   const { signIn } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSignIn = async () => {
     setIsLoading(true);
+    setError(null);
+    
     try {
+      console.log('Login: Attempting sign-in...');
       await signIn();
-    } catch (error) {
+      console.log('Login: Sign-in successful');
+    } catch (error: any) {
       console.error('Login error:', error);
+      setError(error.message || 'Sign-in failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -43,11 +49,18 @@ export default function Login() {
             </p>
           </div>
           
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-900/30 border border-red-500/30 rounded-lg p-3 mb-4">
+              <p className="text-red-400 text-sm text-center">{error}</p>
+            </div>
+          )}
+
           {/* Sign In Button */}
           <Button
             onClick={handleSignIn}
             disabled={isLoading}
-            className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white py-3 text-lg font-semibold shadow-lg shadow-cyan-500/25 hover:shadow-cyan-400/40 transition-all duration-300 hover:scale-105"
+            className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white py-3 text-lg font-semibold shadow-lg shadow-cyan-500/25 hover:shadow-cyan-400/40 transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
             data-testid="button-sign-in"
           >
             {isLoading ? (

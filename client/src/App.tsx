@@ -37,13 +37,21 @@ function ProtectedRoutes() {
     );
   }
 
-  // CRITICAL: Enforce authentication - no bypassing allowed
+  // CRITICAL: Enforce authentication - ABSOLUTELY NO bypassing allowed
   if (!user) {
+    console.log('ProtectedRoutes: No user, redirecting to login');
     return <Login />;
   }
 
-  // Double-check authentication before allowing access
+  // CRITICAL: Triple-check authentication before allowing access
   if (!user.uid || !user.email) {
+    console.log('ProtectedRoutes: Invalid user data, redirecting to login');
+    return <Login />;
+  }
+
+  // PRODUCTION SAFETY: Additional validation
+  if (typeof user.uid !== 'string' || user.uid.length < 10) {
+    console.log('ProtectedRoutes: Invalid user ID format, redirecting to login');
     return <Login />;
   }
 

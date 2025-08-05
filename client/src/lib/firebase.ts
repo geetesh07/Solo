@@ -67,10 +67,22 @@ const provider = new GoogleAuthProvider();
 
 export const signInWithGoogle = async () => {
   try {
+    console.log('Firebase: Attempting Google sign-in...');
     const result = await signInWithPopup(auth, provider);
+    console.log('Firebase: Sign-in successful:', result.user?.email);
     return result.user;
-  } catch (error) {
-    console.error("Error signing in with Google:", error);
+  } catch (error: any) {
+    console.error("Firebase: Sign-in error:", error);
+    
+    // Provide better error messages for production
+    if (error.code === 'auth/popup-blocked') {
+      throw new Error('Popup was blocked. Please allow popups for this site and try again.');
+    } else if (error.code === 'auth/popup-closed-by-user') {
+      throw new Error('Sign-in was cancelled. Please try again.');
+    } else if (error.code === 'auth/network-request-failed') {
+      throw new Error('Network error. Please check your connection and try again.');
+    }
+    
     throw error;
   }
 };
