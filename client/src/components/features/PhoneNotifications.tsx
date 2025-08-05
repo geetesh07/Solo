@@ -37,7 +37,7 @@ export function PhoneNotifications() {
 
   const requestPermission = async () => {
     if (!('Notification' in window)) {
-      showToast('Notifications not supported on this device', 'error');
+      showToast({ title: 'Notifications not supported on this device', type: 'error' });
       return;
     }
 
@@ -46,66 +46,87 @@ export function PhoneNotifications() {
       setPermission(permission);
       
       if (permission === 'granted') {
-        showToast('Notifications enabled successfully!', 'success');
+        showToast({ title: 'Notifications enabled successfully!', type: 'success' });
         setupNotificationScheduler();
       } else {
-        showToast('Notification permission denied', 'error');
+        showToast({ title: 'Notification permission denied', type: 'error' });
       }
     } catch (error) {
-      showToast('Failed to request notification permission', 'error');
+      showToast({ title: 'Failed to request notification permission', type: 'error' });
     }
   };
 
   const setupNotificationScheduler = () => {
-    if (permission !== 'granted') return;
+    if (typeof window === 'undefined' || permission !== 'granted') return;
 
-    // Clear existing intervals
-    const intervals = (window as any).hunterIntervals || [];
-    intervals.forEach((id: number) => clearInterval(id));
-    (window as any).hunterIntervals = [];
-
-    // Set up new intervals for each enabled reminder
-    reminderTimes.forEach(reminder => {
-      if (!reminder.enabled) return;
-
-      const [hours, minutes] = reminder.time.split(':').map(Number);
-      
-      const scheduleNotification = () => {
-        const now = new Date();
-        const scheduledTime = new Date();
-        scheduledTime.setHours(hours, minutes, 0, 0);
-
-        // If the time has passed today, schedule for tomorrow
-        if (scheduledTime <= now) {
-          scheduledTime.setDate(scheduledTime.getDate() + 1);
+    try {
+      // Clear existing intervals
+      const intervals = (window as any).hunterIntervals || [];
+      intervals.forEach((id: number) => {
+        if (typeof id === 'number') {
+          clearTimeout(id);
         }
+      });
+      (window as any).hunterIntervals = [];
 
-        const timeUntilNotification = scheduledTime.getTime() - now.getTime();
+      // Set up new intervals for each enabled reminder
+      reminderTimes.forEach(reminder => {
+        if (!reminder?.enabled || !reminder?.time || !reminder?.label) return;
 
-        const timeoutId = setTimeout(() => {
-          showNotification(reminder.label);
-          // Schedule next day
+        try {
+          const [hours, minutes] = reminder.time.split(':').map(Number);
+          
+          if (isNaN(hours) || isNaN(minutes)) {
+            console.warn('Invalid time format:', reminder.time);
+            return;
+          }
+          
+          const scheduleNotification = () => {
+            const now = new Date();
+            const scheduledTime = new Date();
+            scheduledTime.setHours(hours, minutes, 0, 0);
+
+            // If the time has passed today, schedule for tomorrow
+            if (scheduledTime <= now) {
+              scheduledTime.setDate(scheduledTime.getDate() + 1);
+            }
+
+            const timeUntilNotification = scheduledTime.getTime() - now.getTime();
+
+            const timeoutId = setTimeout(() => {
+              showNotification(reminder.label);
+              // Schedule next day
+              scheduleNotification();
+            }, timeUntilNotification);
+
+            if (typeof window !== 'undefined') {
+              (window as any).hunterIntervals = (window as any).hunterIntervals || [];
+              (window as any).hunterIntervals.push(timeoutId);
+            }
+          };
+
           scheduleNotification();
-        }, timeUntilNotification);
-
-        (window as any).hunterIntervals = (window as any).hunterIntervals || [];
-        (window as any).hunterIntervals.push(timeoutId);
-      };
-
-      scheduleNotification();
-    });
+        } catch (error) {
+          console.error('Error setting up notification for reminder:', reminder, error);
+        }
+      });
+    } catch (error) {
+      console.error('Error in setupNotificationScheduler:', error);
+    }
   };
 
   const showNotification = (message: string) => {
-    if (permission !== 'granted') return;
+    if (typeof window === 'undefined' || permission !== 'granted' || !message) return;
 
     try {
-      new Notification('🎯 Solo Hunter', {
-        body: message,
-        icon: '/icon-192x192.png',
-        tag: 'hunter-reminder',
-        requireInteraction: false
-      });
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('🎯 Solo Hunter', {
+          body: message,
+          icon: '/icon-192x192.png',
+          tag: 'hunter-reminder',
+          requireInteraction: false
+        });
+      }
     } catch (error) {
       console.error('Failed to show notification:', error);
     }
@@ -113,7 +134,7 @@ export function PhoneNotifications() {
 
   const addReminderTime = () => {
     if (!newTime || !newLabel.trim()) {
-      showToast('Please enter both time and label', 'error');
+      showToast({ title: 'Please enter both time and label', type: 'error' });
       return;
     }
 
@@ -128,7 +149,7 @@ export function PhoneNotifications() {
     setNewTime('');
     setNewLabel('');
     setIsAddingNew(false);
-    showToast('Reminder added successfully!', 'success');
+    showToast({ title: 'Reminder added successfully!', type: 'success' });
   };
 
   const toggleReminder = (id: string) => {
@@ -139,12 +160,12 @@ export function PhoneNotifications() {
 
   const deleteReminder = (id: string) => {
     setReminderTimes(prev => prev.filter(reminder => reminder.id !== id));
-    showToast('Reminder deleted', 'success');
+    showToast({ title: 'Reminder deleted', type: 'success' });
   };
 
   const testNotification = () => {
     if (permission !== 'granted') {
-      showToast('Please enable notifications first', 'error');
+      showToast({ title: 'Please enable notifications first', type: 'error' });
       return;
     }
     showNotification('Test notification - everything is working!');

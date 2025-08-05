@@ -1,0 +1,37 @@
+Service Worker: Script loaded successfully
+sw.js:255 Service Worker: Message received Object
+index-sE9C_QSa.js:2260 Deployed environment detected - enabling Service Worker
+hunter-quest-geeteshpatil.replit.app/:1 Unchecked runtime.lastError: The message port closed before a response was received.Understand this error
+index-sE9C_QSa.js:2260 Service Worker registered: ServiceWorkerRegistration
+index-sE9C_QSa.js:2322 Service Worker initialized successfully
+index-sE9C_QSa.js:2322 Notifications enabled
+index-sE9C_QSa.js:2260 Background sync registered
+index-sE9C_QSa.js:2260 Push notification registration failed: AbortError: Registration failed - missing applicationServerKey, and gcm_sender_id not found in manifest
+subscribeToPushNotifications @ index-sE9C_QSa.js:2260Understand this error
+sw.js:171 Service Worker: Background sync triggered
+sw.js:255 Service Worker: Message received Object
+VM13:21 SW registered:  ServiceWorkerRegistration
+sw.js:255 Service Worker: Message received Object
+index-sE9C_QSa.js:40 Error: Minified React error #130; visit https://reactjs.org/docs/error-decoder.html?invariant=130&args[]=undefined&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+    at gl (index-sE9C_QSa.js:40:49311)
+    at v (index-sE9C_QSa.js:38:7878)
+    at j (index-sE9C_QSa.js:38:9255)
+    at O (index-sE9C_QSa.js:38:11331)
+    at et (index-sE9C_QSa.js:40:1475)
+    at Gv (index-sE9C_QSa.js:40:45668)
+    at Wv (index-sE9C_QSa.js:40:39727)
+    at sN (index-sE9C_QSa.js:40:39655)
+    at Gl (index-sE9C_QSa.js:40:39508)
+    at zd (index-sE9C_QSa.js:40:35875)
+Td @ index-sE9C_QSa.js:40Understand this error
+index-sE9C_QSa.js:38 Uncaught Error: Minified React error #130; visit https://reactjs.org/docs/error-decoder.html?invariant=130&args[]=undefined&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+    at gl (index-sE9C_QSa.js:40:49311)
+    at v (index-sE9C_QSa.js:38:7878)
+    at j (index-sE9C_QSa.js:38:9255)
+    at O (index-sE9C_QSa.js:38:11331)
+    at et (index-sE9C_QSa.js:40:1475)
+    at Gv (index-sE9C_QSa.js:40:45668)
+    at Wv (index-sE9C_QSa.js:40:39727)
+    at sN (index-sE9C_QSa.js:40:39655)
+    at Gl (index-sE9C_QSa.js:40:39508)
+    at zd (index-sE9C_QSa.js:40:35875)Understand this error

@@ -23,14 +23,16 @@ console.log('Firebase Config Debug:', {
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'NOT_SET'
 });
 
-// Connect to Firestore emulator in development only if no real Firebase is configured
-if (import.meta.env.DEV && !import.meta.env.VITE_FIREBASE_PROJECT_ID) {
+// Only use emulator if explicitly no Firebase project is configured
+if (import.meta.env.DEV && (!import.meta.env.VITE_FIREBASE_PROJECT_ID || import.meta.env.VITE_FIREBASE_PROJECT_ID === 'demo-project')) {
   try {
     connectFirestoreEmulator(db, 'localhost', 8080);
     console.log('Using Firestore emulator - authentication will be mocked');
   } catch (error) {
-    console.log('Firestore emulator already connected');
+    console.log('Firestore emulator connection failed:', error);
   }
+} else {
+  console.log('Using real Firebase project:', import.meta.env.VITE_FIREBASE_PROJECT_ID);
 }
 
 const provider = new GoogleAuthProvider();
