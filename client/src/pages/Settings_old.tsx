@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Save, User, Palette, Bell, Shield, Trash2 } from "lucide-react";
-import { showToast } from "@/components/ui/Toast";
+import { showToast } from "@/components/ui/toast";
 import { useConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 export function Settings() {

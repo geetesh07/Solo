@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import * as React from "react";
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Plus, Grid3X3, CalendarDays } from "lucide-react";
-import { showToast } from "@/components/ui/Toast";
+import { showToast } from "@/components/ui/toast";
 import { useConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { WeeklyView } from "./WeeklyView";

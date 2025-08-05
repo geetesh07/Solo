@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Bell, BellOff, Clock, Plus, Trash2, Check, X } from 'lucide-react';
-import { showToast } from '@/components/ui/Toast';
+import { showToast } from '@/components/ui/toast';
 
 interface ReminderTime {
   id: string;

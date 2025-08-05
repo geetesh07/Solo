@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Bell, Settings, X, Check } from "lucide-react";
-import { showToast } from "@/components/ui/Toast";
+import { showToast } from "@/components/ui/toast";
 
 interface NotificationSystemProps {
   isOpen: boolean;

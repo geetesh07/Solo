@@ -13,7 +13,7 @@ import { ShadowArchives } from "../components/features/ShadowArchives";
 import { OnboardingModal } from "@/components/modals/OnboardingModal";
 import { MotivationalGreeting } from "@/components/ui/MotivationalGreeting";
 import { StreakTracker } from "../components/features/StreakTracker";
-import { showToast } from "@/components/ui/Toast";
+import { showToast } from "@/components/ui/toast";
 import { PWAInstall } from "@/components/features/PWAInstall";
 import { serviceWorkerManager, HunterNotifications } from "@/lib/serviceWorker";
 

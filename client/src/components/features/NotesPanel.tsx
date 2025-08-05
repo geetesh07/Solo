@@ -1,7 +1,7 @@
 import { useState } from "react";
 import * as React from "react";
 import { Search, Plus, Tag, Calendar, Edit3, Trash2, Filter, Star } from "lucide-react";
-import { showToast } from "@/components/ui/Toast";
+import { showToast } from "@/components/ui/toast";
 import { useConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Download, Smartphone, ExternalLink, CheckCircle } from 'lucide-react';
-// import { showToast } from '@/components/ui/Toast';
+// import { showToast } from '@/components/ui/toast';
 
 export function APKGenerator() {
   const [isGenerating, setIsGenerating] = useState(false);

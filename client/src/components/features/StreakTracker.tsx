@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Flame, Trophy, Star, Target, Calendar, Zap, Crown, Shield, Sword } from "lucide-react";
-import { showToast } from "@/components/ui/Toast";
+import { showToast } from "@/components/ui/toast";
 
 interface StreakData {
   currentStreak: number;
