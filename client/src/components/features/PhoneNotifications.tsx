@@ -134,52 +134,22 @@ export function PhoneNotifications() {
 
   const addReminderTime = () => {
     if (!newTime || !newLabel.trim()) {
-      showToast({ 
-        title: 'Missing Information', 
-        message: 'Please enter both time and label for the reminder',
-        type: 'warning' 
-      });
+      showToast({ title: 'Please enter both time and label', type: 'error' });
       return;
     }
 
-    try {
-      // Validate time format
-      const [hours, minutes] = newTime.split(':').map(Number);
-      if (isNaN(hours) || isNaN(minutes) || hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
-        showToast({ 
-          title: 'Invalid Time', 
-          message: 'Please enter a valid time in HH:MM format',
-          type: 'error' 
-        });
-        return;
-      }
+    const newReminder: ReminderTime = {
+      id: Date.now().toString(),
+      time: newTime,
+      label: newLabel,
+      enabled: true
+    };
 
-      const newReminder: ReminderTime = {
-        id: Date.now().toString(),
-        time: newTime,
-        label: newLabel.trim(),
-        enabled: true
-      };
-
-      console.log('Adding new reminder:', newReminder);
-      setReminderTimes(prev => [...prev, newReminder]);
-      setNewTime('');
-      setNewLabel('');
-      setIsAddingNew(false);
-      
-      showToast({ 
-        title: 'Reminder Added!', 
-        message: `"${newReminder.label}" scheduled for ${newReminder.time}`,
-        type: 'success' 
-      });
-    } catch (error) {
-      console.error('Error adding reminder:', error);
-      showToast({ 
-        title: 'Failed to Add Reminder', 
-        message: 'Please try again',
-        type: 'error' 
-      });
-    }
+    setReminderTimes(prev => [...prev, newReminder]);
+    setNewTime('');
+    setNewLabel('');
+    setIsAddingNew(false);
+    showToast({ title: 'Reminder added successfully!', type: 'success' });
   };
 
   const toggleReminder = (id: string) => {
@@ -193,57 +163,12 @@ export function PhoneNotifications() {
     showToast({ title: 'Reminder deleted', type: 'success' });
   };
 
-  const testNotification = async () => {
-    console.log('Test notification clicked, permission:', permission);
-    
-    if (!('Notification' in window)) {
-      showToast({ 
-        title: 'Not Supported', 
-        message: 'Notifications are not supported on this device',
-        type: 'error' 
-      });
-      return;
-    }
-
+  const testNotification = () => {
     if (permission !== 'granted') {
-      showToast({ 
-        title: 'Permission Required', 
-        message: 'Please enable notifications first',
-        type: 'warning' 
-      });
+      showToast({ title: 'Please enable notifications first', type: 'error' });
       return;
     }
-
-    try {
-      // Show browser notification
-      const notification = new Notification('🎯 Solo Hunter - Test Alert', {
-        body: 'Notification system is working perfectly! You will receive reminders at your scheduled times.',
-        icon: '/icon-192x192.png',
-        tag: 'hunter-test',
-        requireInteraction: false,
-        silent: false
-      });
-
-      // Auto close after 5 seconds
-      setTimeout(() => {
-        notification.close();
-      }, 5000);
-
-      showToast({ 
-        title: 'Test Notification Sent!', 
-        message: 'Check your browser or device notifications',
-        type: 'success' 
-      });
-      
-      console.log('Test notification sent successfully');
-    } catch (error) {
-      console.error('Notification error:', error);
-      showToast({ 
-        title: 'Notification Failed', 
-        message: `Error: ${error}`,
-        type: 'error' 
-      });
-    }
+    showNotification('Test notification - everything is working!');
   };
 
   return (
@@ -302,68 +227,43 @@ export function PhoneNotifications() {
 
         {/* Add New Reminder */}
         {isAddingNew && (
-          <div className="p-4 bg-gray-800/50 rounded-lg border border-cyan-500/30">
-            <h4 className="text-white font-medium mb-3">Add New Reminder</h4>
-            <div className="space-y-3">
-              <div>
-                <label className="block text-gray-300 text-sm mb-1">Time</label>
-                <input
-                  type="time"
-                  value={newTime}
-                  onChange={(e) => {
-                    console.log('Time input changed:', e.target.value);
-                    setNewTime(e.target.value);
-                  }}
-                  className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
-                  data-testid="input-reminder-time"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-gray-300 text-sm mb-1">Label</label>
-                <input
-                  type="text"
-                  value={newLabel}
-                  onChange={(e) => {
-                    console.log('Label input changed:', e.target.value);
-                    setNewLabel(e.target.value);
-                  }}
-                  placeholder="e.g., Morning Quest Check"
-                  className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 placeholder-gray-400"
-                  data-testid="input-reminder-label"
-                  required
-                />
-              </div>
-              <div className="flex space-x-2 pt-2">
-                <button
-                  onClick={() => {
-                    console.log('Save reminder clicked with:', { newTime, newLabel });
-                    addReminderTime();
-                  }}
-                  disabled={!newTime || !newLabel.trim()}
-                  className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                    newTime && newLabel.trim()
-                      ? 'bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white'
-                      : 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                  }`}
-                  data-testid="button-save-reminder"
-                >
-                  <Check className="w-4 h-4 inline mr-2" />
-                  Save Reminder
-                </button>
-                <button
-                  onClick={() => {
-                    console.log('Cancel reminder clicked');
-                    setIsAddingNew(false);
-                    setNewTime('');
-                    setNewLabel('');
-                  }}
-                  className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm rounded-lg transition-colors"
-                  data-testid="button-cancel-reminder"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
+          <div className="p-3 bg-gray-800/50 rounded-lg border border-gray-700/50 space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <input
+                type="time"
+                value={newTime}
+                onChange={(e) => setNewTime(e.target.value)}
+                className="bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm focus:border-blue-400 focus:outline-none"
+                data-testid="input-reminder-time"
+              />
+              <input
+                type="text"
+                value={newLabel}
+                onChange={(e) => setNewLabel(e.target.value)}
+                placeholder="Reminder label"
+                className="bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white text-sm placeholder-gray-400 focus:border-blue-400 focus:outline-none"
+                data-testid="input-reminder-label"
+              />
+            </div>
+            <div className="flex space-x-2">
+              <button
+                onClick={addReminderTime}
+                className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-xs rounded transition-colors"
+                data-testid="button-save-reminder"
+              >
+                <Check className="w-3 h-3" />
+              </button>
+              <button
+                onClick={() => {
+                  setIsAddingNew(false);
+                  setNewTime('');
+                  setNewLabel('');
+                }}
+                className="px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white text-xs rounded transition-colors"
+                data-testid="button-cancel-reminder"
+              >
+                <X className="w-3 h-3" />
+              </button>
             </div>
           </div>
         )}

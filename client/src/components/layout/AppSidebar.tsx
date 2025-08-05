@@ -2,9 +2,7 @@ import { Home, Calendar, BarChart3, Settings, User, BookOpen, Flame } from "luci
 
 interface AppSidebarProps {
   currentView: string;
-  onViewChange?: (view: string) => void;
-  collapsed?: boolean;
-  onToggleCollapse?: () => void;
+  onViewChange: (view: string) => void;
   userLevel?: number;
   currentXP?: number;
   maxXP?: number;
@@ -15,8 +13,6 @@ interface AppSidebarProps {
 export function AppSidebar({ 
   currentView, 
   onViewChange, 
-  collapsed = false,
-  onToggleCollapse,
   userLevel = 1, 
   currentXP = 0, 
   maxXP = 100,
@@ -87,7 +83,7 @@ export function AppSidebar({
             return (
               <button
                 key={item.id}
-                onClick={() => onViewChange?.(item.id)}
+                onClick={() => onViewChange(item.id)}
                 className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-all duration-200 font-medium ${
                   isActive
                     ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg'

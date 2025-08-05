@@ -1,6 +1,6 @@
 import React, { useState, useEffect, createContext, useContext, ReactNode } from 'react';
-import type { User } from 'firebase/auth';
-import { onAuthStateChange, signInWithGoogle, logOut, getRedirectResult, auth } from '@/lib/firebase';
+import { User } from 'firebase/auth';
+import { onAuthStateChange, signInWithGoogle, logOut } from '@/lib/firebase';
 
 interface AuthContextType {
   user: User | null;
@@ -17,50 +17,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     console.log('AuthProvider: Setting up auth state listener');
-    
-    // Handle redirect result for storage-partitioned environments
-    const handleRedirectResult = async () => {
-      try {
-        const result = await getRedirectResult(auth);
-        if (result) {
-          console.log('AuthProvider: Redirect sign-in successful:', result.user?.email);
-          setUser(result.user);
-        }
-      } catch (error) {
-        console.error('AuthProvider: Redirect result error:', error);
-      }
-    };
-    
-    // Check for redirect result on page load
-    handleRedirectResult();
-    
-    // Add timeout to prevent infinite loading in production
-    const loadingTimeout = setTimeout(() => {
-      console.log('AuthProvider: Timeout reached, stopping loading state');
-      setLoading(false);
-    }, 8000); // 8 second timeout
-    
-    let isUnmounted = false;
-    
-    const unsubscribe = onAuthStateChange(async (user: User | null) => {
-      if (isUnmounted) return;
-      
+    const unsubscribe = onAuthStateChange(async (user) => {
       console.log('AuthProvider: Auth state changed', { user: user ? user.email : 'null' });
-      clearTimeout(loadingTimeout); // Clear timeout when auth state resolves
       setUser(user);
       
-      if (user && !isUnmounted) {
+      if (user) {
+        // Set user in data manager for proper data isolation
+        const { userDataManager } = await import('@/lib/userDataManager');
+        userDataManager.setUser(user);
+        
+        // Check if user profile exists, create if not
         try {
-          // Set user in data manager for proper data isolation
-          const { userDataManager } = await import('@/lib/userDataManager');
-          userDataManager.setUser(user);
-          
-          // Check if user profile exists, create if not
           const profile = await userDataManager.getUserProfile();
-          if (!profile && !isUnmounted) {
+          if (!profile) {
             console.log('Creating new user profile for:', user.email);
             await userDataManager.createUserProfile(user);
-          } else if (!isUnmounted) {
+          } else {
             // Update last login date
             await userDataManager.updateUserProfile({
               lastLoginDate: new Date().toISOString()
@@ -68,20 +40,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
         } catch (error) {
           console.error('Error managing user profile:', error);
-          // Don't let profile errors block the app
         }
       }
       
-      if (!isUnmounted) {
-        setLoading(false);
-      }
+      setLoading(false);
     });
 
-    return () => {
-      isUnmounted = true;
-      clearTimeout(loadingTimeout);
-      unsubscribe();
-    };
+    return () => unsubscribe();
   }, []);
 
   const signIn = async () => {
