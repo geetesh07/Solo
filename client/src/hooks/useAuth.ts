@@ -26,7 +26,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const { userDataManager } = await import('@/lib/userDataManager');
         userDataManager.setUser(user);
         
-        // Check if user profile exists, create if not
+        // Sync user with backend database
+        try {
+          const response = await fetch('/api/auth/user', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-firebase-uid': user.uid
+            },
+            body: JSON.stringify({
+              firebaseUid: user.uid,
+              email: user.email,
+              displayName: user.displayName
+            })
+          });
+          
+          if (response.ok) {
+            const dbUser = await response.json();
+            console.log('User synced with database:', dbUser.email);
+          }
+        } catch (error) {
+          console.error('Error syncing user with database:', error);
+        }
+        
+        // Check if user profile exists in Firestore, create if not
         try {
           const profile = await userDataManager.getUserProfile();
           if (!profile) {
