@@ -207,7 +207,7 @@ class UserDataManager {
       );
       
       const querySnapshot = await getDocs(q);
-      return querySnapshot.docs.map((doc) => ({
+      return querySnapshot.docs.map((doc: any) => ({
         id: doc.id,
         ...doc.data()
       }) as Goal);
@@ -265,7 +265,7 @@ class UserDataManager {
     );
     
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map((doc) => ({
+    return querySnapshot.docs.map((doc: any) => ({
       id: doc.id,
       ...doc.data()
     }) as Category);
@@ -306,7 +306,7 @@ class UserDataManager {
     );
     
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map((doc) => ({
+    return querySnapshot.docs.map((doc: any) => ({
       id: doc.id,
       ...doc.data()
     }) as Note);
@@ -402,7 +402,7 @@ class UserDataManager {
     );
 
     return onSnapshot(q, (querySnapshot: QuerySnapshot<DocumentData>) => {
-      const goals = querySnapshot.docs.map((doc) => ({
+      const goals = querySnapshot.docs.map((doc: any) => ({
         id: doc.id,
         ...doc.data()
       }) as Goal);
