@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, User } from "firebase/auth";
-import { getFirestore, enableNetwork, disableNetwork, terminate, clearIndexedDbPersistence } from "firebase/firestore";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, type User } from "firebase/auth";
+import { getFirestore, enableNetwork, disableNetwork, terminate, clearIndexedDbPersistence, type Firestore } from "firebase/firestore";
 
 // Validate required Firebase configuration
 if (!import.meta.env.VITE_FIREBASE_API_KEY || !import.meta.env.VITE_FIREBASE_PROJECT_ID || !import.meta.env.VITE_FIREBASE_APP_ID) {
@@ -25,7 +25,7 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 
 // Enhanced Firestore initialization with robust error recovery
-let firestoreInstance: any = null;
+let firestoreInstance: Firestore | null = null;
 let isFirestoreInitialized = false;
 let connectionRetryCount = 0;
 const MAX_RETRY_ATTEMPTS = 3;
@@ -55,7 +55,7 @@ export const getFirestoreInstance = async () => {
 };
 
 // Legacy export for compatibility
-export let db: any;
+export let db: Firestore | null = null;
 
 // Initialize immediately but handle errors gracefully
 (async () => {
