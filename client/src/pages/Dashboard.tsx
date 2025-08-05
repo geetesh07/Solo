@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserProfile } from "@/hooks/useUserData";
 import { useUserGoals } from "@/hooks/useUserData";
+import { AppSidebar } from "../components/layout/AppSidebar";
 import { TopBar } from "../components/layout/TopBar";
 import { Crown, Star, CheckCircle, Calendar, BarChart3, Target, Plus, X, Bell, Trash2, Check, Menu, Flame } from "lucide-react";
 import { AnalyticsDashboard } from "../components/analytics/AnalyticsDashboard";
@@ -29,6 +30,7 @@ function Dashboard() {
 
   const [location, setLocation] = useLocation();
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] = useState(false);
   
   // Extract current view from URL path
   const getCurrentView = () => {
@@ -38,9 +40,9 @@ function Dashboard() {
   };
   
   const currentView = getCurrentView();
+  const [isMorningModalOpen, setIsMorningModalOpen] = useState(false);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [showGreeting, setShowGreeting] = useState(false);
-  const [newGoalTitle, setNewGoalTitle] = useState('');
-  const [selectedPriority, setSelectedPriority] = useState<'medium' | 'high'>('medium');
 
   // Initialize service worker and show greeting on first visit of the day
   useEffect(() => {
@@ -71,33 +73,96 @@ function Dashboard() {
             }
           }
         });
+        
+        // Enable background sync
+        serviceWorkerManager.enableBackgroundSync();
+        
+        // Subscribe to push notifications
+        serviceWorkerManager.subscribeToPushNotifications();
+      } else {
+        console.log('Service Worker not available, using fallback notifications');
       }
     });
   }, [user.uid]);
 
-  // Calculate stats
-  const completedGoals = goals.filter(goal => goal.status === 'completed').length;
-  const totalGoals = goals.length;
-  const streakCount = profile?.streak || 0;
+  const [newGoal, setNewGoal] = useState({ 
+    title: '', 
+    categoryId: '', 
+    priority: 'medium' as 'low' | 'medium' | 'high', 
+    dueDate: new Date().toISOString().split('T')[0] // Default to today
+  });
+  const [isAddingGoal, setIsAddingGoal] = useState<string | null>(null);
 
-  const completeGoal = async (goalId: string) => {
+  // Calculate dynamic user stats from actual goals
+  const totalGoals = goals.length;
+  const completedGoals = goals.filter(g => g.status === 'completed').length;
+  const currentXP = profile?.xp || 0;
+  const level = profile?.level || 1;
+  const currentLevelXP = currentXP % 100;
+  const streak = profile?.streak || 0;
+  const rank = profile?.rank || "E-Rank";
+
+  // Firebase-based goal management functions
+  const handleAddGoal = async (categoryId: string) => {
+    if (!newGoal.title.trim()) return;
+    
     try {
-      await updateGoal(goalId, { 
-        status: 'completed',
-        completedAt: new Date().toISOString()
-      });
-      showToast({
-        type: 'success',
-        title: 'Quest Completed!',
-        message: `+${25} XP earned!`
+      await createGoal({
+        title: newGoal.title,
+        category: categoryId,
+        priority: newGoal.priority,
+        dueDate: newGoal.dueDate || undefined,
+        status: 'pending',
+        xpReward: 25
       });
       
-      // Send celebration notification
-      if ('serviceWorker' in navigator) {
-        HunterNotifications.questComplete('Quest completed successfully!');
+      setNewGoal({ 
+        title: '', 
+        categoryId: '', 
+        priority: 'medium', 
+        dueDate: new Date().toISOString().split('T')[0] 
+      });
+      setIsAddingGoal(null);
+      
+      showToast({
+        type: 'success',
+        title: 'Quest Added!',
+        message: `"${newGoal.title}" has been added to your quest list`
+      });
+    } catch (error) {
+      console.error('Error adding goal:', error);
+      showToast({
+        type: 'error',
+        title: 'Failed to Add Quest',
+        message: 'Please try again'
+      });
+    }
+  };
+
+  const handleToggleGoal = async (goalId: string) => {
+    try {
+      const goal = goals.find(g => g.id === goalId);
+      if (!goal) return;
+      
+      await updateGoal(goalId, {
+        status: goal.status === 'completed' ? 'pending' : 'completed',
+        completedAt: goal.status === 'completed' ? undefined : new Date().toISOString()
+      });
+      
+      if (goal.status !== 'completed') {
+        showToast({
+          type: 'success',
+          title: 'Quest Completed!',
+          message: `"${goal.title}" marked as complete. XP gained!`
+        });
       }
     } catch (error) {
-      console.error('Error completing goal:', error);
+      console.error('Error toggling goal:', error);
+      showToast({
+        type: 'error',
+        title: 'Update Failed',
+        message: 'Please try again'
+      });
     }
   };
 
@@ -106,7 +171,7 @@ function Dashboard() {
       await deleteGoal(goalId);
       showToast({
         type: 'success',
-        title: 'Quest Removed',
+        title: 'Quest Deleted',
         message: 'Quest has been removed from your list'
       });
     } catch (error) {
@@ -114,34 +179,6 @@ function Dashboard() {
       showToast({
         type: 'error',
         title: 'Delete Failed',
-        message: 'Please try again'
-      });
-    }
-  };
-
-  const handleCreateQuest = async (priority: 'medium' | 'high') => {
-    if (!newGoalTitle.trim()) return;
-    
-    try {
-      await createGoal({
-        title: newGoalTitle.trim(),
-        category: 'Main Mission',
-        priority: priority,
-        status: 'pending',
-        xpReward: priority === 'high' ? 50 : 25
-      });
-      
-      setNewGoalTitle('');
-      showToast({
-        type: 'success',
-        title: 'Quest Created!',
-        message: 'New quest added to your list'
-      });
-    } catch (error) {
-      console.error('Error creating goal:', error);
-      showToast({
-        type: 'error',
-        title: 'Creation Failed',
         message: 'Please try again'
       });
     }
@@ -159,229 +196,200 @@ function Dashboard() {
     );
   }
 
-  const renderMobileDashboard = () => (
-    <div className="min-h-screen bg-gradient-to-br from-blue-950 via-slate-900 to-blue-900 pb-20">
-      {/* Mobile Header */}
-      <div className="bg-gradient-to-r from-slate-900/95 to-blue-900/95 backdrop-blur-xl border-b border-blue-500/20 sticky top-0 z-40">
-        <div className="flex items-center justify-between p-4">
-          <div className="flex items-center space-x-3">
-            <button 
-              onClick={() => setIsMobileSidebarOpen(true)}
-              className="p-2 text-cyan-400 hover:bg-cyan-500/10 rounded-lg transition-colors"
-            >
-              <Menu className="w-6 h-6" />
-            </button>
+  const renderDashboard = () => (
+    <div className="space-y-5">
+      {/* Hunter Status Window */}
+      <div className="bg-gradient-to-br from-gray-900/90 to-gray-800/80 border border-cyan-500/20 rounded-xl p-5 shadow-2xl backdrop-blur-sm">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-4">
+            <div className="relative">
+              <div className="w-14 h-14 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                <Crown className="w-7 h-7 text-white" />
+              </div>
+              <div className="absolute -bottom-1 -right-1 bg-amber-500 text-black text-xs font-bold px-1.5 py-0.5 rounded-full">
+                {rank}
+              </div>
+            </div>
             <div>
-              <h1 className="text-lg font-bold text-cyan-400 font-['Orbitron']">Solo Hunter</h1>
-              <p className="text-xs text-gray-400">Tuesday, 05/08/2025</p>
+              <h1 className="text-xl font-bold text-white font-['Orbitron']">
+                <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+                  HUNTER LEVEL {level}
+                </span>
+              </h1>
+              <p className="text-gray-300">Welcome back, {user?.displayName || 'Hunter'}</p>
             </div>
           </div>
-          
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-sm">P</span>
+          <div className="flex space-x-5 text-center">
+            <div>
+              <div className="text-xl font-bold text-green-400">{completedGoals}</div>
+              <div className="text-xs text-gray-400">Completed</div>
             </div>
-            <button className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-white text-sm font-semibold transition-colors">
-              Sign Out
-            </button>
+            <div>
+              <div className="text-xl font-bold text-amber-400">{streak}</div>
+              <div className="text-xs text-gray-400">Streak</div>
+            </div>
+            <div>
+              <div className="text-xl font-bold text-blue-400">{totalGoals - completedGoals}</div>
+              <div className="text-xs text-gray-400">Active</div>
+            </div>
+          </div>
+        </div>
+
+        {/* XP Progress */}
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-300 font-semibold">EXPERIENCE POINTS</span>
+            <span className="text-cyan-400 font-bold">{currentLevelXP} / 100</span>
+          </div>
+          <div className="relative h-3 bg-gray-800 rounded-full overflow-hidden border border-gray-700">
+            <div 
+              className="h-full bg-gradient-to-r from-blue-500 via-cyan-400 to-amber-400 rounded-full transition-all duration-1000"
+              style={{ width: `${(currentLevelXP / 100) * 100}%` }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse" />
+          </div>
+          <div className="flex justify-between text-xs text-gray-500">
+            <span>Level {level}</span>
+            <span>Next: Level {level + 1}</span>
           </div>
         </div>
       </div>
+
+      {/* Goals Display */}
+      <div className="space-y-4">
+        <h2 className="text-xl font-bold text-white font-['Orbitron']">Active Quests</h2>
+        {totalGoals === 0 ? (
+          <div className="text-center py-8 text-gray-400">
+            <Target className="w-12 h-12 mx-auto mb-4 opacity-50" />
+            <p>No active quests. Create your first quest to begin your hunter journey!</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {goals.map((goal) => (
+              <div key={goal.id} className="bg-gray-800/50 border border-gray-700 rounded-lg p-4 flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <button
+                    onClick={() => handleToggleGoal(goal.id)}
+                    className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                      goal.status === 'completed'
+                        ? 'bg-green-500 border-green-500 text-white'
+                        : 'border-gray-400 hover:border-green-500'
+                    }`}
+                  >
+                    {goal.status === 'completed' && <Check className="w-4 h-4" />}
+                  </button>
+                  <div>
+                    <h3 className={`font-medium ${goal.status === 'completed' ? 'text-gray-400 line-through' : 'text-white'}`}>
+                      {goal.title}
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      {goal.category} • {goal.priority} priority
+                      {goal.dueDate && ` • Due: ${new Date(goal.dueDate).toLocaleDateString()}`}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => handleDeleteGoal(goal.id)}
+                  className="text-red-400 hover:text-red-300 transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Add Goal Section */}
+      <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4">
+        <div className="flex items-center space-x-3">
+          <input
+            type="text"
+            value={newGoal.title}
+            onChange={(e) => setNewGoal({ ...newGoal, title: e.target.value })}
+            placeholder="Enter new quest..."
+            className="flex-1 bg-gray-900 border border-gray-600 rounded px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-400"
+          />
+          <select
+            value={newGoal.priority}
+            onChange={(e) => setNewGoal({ ...newGoal, priority: e.target.value as 'low' | 'medium' | 'high' })}
+            className="bg-gray-900 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-cyan-400"
+          >
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+          </select>
+          <input
+            type="date"
+            value={newGoal.dueDate}
+            onChange={(e) => setNewGoal({ ...newGoal, dueDate: e.target.value })}
+            className="bg-gray-900 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-cyan-400"
+          />
+          <button
+            onClick={() => handleAddGoal('main-mission')}
+            className="bg-cyan-500 hover:bg-cyan-600 text-white px-4 py-2 rounded transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 flex">
+      {/* Desktop Sidebar */}
+      <div className={`hidden lg:block transition-all duration-300 ${isDesktopSidebarCollapsed ? 'w-16' : 'w-64'}`}>
+        <AppSidebar
+          currentView={currentView}
+          onViewChange={(view) => setLocation(view === 'dashboard' ? '/' : `/${view}`)}
+          collapsed={isDesktopSidebarCollapsed}
+          onToggleCollapse={() => setIsDesktopSidebarCollapsed(!isDesktopSidebarCollapsed)}
+          userLevel={profile?.level || 1}
+          currentXP={profile?.xp || 0}
+          maxXP={((profile?.level || 1) * 100)}
+          user={user}
+        />
+      </div>
+
+      {/* Mobile Sidebar Overlay */}
+      {isMobileSidebarOpen && (
+        <>
+          <div 
+            className="lg:hidden fixed inset-0 bg-black/50 z-40" 
+            onClick={() => setIsMobileSidebarOpen(false)}
+          />
+          <div className="lg:hidden fixed left-0 top-0 h-full w-64 z-50">
+            <AppSidebar
+              currentView={currentView}
+              onViewChange={(view) => {
+                setLocation(view === 'dashboard' ? '/' : `/${view}`);
+                setIsMobileSidebarOpen(false);
+              }}
+              userLevel={profile?.level || 1}
+              currentXP={profile?.xp || 0}
+              maxXP={((profile?.level || 1) * 100)}
+              user={user}
+            />
+          </div>
+        </>
+      )}
 
       {/* Main Content */}
-      <div className="px-4 py-6 space-y-6">
-        {/* Hunter Status Card */}
-        <div className="bg-gradient-to-br from-blue-900/90 to-blue-800/70 backdrop-blur-xl rounded-3xl p-6 border border-blue-500/30 shadow-2xl">
-          <div className="flex items-center space-x-4 mb-6">
-            <div className="relative">
-              <div className="w-16 h-16 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-2xl flex items-center justify-center shadow-lg">
-                <Crown className="w-8 h-8 text-white" />
-              </div>
-              <div className="absolute -bottom-2 -right-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full border-2 border-white">
-                {profile?.rank || 'E-Rank'}
-              </div>
-            </div>
-            <div className="flex-1">
-              <h1 className="text-2xl font-bold text-cyan-400 font-['Orbitron'] leading-tight">
-                HUNTER
-              </h1>
-              <h2 className="text-2xl font-bold text-cyan-400 font-['Orbitron'] leading-tight">
-                LEVEL {profile?.level || 1}
-              </h2>
-              <p className="text-gray-300 text-sm mt-1">Welcome back,</p>
-              <p className="text-white font-semibold">{user?.displayName || 'Patil Geetesh'}</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-6 mb-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-green-400">{completedGoals}</div>
-              <div className="text-sm text-gray-400">Completed</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-yellow-400">{streakCount}</div>
-              <div className="text-sm text-gray-400">Streak</div>
-            </div>
-          </div>
-
-          {/* XP Progress Bar */}
-          <div>
-            <div className="flex justify-between text-sm text-gray-300 mb-3">
-              <span className="font-['Orbitron'] text-cyan-400 font-semibold">EXPERIENCE POINTS</span>
-              <span className="text-cyan-400 font-bold">{profile?.xp || 0} / {((profile?.level || 1) * 100)}</span>
-            </div>
-            <div className="w-full bg-slate-800/60 rounded-full h-4 overflow-hidden border border-cyan-500/30">
-              <div 
-                className="h-full bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 transition-all duration-1000 shadow-lg"
-                style={{ width: `${Math.min(((profile?.xp || 0) % 100), 100)}%` }}
-              />
-            </div>
-            <div className="flex justify-between text-xs text-gray-400 mt-2">
-              <span>Level {profile?.level || 1}</span>
-              <span>Next: Level {(profile?.level || 1) + 1}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Active Quests Section */}
-        <div>
-          <h2 className="text-2xl font-bold text-white mb-6 font-['Orbitron']">Active Quests</h2>
-          
-          {goals.length === 0 ? (
-            <div className="text-center py-16">
-              <div className="w-32 h-32 mx-auto mb-8 rounded-full bg-gradient-to-r from-slate-700/50 to-slate-600/50 flex items-center justify-center border border-slate-600/30">
-                <Target className="w-16 h-16 text-slate-500" strokeWidth={1.5} />
-              </div>
-              <p className="text-slate-400 text-lg mb-8 px-4 leading-relaxed">
-                No active quests. Create your first quest to begin your hunter journey!
-              </p>
-              
-              {/* Quick Add Quest Form */}
-              <div className="bg-slate-900/60 backdrop-blur-xl rounded-3xl p-6 border border-slate-700/50 mx-2">
-                <div className="space-y-4">
-                  <input
-                    type="text"
-                    placeholder="Enter new quest..."
-                    value={newGoalTitle}
-                    onChange={(e) => setNewGoalTitle(e.target.value)}
-                    className="w-full bg-slate-800/80 border border-slate-600/50 rounded-2xl px-6 py-4 text-white placeholder-slate-400 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition-all text-lg"
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter' && newGoalTitle.trim()) {
-                        handleCreateQuest(selectedPriority);
-                      }
-                    }}
-                  />
-                  <div className="grid grid-cols-2 gap-3">
-                    <button 
-                      onClick={() => {
-                        setSelectedPriority('medium');
-                        if (newGoalTitle.trim()) handleCreateQuest('medium');
-                      }}
-                      className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white py-4 rounded-2xl font-bold text-lg transition-all hover:from-cyan-600 hover:to-blue-700 shadow-lg hover:shadow-cyan-500/25 active:scale-95"
-                    >
-                      Medium
-                    </button>
-                    <button 
-                      onClick={() => {
-                        setSelectedPriority('high');
-                        if (newGoalTitle.trim()) handleCreateQuest('high');
-                      }}
-                      className="bg-gradient-to-r from-orange-500 to-red-600 text-white py-4 rounded-2xl font-bold text-lg transition-all hover:from-orange-600 hover:to-red-700 shadow-lg hover:shadow-orange-500/25 active:scale-95"
-                    >
-                      High
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {goals.map((goal) => (
-                <div key={goal.id} className="bg-slate-900/60 backdrop-blur-xl rounded-2xl p-5 border border-slate-700/50">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h4 className="text-white font-semibold text-lg mb-2">{goal.title}</h4>
-                      {goal.description && (
-                        <p className="text-slate-400 text-sm mb-3">{goal.description}</p>
-                      )}
-                      <div className="flex items-center space-x-3 text-sm">
-                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                          goal.priority === 'high' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
-                          goal.priority === 'medium' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
-                          'bg-green-500/20 text-green-400 border border-green-500/30'
-                        }`}>
-                          {goal.priority.toUpperCase()}
-                        </span>
-                        <span className="text-cyan-400 font-semibold">+{goal.xpReward} XP</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2 ml-4">
-                      <button
-                        onClick={() => completeGoal(goal.id)}
-                        className="text-green-400 hover:text-green-300 transition-colors p-2 rounded-lg hover:bg-green-500/10"
-                        title="Complete Quest"
-                      >
-                        <Check className="w-6 h-6" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteGoal(goal.id)}
-                        className="text-red-400 hover:text-red-300 transition-colors p-2 rounded-lg hover:bg-red-500/10"
-                        title="Delete Quest"
-                      >
-                        <Trash2 className="w-6 h-6" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-              
-              {/* Add New Quest Button */}
-              <div className="bg-slate-900/60 backdrop-blur-xl rounded-2xl p-5 border border-slate-700/50">
-                <div className="space-y-4">
-                  <input
-                    type="text"
-                    placeholder="Enter new quest..."
-                    value={newGoalTitle}
-                    onChange={(e) => setNewGoalTitle(e.target.value)}
-                    className="w-full bg-slate-800/80 border border-slate-600/50 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition-all"
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter' && newGoalTitle.trim()) {
-                        handleCreateQuest(selectedPriority);
-                      }
-                    }}
-                  />
-                  <div className="grid grid-cols-2 gap-3">
-                    <button 
-                      onClick={() => {
-                        setSelectedPriority('medium');
-                        if (newGoalTitle.trim()) handleCreateQuest('medium');
-                      }}
-                      className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white py-3 rounded-xl font-semibold transition-all hover:from-cyan-600 hover:to-blue-700 shadow-lg active:scale-95"
-                    >
-                      Medium
-                    </button>
-                    <button 
-                      onClick={() => {
-                        setSelectedPriority('high');
-                        if (newGoalTitle.trim()) handleCreateQuest('high');
-                      }}
-                      className="bg-gradient-to-r from-orange-500 to-red-600 text-white py-3 rounded-xl font-semibold transition-all hover:from-orange-600 hover:to-red-700 shadow-lg active:scale-95"
-                    >
-                      High
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Mobile Navigation - Bottom */}
-      <div className="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-xl border-t border-blue-500/20 p-4 z-50">
-        <div className="flex justify-center">
-          <div className="w-1/3 h-1 bg-cyan-400 rounded-full"></div>
-        </div>
+      <div className="flex-1 flex flex-col min-w-0">
+        <TopBar 
+          onMenuClick={() => setIsMobileSidebarOpen(true)}
+          user={user}
+        />
+        
+        <main className="flex-1 p-4 lg:p-6 overflow-y-auto">
+          {currentView === 'dashboard' && renderDashboard()}
+          {currentView === 'analytics' && <AnalyticsDashboard />}
+          {currentView === 'calendar' && <CalendarView />}
+          {currentView === 'settings' && <Settings />}
+          {currentView === 'notes' && <ShadowArchives />}
+          {currentView === 'streaks' && <StreakTracker completedGoalsToday={completedGoals} totalGoalsToday={totalGoals} />}
+        </main>
       </div>
 
       {/* Modals */}
@@ -391,27 +399,16 @@ function Dashboard() {
           userName={user?.displayName || 'Hunter'}
         />
       )}
+      
+      {isMorningModalOpen && (
+        <MorningModal isOpen={isMorningModalOpen} onClose={() => setIsMorningModalOpen(false)} />
+      )}
+      
+      {isOnboardingOpen && (
+        <OnboardingModal isOpen={isOnboardingOpen} onClose={() => setIsOnboardingOpen(false)} />
+      )}
 
       <PWAInstall />
-    </div>
-  );
-
-  // For mobile, show the optimized mobile dashboard
-  if (currentView === 'dashboard') {
-    return renderMobileDashboard();
-  }
-
-  // For other views, show the regular layout with navigation
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900">
-      <TopBar onMenuClick={() => setIsMobileSidebarOpen(true)} user={user} />
-      <main className="p-4">
-        {currentView === 'analytics' && <AnalyticsDashboard />}
-        {currentView === 'calendar' && <CalendarView />}
-        {currentView === 'settings' && <Settings />}
-        {currentView === 'notes' && <ShadowArchives />}
-        {currentView === 'streaks' && <StreakTracker completedGoalsToday={completedGoals} totalGoalsToday={totalGoals} />}
-      </main>
     </div>
   );
 }

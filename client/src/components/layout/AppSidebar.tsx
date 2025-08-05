@@ -87,7 +87,7 @@ export function AppSidebar({
             return (
               <button
                 key={item.id}
-                onClick={() => onViewChange(item.id)}
+                onClick={() => onViewChange?.(item.id)}
                 className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-all duration-200 font-medium ${
                   isActive
                     ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg'
