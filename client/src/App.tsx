@@ -21,21 +21,25 @@ const queryClient = new QueryClient({
 function ProtectedRoutes() {
   const { user, loading } = useAuth();
 
-  // Show loading state while checking authentication
+  // CRITICAL: Show loading state while checking authentication
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <div className="text-cyan-400 font-['Orbitron'] text-xl">Awakening Hunter System...</div>
-          <div className="text-gray-400 text-sm mt-2">Please wait while we initialize your dashboard</div>
+          <div className="text-cyan-400 font-['Orbitron'] text-xl">Authenticating...</div>
         </div>
       </div>
     );
   }
 
-  // If no user, show login page
+  // CRITICAL: Enforce authentication - no bypassing allowed
   if (!user) {
+    return <Login />;
+  }
+
+  // Double-check authentication before allowing access
+  if (!user.uid || !user.email) {
     return <Login />;
   }
 

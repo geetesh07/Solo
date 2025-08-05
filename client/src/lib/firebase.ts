@@ -2,38 +2,24 @@ import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, User } from "firebase/auth";
 import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
 
+// Validate required Firebase configuration
+if (!import.meta.env.VITE_FIREBASE_API_KEY || !import.meta.env.VITE_FIREBASE_PROJECT_ID || !import.meta.env.VITE_FIREBASE_APP_ID) {
+  throw new Error('Firebase configuration incomplete. Missing required environment variables.');
+}
+
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "demo-api-key",
-  authDomain: `${import.meta.env.VITE_FIREBASE_PROJECT_ID || "demo-project"}.firebaseapp.com`,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "demo-project",
-  storageBucket: `${import.meta.env.VITE_FIREBASE_PROJECT_ID || "demo-project"}.firebasestorage.app`,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "demo-app-id",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.firebaseapp.com`,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.firebasestorage.app`,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 
-// Debug Firebase configuration
-console.log('Firebase Config Debug:', {
-  hasApiKey: !!import.meta.env.VITE_FIREBASE_API_KEY,
-  hasProjectId: !!import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  hasAppId: !!import.meta.env.VITE_FIREBASE_APP_ID,
-  isDev: import.meta.env.DEV,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'NOT_SET'
-});
-
-// Only use emulator if explicitly no Firebase project is configured
-if (import.meta.env.DEV && (!import.meta.env.VITE_FIREBASE_PROJECT_ID || import.meta.env.VITE_FIREBASE_PROJECT_ID === 'demo-project')) {
-  try {
-    connectFirestoreEmulator(db, 'localhost', 8080);
-    console.log('Using Firestore emulator - authentication will be mocked');
-  } catch (error) {
-    console.log('Firestore emulator connection failed:', error);
-  }
-} else {
-  console.log('Using real Firebase project:', import.meta.env.VITE_FIREBASE_PROJECT_ID);
-}
+console.log('Firebase initialized with project:', import.meta.env.VITE_FIREBASE_PROJECT_ID);
 
 const provider = new GoogleAuthProvider();
 
