@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, User } from "firebase/auth";
-import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
+import { getFirestore, connectFirestoreEmulator, enableNetwork, disableNetwork } from "firebase/firestore";
 
 // Validate required Firebase configuration
 if (!import.meta.env.VITE_FIREBASE_API_KEY || !import.meta.env.VITE_FIREBASE_PROJECT_ID || !import.meta.env.VITE_FIREBASE_APP_ID) {
@@ -18,6 +18,42 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+
+// Enable offline persistence and handle connection issues
+let isFirestoreEnabled = true;
+
+// Function to handle Firestore connection recovery
+export const ensureFirestoreConnection = async () => {
+  if (!isFirestoreEnabled) {
+    try {
+      await enableNetwork(db);
+      isFirestoreEnabled = true;
+      console.log('Firestore connection restored');
+    } catch (error) {
+      console.warn('Failed to restore Firestore connection:', error);
+    }
+  }
+};
+
+// Function to handle connection errors gracefully
+export const handleFirestoreError = async (error: any) => {
+  console.error('Firestore error:', error);
+  
+  if (error?.code === 'unavailable' || error?.message?.includes('400')) {
+    console.log('Attempting to restore Firestore connection...');
+    try {
+      await disableNetwork(db);
+      isFirestoreEnabled = false;
+      
+      // Wait a bit then re-enable
+      setTimeout(async () => {
+        await ensureFirestoreConnection();
+      }, 2000);
+    } catch (retryError) {
+      console.warn('Failed to recover Firestore connection:', retryError);
+    }
+  }
+};
 
 console.log('Firebase initialized with project:', import.meta.env.VITE_FIREBASE_PROJECT_ID);
 

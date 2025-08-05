@@ -16,7 +16,7 @@ import {
   DocumentData
 } from 'firebase/firestore';
 import { User } from 'firebase/auth';
-import { db } from './firebase';
+import { db, handleFirestoreError, ensureFirestoreConnection } from './firebase';
 
 // User Profile Interface
 export interface UserProfile {
@@ -101,78 +101,121 @@ class UserDataManager {
   async createUserProfile(user: User): Promise<void> {
     if (!user.uid) throw new Error('User ID required');
 
-    const userProfile: UserProfile = {
-      uid: user.uid,
-      email: user.email || '',
-      displayName: user.displayName || 'Hunter',
-      level: 1,
-      xp: 0,
-      rank: 'E-Rank',
-      streak: 0,
-      totalGoalsCompleted: 0,
-      lastLoginDate: new Date().toISOString(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
+    try {
+      await ensureFirestoreConnection();
+      
+      const userProfile: UserProfile = {
+        uid: user.uid,
+        email: user.email || '',
+        displayName: user.displayName || 'Hunter',
+        level: 1,
+        xp: 0,
+        rank: 'E-Rank',
+        streak: 0,
+        totalGoalsCompleted: 0,
+        lastLoginDate: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
 
-    await setDoc(doc(db, 'users', user.uid), userProfile);
-    
-    // Create default categories for new user
-    await this.createDefaultCategories(user.uid);
+      await setDoc(doc(db, 'users', user.uid), userProfile);
+      console.log('User profile created successfully:', user.uid);
+      
+      // Create default categories for new user
+      await this.createDefaultCategories(user.uid);
+    } catch (error) {
+      console.error('Error creating user profile:', error);
+      await handleFirestoreError(error);
+      throw error;
+    }
   }
 
   async getUserProfile(userId?: string): Promise<UserProfile | null> {
     const uid = userId || this.userId;
     if (!uid) throw new Error('User not authenticated');
 
-    const docRef = doc(db, 'users', uid);
-    const docSnap = await getDoc(docRef);
-    
-    if (docSnap.exists()) {
-      return docSnap.data() as UserProfile;
+    try {
+      await ensureFirestoreConnection();
+      
+      const docRef = doc(db, 'users', uid);
+      const docSnap = await getDoc(docRef);
+      
+      if (docSnap.exists()) {
+        return docSnap.data() as UserProfile;
+      }
+      return null;
+    } catch (error) {
+      console.error('Error getting user profile:', error);
+      await handleFirestoreError(error);
+      throw error;
     }
-    return null;
   }
 
   async updateUserProfile(updates: Partial<UserProfile>): Promise<void> {
     if (!this.userId) throw new Error('User not authenticated');
 
-    const userRef = doc(db, 'users', this.userId);
-    await updateDoc(userRef, {
-      ...updates,
-      updatedAt: new Date().toISOString()
-    });
+    try {
+      await ensureFirestoreConnection();
+      
+      const userRef = doc(db, 'users', this.userId);
+      await updateDoc(userRef, {
+        ...updates,
+        updatedAt: new Date().toISOString()
+      });
+      console.log('User profile updated successfully');
+    } catch (error) {
+      console.error('Error updating user profile:', error);
+      await handleFirestoreError(error);
+      throw error;
+    }
   }
 
   // Goals Management
   async createGoal(goalData: Omit<Goal, 'id' | 'userId' | 'createdAt' | 'updatedAt'>): Promise<string> {
     if (!this.userId) throw new Error('User not authenticated');
 
-    const goal: Omit<Goal, 'id'> = {
-      ...goalData,
-      userId: this.userId,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
+    try {
+      await ensureFirestoreConnection();
+      
+      const goal: Omit<Goal, 'id'> = {
+        ...goalData,
+        userId: this.userId,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
 
-    const docRef = await addDoc(collection(db, 'goals'), goal);
-    return docRef.id;
+      const docRef = await addDoc(collection(db, 'goals'), goal);
+      console.log('Goal created successfully:', docRef.id);
+      return docRef.id;
+    } catch (error) {
+      console.error('Error creating goal:', error);
+      await handleFirestoreError(error);
+      throw error;
+    }
   }
 
   async getUserGoals(): Promise<Goal[]> {
     if (!this.userId) throw new Error('User not authenticated');
 
-    const q = query(
-      collection(db, 'goals'),
-      where('userId', '==', this.userId),
-      orderBy('createdAt', 'desc')
-    );
-    
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data()
-    }) as Goal);
+    try {
+      await ensureFirestoreConnection();
+      
+      const q = query(
+        collection(db, 'goals'),
+        where('userId', '==', this.userId),
+        orderBy('createdAt', 'desc')
+      );
+      
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data()
+      }) as Goal);
+    } catch (error) {
+      console.error('Error getting user goals:', error);
+      await handleFirestoreError(error);
+      throw error;
+    }
   }
 
   async updateGoal(goalId: string, updates: Partial<Goal>): Promise<void> {
