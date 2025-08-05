@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, User } from "firebase/auth";
-import { getFirestore, connectFirestoreEmulator, enableNetwork, disableNetwork } from "firebase/firestore";
+import { getFirestore, enableNetwork, disableNetwork, terminate, clearIndexedDbPersistence } from "firebase/firestore";
 
 // Validate required Firebase configuration
 if (!import.meta.env.VITE_FIREBASE_API_KEY || !import.meta.env.VITE_FIREBASE_PROJECT_ID || !import.meta.env.VITE_FIREBASE_APP_ID) {
@@ -23,42 +23,127 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-export const db = getFirestore(app);
 
-// Enable offline persistence and handle connection issues
-let isFirestoreEnabled = true;
+// Enhanced Firestore initialization with robust error recovery
+let firestoreInstance: any = null;
+let isFirestoreInitialized = false;
+let connectionRetryCount = 0;
+const MAX_RETRY_ATTEMPTS = 3;
 
-// Function to handle Firestore connection recovery
-export const ensureFirestoreConnection = async () => {
-  if (!isFirestoreEnabled) {
-    try {
-      await enableNetwork(db);
-      isFirestoreEnabled = true;
-      console.log('Firestore connection restored');
-    } catch (error) {
-      console.warn('Failed to restore Firestore connection:', error);
+const initializeFirestore = async () => {
+  try {
+    if (!isFirestoreInitialized) {
+      console.log('Initializing Firestore with enhanced error handling...');
+      firestoreInstance = getFirestore(app);
+      isFirestoreInitialized = true;
+      connectionRetryCount = 0;
+      console.log('Firestore initialized successfully');
     }
+    return firestoreInstance;
+  } catch (error) {
+    console.error('Firestore initialization failed:', error);
+    throw error;
   }
 };
 
-// Function to handle connection errors gracefully
+// Get Firestore instance with lazy initialization
+export const getFirestoreInstance = async () => {
+  if (!firestoreInstance) {
+    await initializeFirestore();
+  }
+  return firestoreInstance;
+};
+
+// Legacy export for compatibility
+export let db: any;
+
+// Initialize immediately but handle errors gracefully
+(async () => {
+  try {
+    db = await getFirestoreInstance();
+  } catch (error) {
+    console.error('Failed to initialize Firestore on startup:', error);
+  }
+})();
+
+// Enhanced connection recovery with exponential backoff
+export const ensureFirestoreConnection = async () => {
+  try {
+    if (!firestoreInstance) {
+      await initializeFirestore();
+    }
+    
+    if (connectionRetryCount < MAX_RETRY_ATTEMPTS) {
+      await enableNetwork(firestoreInstance);
+      console.log('Firestore connection restored');
+      connectionRetryCount = 0;
+      return true;
+    } else {
+      console.error('Max retry attempts reached, connection failed');
+      return false;
+    }
+  } catch (error) {
+    connectionRetryCount++;
+    console.warn(`Firestore connection attempt ${connectionRetryCount} failed:`, error);
+    
+    if (connectionRetryCount >= MAX_RETRY_ATTEMPTS) {
+      console.error('Giving up on Firestore connection after max retries');
+      return false;
+    }
+    
+    // Exponential backoff
+    const delay = Math.pow(2, connectionRetryCount) * 1000;
+    setTimeout(() => ensureFirestoreConnection(), delay);
+    return false;
+  }
+};
+
+// Robust error handling for 400 errors
 export const handleFirestoreError = async (error: any) => {
-  console.error('Firestore error:', error);
+  console.error('Firestore error detected:', error);
   
-  if (error?.code === 'unavailable' || error?.message?.includes('400')) {
-    console.log('Attempting to restore Firestore connection...');
+  // Handle specific error codes
+  if (error?.code === 'unavailable' || 
+      error?.message?.includes('400') || 
+      error?.message?.includes('Bad Request') ||
+      error?.code === 'resource-exhausted') {
+    
+    console.log('Attempting aggressive Firestore recovery...');
+    
     try {
-      await disableNetwork(db);
-      isFirestoreEnabled = false;
+      // Terminate existing connection
+      if (firestoreInstance) {
+        await terminate(firestoreInstance);
+      }
       
-      // Wait a bit then re-enable
+      // Clear any cached data
+      try {
+        await clearIndexedDbPersistence(firestoreInstance);
+      } catch (clearError) {
+        console.warn('Could not clear persistence:', clearError);
+      }
+      
+      // Reset state
+      isFirestoreInitialized = false;
+      firestoreInstance = null;
+      connectionRetryCount = 0;
+      
+      // Wait and reinitialize
       setTimeout(async () => {
-        await ensureFirestoreConnection();
-      }, 2000);
-    } catch (retryError) {
-      console.warn('Failed to recover Firestore connection:', retryError);
+        try {
+          await initializeFirestore();
+          db = firestoreInstance;
+        } catch (reinitError) {
+          console.error('Failed to reinitialize Firestore:', reinitError);
+        }
+      }, 3000);
+      
+    } catch (recoveryError) {
+      console.error('Failed to recover from Firestore error:', recoveryError);
     }
   }
+  
+  return false;
 };
 
 console.log('Firebase initialized with project:', import.meta.env.VITE_FIREBASE_PROJECT_ID);

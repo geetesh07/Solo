@@ -16,7 +16,7 @@ import {
   DocumentData
 } from 'firebase/firestore';
 import { User } from 'firebase/auth';
-import { db, handleFirestoreError, ensureFirestoreConnection } from './firebase';
+import { getFirestoreInstance, handleFirestoreError } from './firebase';
 
 // User Profile Interface
 export interface UserProfile {
@@ -43,8 +43,8 @@ export interface Goal {
   priority: 'low' | 'medium' | 'high';
   status: 'pending' | 'in-progress' | 'completed' | 'cancelled';
   dueDate?: string;
-  completedAt?: string;
   xpReward: number;
+  completedAt?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -56,7 +56,6 @@ export interface Category {
   name: string;
   icon: string;
   originalName: string;
-  color?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -67,7 +66,6 @@ export interface Note {
   userId: string;
   title: string;
   content: string;
-  tags: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -75,17 +73,15 @@ export interface Note {
 // User Settings Interface
 export interface UserSettings {
   userId: string;
-  theme: string;
-  notifications: {
+  dailyGoalTarget: number;
+  notificationsEnabled: boolean;
+  reminderTimes: Array<{
+    id: string;
+    time: string;
+    label: string;
     enabled: boolean;
-    reminderTimes: Array<{
-      id: string;
-      time: string;
-      label: string;
-      enabled: boolean;
-    }>;
-  };
-  categories: Category[];
+  }>;
+  theme: 'light' | 'dark';
   createdAt: string;
   updatedAt: string;
 }
@@ -93,113 +89,113 @@ export interface UserSettings {
 class UserDataManager {
   private userId: string | null = null;
 
-  setUser(user: User | null) {
-    this.userId = user?.uid || null;
+  setUser(user: User) {
+    this.userId = user.uid;
+    console.log('UserDataManager: User set for:', user.email);
   }
 
-  // User Profile Management
-  async createUserProfile(user: User): Promise<void> {
-    if (!user.uid) throw new Error('User ID required');
-
+  private async executeWithRetry<T>(operation: () => Promise<T>): Promise<T> {
     try {
-      await ensureFirestoreConnection();
+      return await operation();
+    } catch (error: any) {
+      console.error('Firestore operation failed:', error);
       
-      const userProfile: UserProfile = {
-        uid: user.uid,
-        email: user.email || '',
-        displayName: user.displayName || 'Hunter',
-        level: 1,
-        xp: 0,
-        rank: 'E-Rank',
-        streak: 0,
-        totalGoalsCompleted: 0,
-        lastLoginDate: new Date().toISOString(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-
-      await setDoc(doc(db, 'users', user.uid), userProfile);
-      console.log('User profile created successfully:', user.uid);
+      // Handle 400 errors specifically
+      if (error?.message?.includes('400') || error?.code === 'unavailable') {
+        console.log('Handling Firestore 400 error, attempting recovery...');
+        await handleFirestoreError(error);
+        
+        // Retry operation after recovery attempt
+        try {
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          return await operation();
+        } catch (retryError) {
+          console.error('Retry failed:', retryError);
+          throw retryError;
+        }
+      }
       
-      // Create default categories for new user
-      await this.createDefaultCategories(user.uid);
-    } catch (error) {
-      console.error('Error creating user profile:', error);
-      await handleFirestoreError(error);
       throw error;
     }
   }
 
-  async getUserProfile(userId?: string): Promise<UserProfile | null> {
-    const uid = userId || this.userId;
-    if (!uid) throw new Error('User not authenticated');
+  // User Profile Management
+  async createUserProfile(user: User): Promise<UserProfile> {
+    if (!this.userId) throw new Error('User not authenticated');
 
-    try {
-      await ensureFirestoreConnection();
-      
-      const docRef = doc(db, 'users', uid);
+    const profile: UserProfile = {
+      uid: user.uid,
+      email: user.email || '',
+      displayName: user.displayName || '',
+      level: 1,
+      xp: 0,
+      rank: 'E-Rank',
+      streak: 0,
+      totalGoalsCompleted: 0,
+      lastLoginDate: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    return this.executeWithRetry(async () => {
+      const db = await getFirestoreInstance();
+      await setDoc(doc(db, 'users', user.uid), profile);
+      await this.createDefaultCategories(user.uid);
+      return profile;
+    });
+  }
+
+  async getUserProfile(): Promise<UserProfile | null> {
+    if (!this.userId) throw new Error('User not authenticated');
+
+    return this.executeWithRetry(async () => {
+      const db = await getFirestoreInstance();
+      const docRef = doc(db, 'users', this.userId!);
       const docSnap = await getDoc(docRef);
       
       if (docSnap.exists()) {
         return docSnap.data() as UserProfile;
       }
       return null;
-    } catch (error) {
-      console.error('Error getting user profile:', error);
-      await handleFirestoreError(error);
-      throw error;
-    }
+    });
   }
 
   async updateUserProfile(updates: Partial<UserProfile>): Promise<void> {
     if (!this.userId) throw new Error('User not authenticated');
 
-    try {
-      await ensureFirestoreConnection();
-      
-      const userRef = doc(db, 'users', this.userId);
+    return this.executeWithRetry(async () => {
+      const db = await getFirestoreInstance();
+      const userRef = doc(db, 'users', this.userId!);
       await updateDoc(userRef, {
         ...updates,
         updatedAt: new Date().toISOString()
       });
-      console.log('User profile updated successfully');
-    } catch (error) {
-      console.error('Error updating user profile:', error);
-      await handleFirestoreError(error);
-      throw error;
-    }
+    });
   }
 
   // Goals Management
   async createGoal(goalData: Omit<Goal, 'id' | 'userId' | 'createdAt' | 'updatedAt'>): Promise<string> {
     if (!this.userId) throw new Error('User not authenticated');
 
-    try {
-      await ensureFirestoreConnection();
-      
+    return this.executeWithRetry(async () => {
+      const db = await getFirestoreInstance();
       const goal: Omit<Goal, 'id'> = {
         ...goalData,
-        userId: this.userId,
+        userId: this.userId!,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
 
       const docRef = await addDoc(collection(db, 'goals'), goal);
-      console.log('Goal created successfully:', docRef.id);
       return docRef.id;
-    } catch (error) {
-      console.error('Error creating goal:', error);
-      await handleFirestoreError(error);
-      throw error;
-    }
+    });
   }
 
   async getUserGoals(): Promise<Goal[]> {
     if (!this.userId) throw new Error('User not authenticated');
 
-    try {
-      await ensureFirestoreConnection();
-      
+    return this.executeWithRetry(async () => {
+      const db = await getFirestoreInstance();
       const q = query(
         collection(db, 'goals'),
         where('userId', '==', this.userId),
@@ -211,31 +207,29 @@ class UserDataManager {
         id: doc.id,
         ...doc.data()
       }) as Goal);
-    } catch (error) {
-      console.error('Error getting user goals:', error);
-      await handleFirestoreError(error);
-      throw error;
-    }
+    });
   }
 
   async updateGoal(goalId: string, updates: Partial<Goal>): Promise<void> {
     if (!this.userId) throw new Error('User not authenticated');
 
-    const goalRef = doc(db, 'goals', goalId);
-    await updateDoc(goalRef, {
-      ...updates,
-      updatedAt: new Date().toISOString()
+    return this.executeWithRetry(async () => {
+      const db = await getFirestoreInstance();
+      const goalRef = doc(db, 'goals', goalId);
+      await updateDoc(goalRef, {
+        ...updates,
+        updatedAt: new Date().toISOString()
+      });
     });
-
-    // If goal is completed, update user XP and stats
-    if (updates.status === 'completed' && updates.completedAt) {
-      await this.updateUserXP(updates.xpReward || 10);
-    }
   }
 
   async deleteGoal(goalId: string): Promise<void> {
     if (!this.userId) throw new Error('User not authenticated');
-    await deleteDoc(doc(db, 'goals', goalId));
+    
+    return this.executeWithRetry(async () => {
+      const db = await getFirestoreInstance();
+      await deleteDoc(doc(db, 'goals', goalId));
+    });
   }
 
   // Categories Management
@@ -246,38 +240,47 @@ class UserDataManager {
       { name: 'Side Quest', icon: '⭐', originalName: 'Side Quest' }
     ];
 
-    for (const cat of defaultCategories) {
-      await addDoc(collection(db, 'categories'), {
-        ...cat,
-        userId,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      });
-    }
+    return this.executeWithRetry(async () => {
+      const db = await getFirestoreInstance();
+      for (const cat of defaultCategories) {
+        await addDoc(collection(db, 'categories'), {
+          ...cat,
+          userId,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        });
+      }
+    });
   }
 
   async getUserCategories(): Promise<Category[]> {
     if (!this.userId) throw new Error('User not authenticated');
 
-    const q = query(
-      collection(db, 'categories'),
-      where('userId', '==', this.userId)
-    );
-    
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map((doc: any) => ({
-      id: doc.id,
-      ...doc.data()
-    }) as Category);
+    return this.executeWithRetry(async () => {
+      const db = await getFirestoreInstance();
+      const q = query(
+        collection(db, 'categories'),
+        where('userId', '==', this.userId)
+      );
+      
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map((doc: any) => ({
+        id: doc.id,
+        ...doc.data()
+      }) as Category);
+    });
   }
 
   async updateCategory(categoryId: string, updates: Partial<Category>): Promise<void> {
     if (!this.userId) throw new Error('User not authenticated');
 
-    const categoryRef = doc(db, 'categories', categoryId);
-    await updateDoc(categoryRef, {
-      ...updates,
-      updatedAt: new Date().toISOString()
+    return this.executeWithRetry(async () => {
+      const db = await getFirestoreInstance();
+      const categoryRef = doc(db, 'categories', categoryId);
+      await updateDoc(categoryRef, {
+        ...updates,
+        updatedAt: new Date().toISOString()
+      });
     });
   }
 
@@ -285,92 +288,96 @@ class UserDataManager {
   async createNote(noteData: Omit<Note, 'id' | 'userId' | 'createdAt' | 'updatedAt'>): Promise<string> {
     if (!this.userId) throw new Error('User not authenticated');
 
-    const note: Omit<Note, 'id'> = {
-      ...noteData,
-      userId: this.userId,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
+    return this.executeWithRetry(async () => {
+      const db = await getFirestoreInstance();
+      const note: Omit<Note, 'id'> = {
+        ...noteData,
+        userId: this.userId!,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
 
-    const docRef = await addDoc(collection(db, 'notes'), note);
-    return docRef.id;
+      const docRef = await addDoc(collection(db, 'notes'), note);
+      return docRef.id;
+    });
   }
 
   async getUserNotes(): Promise<Note[]> {
     if (!this.userId) throw new Error('User not authenticated');
 
-    const q = query(
-      collection(db, 'notes'),
-      where('userId', '==', this.userId),
-      orderBy('updatedAt', 'desc')
-    );
-    
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map((doc: any) => ({
-      id: doc.id,
-      ...doc.data()
-    }) as Note);
+    return this.executeWithRetry(async () => {
+      const db = await getFirestoreInstance();
+      const q = query(
+        collection(db, 'notes'),
+        where('userId', '==', this.userId),
+        orderBy('updatedAt', 'desc')
+      );
+      
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map((doc: any) => ({
+        id: doc.id,
+        ...doc.data()
+      }) as Note);
+    });
   }
 
   async updateNote(noteId: string, updates: Partial<Note>): Promise<void> {
     if (!this.userId) throw new Error('User not authenticated');
 
-    const noteRef = doc(db, 'notes', noteId);
-    await updateDoc(noteRef, {
-      ...updates,
-      updatedAt: new Date().toISOString()
+    return this.executeWithRetry(async () => {
+      const db = await getFirestoreInstance();
+      const noteRef = doc(db, 'notes', noteId);
+      await updateDoc(noteRef, {
+        ...updates,
+        updatedAt: new Date().toISOString()
+      });
     });
   }
 
   async deleteNote(noteId: string): Promise<void> {
     if (!this.userId) throw new Error('User not authenticated');
-    await deleteDoc(doc(db, 'notes', noteId));
+    
+    return this.executeWithRetry(async () => {
+      const db = await getFirestoreInstance();
+      await deleteDoc(doc(db, 'notes', noteId));
+    });
   }
 
   // User Settings Management
   async getUserSettings(): Promise<UserSettings | null> {
     if (!this.userId) throw new Error('User not authenticated');
 
-    const docRef = doc(db, 'settings', this.userId);
-    const docSnap = await getDoc(docRef);
-    
-    if (docSnap.exists()) {
-      return docSnap.data() as UserSettings;
-    }
-    return null;
+    return this.executeWithRetry(async () => {
+      const db = await getFirestoreInstance();
+      const docRef = doc(db, 'settings', this.userId!);
+      const docSnap = await getDoc(docRef);
+      
+      if (docSnap.exists()) {
+        return docSnap.data() as UserSettings;
+      }
+      return null;
+    });
   }
 
   async updateUserSettings(settings: Partial<UserSettings>): Promise<void> {
     if (!this.userId) throw new Error('User not authenticated');
 
-    const settingsRef = doc(db, 'settings', this.userId);
-    await setDoc(settingsRef, {
-      ...settings,
-      userId: this.userId,
-      updatedAt: new Date().toISOString()
-    }, { merge: true });
-  }
-
-  // XP and Level Management
-  private async updateUserXP(xpGained: number): Promise<void> {
-    if (!this.userId) throw new Error('User not authenticated');
-
-    const userProfile = await this.getUserProfile();
-    if (!userProfile) return;
-
-    const newXP = userProfile.xp + xpGained;
-    const newLevel = Math.floor(newXP / 100) + 1; // 100 XP per level
-    const newRank = this.calculateRank(newLevel);
-
-    await this.updateUserProfile({
-      xp: newXP,
-      level: newLevel,
-      rank: newRank,
-      totalGoalsCompleted: userProfile.totalGoalsCompleted + 1
+    return this.executeWithRetry(async () => {
+      const db = await getFirestoreInstance();
+      const settingsRef = doc(db, 'settings', this.userId!);
+      await updateDoc(settingsRef, {
+        ...settings,
+        updatedAt: new Date().toISOString()
+      });
     });
   }
 
-  private calculateRank(level: number): string {
+  // Utility functions
+  calculateNextLevel(xp: number): number {
+    return Math.floor(xp / 100) + 1;
+  }
+
+  getRankForLevel(level: number): string {
     if (level >= 50) return 'S-Rank';
     if (level >= 40) return 'A-Rank';
     if (level >= 30) return 'B-Rank';
@@ -379,35 +386,85 @@ class UserDataManager {
     return 'E-Rank';
   }
 
-  // Real-time listeners
+  // Real-time listeners with error handling
   subscribeToUserProfile(callback: (profile: UserProfile | null) => void): () => void {
     if (!this.userId) throw new Error('User not authenticated');
 
-    return onSnapshot(doc(db, 'users', this.userId), (doc: DocumentSnapshot<DocumentData>) => {
-      if (doc.exists()) {
-        callback(doc.data() as UserProfile);
-      } else {
-        callback(null);
+    let unsubscribe: (() => void) | null = null;
+
+    const setupListener = async () => {
+      try {
+        const db = await getFirestoreInstance();
+        unsubscribe = onSnapshot(
+          doc(db, 'users', this.userId!), 
+          (doc: DocumentSnapshot<DocumentData>) => {
+            if (doc.exists()) {
+              callback(doc.data() as UserProfile);
+            } else {
+              callback(null);
+            }
+          },
+          (error) => {
+            console.error('Profile subscription error:', error);
+            handleFirestoreError(error);
+          }
+        );
+      } catch (error) {
+        console.error('Failed to setup profile listener:', error);
+        await handleFirestoreError(error);
       }
-    });
+    };
+
+    setupListener();
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
   }
 
   subscribeToUserGoals(callback: (goals: Goal[]) => void): () => void {
     if (!this.userId) throw new Error('User not authenticated');
 
-    const q = query(
-      collection(db, 'goals'),
-      where('userId', '==', this.userId),
-      orderBy('createdAt', 'desc')
-    );
+    let unsubscribe: (() => void) | null = null;
 
-    return onSnapshot(q, (querySnapshot: QuerySnapshot<DocumentData>) => {
-      const goals = querySnapshot.docs.map((doc: any) => ({
-        id: doc.id,
-        ...doc.data()
-      }) as Goal);
-      callback(goals);
-    });
+    const setupListener = async () => {
+      try {
+        const db = await getFirestoreInstance();
+        const q = query(
+          collection(db, 'goals'),
+          where('userId', '==', this.userId),
+          orderBy('createdAt', 'desc')
+        );
+
+        unsubscribe = onSnapshot(
+          q, 
+          (querySnapshot: QuerySnapshot<DocumentData>) => {
+            const goals = querySnapshot.docs.map((doc: any) => ({
+              id: doc.id,
+              ...doc.data()
+            }) as Goal);
+            callback(goals);
+          },
+          (error) => {
+            console.error('Goals subscription error:', error);
+            handleFirestoreError(error);
+          }
+        );
+      } catch (error) {
+        console.error('Failed to setup goals listener:', error);
+        await handleFirestoreError(error);
+      }
+    };
+
+    setupListener();
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
   }
 }
 
