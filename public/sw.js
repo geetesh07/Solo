@@ -1,16 +1,10 @@
-// Solo Leveling Productivity App - Service Worker
-const CACHE_NAME = 'solo-hunter-v1.2.0';
+// Solo Leveling Productivity App - Production Service Worker
+const CACHE_NAME = 'solo-hunter-prod-v1.0';
 const OFFLINE_URL = '/offline.html';
 
-// Assets to cache for offline functionality
+// Minimal cache for production performance
 const CACHE_URLS = [
   '/',
-  '/dashboard',
-  '/settings',
-  '/calendar',
-  '/analytics',
-  '/notes',
-  '/streaks',
   '/offline.html',
   '/manifest.json',
   '/favicon.ico',

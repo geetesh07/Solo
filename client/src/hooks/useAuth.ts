@@ -1,6 +1,6 @@
 import React, { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { User } from 'firebase/auth';
-import { onAuthStateChange, signInWithGoogle, logOut } from '@/lib/firebase';
+import { onAuthStateChange, signInWithGoogle, logOut, handleRedirectResult } from '@/lib/firebase';
 
 interface AuthContextType {
   user: User | null;
@@ -16,54 +16,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log('AuthProvider: Setting up auth state listener');
+    // Handle redirect result first (for Google sign-in redirect)
+    handleRedirectResult().then((redirectUser) => {
+      if (redirectUser) {
+        setUser(redirectUser);
+        initializeUser(redirectUser);
+      }
+    });
+
     const unsubscribe = onAuthStateChange(async (user) => {
-      console.log('AuthProvider: Auth state changed', { user: user ? user.email : 'null' });
       setUser(user);
       
       if (user) {
-        // Set user in data manager for proper data isolation
-        const { userDataManager } = await import('@/lib/userDataManager');
-        userDataManager.setUser(user);
-        
-        // Sync user with backend database
-        try {
-          const response = await fetch('/api/auth/user', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-firebase-uid': user.uid
-            },
-            body: JSON.stringify({
-              firebaseUid: user.uid,
-              email: user.email,
-              displayName: user.displayName
-            })
-          });
-          
-          if (response.ok) {
-            const dbUser = await response.json();
-            console.log('User synced with database:', dbUser.email);
-          }
-        } catch (error) {
-          console.error('Error syncing user with database:', error);
-        }
-        
-        // Check if user profile exists in Firestore, create if not
-        try {
-          const profile = await userDataManager.getUserProfile();
-          if (!profile) {
-            console.log('Creating new user profile for:', user.email);
-            await userDataManager.createUserProfile(user);
-          } else {
-            // Update last login date
-            await userDataManager.updateUserProfile({
-              lastLoginDate: new Date().toISOString()
-            });
-          }
-        } catch (error) {
-          console.error('Error managing user profile:', error);
-        }
+        await initializeUser(user);
       }
       
       setLoading(false);
@@ -72,14 +37,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => unsubscribe();
   }, []);
 
+  const initializeUser = async (user: User) => {
+    // Set user in data manager for proper data isolation
+    const { userDataManager } = await import('@/lib/userDataManager');
+    userDataManager.setUser(user);
+    
+    // Check if user profile exists in Firestore, create if not
+    try {
+      const profile = await userDataManager.getUserProfile();
+      if (!profile) {
+        await userDataManager.createUserProfile(user);
+      } else {
+        // Update last login date
+        await userDataManager.updateUserProfile({
+          lastLoginDate: new Date().toISOString()
+        });
+      }
+    } catch (error) {
+      // Silently handle profile creation errors in production
+      await userDataManager.createUserProfile(user);
+    }
+  };
+
   const signIn = async () => {
     try {
-      console.log('AuthProvider: Attempting Google sign in');
       const user = await signInWithGoogle();
-      console.log('AuthProvider: Sign in successful', { user: user ? user.email : 'null' });
       return user;
     } catch (error) {
-      console.error('AuthProvider: Sign in error:', error);
       throw error;
     }
   };
@@ -88,7 +72,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await logOut();
     } catch (error) {
-      console.error('Sign out error:', error);
       throw error;
     }
   };
