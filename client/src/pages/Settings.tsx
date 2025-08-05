@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserCategories } from "@/hooks/useUserData";
 import { Bell, Palette, User, Shield, RefreshCw, Download, Upload, Trash2, Settings as SettingsIcon, Edit, Save, X, LogOut } from "lucide-react";
 import { NotificationSystem } from "../components/features/NotificationSystem";
 import { PhoneNotifications } from "../components/features/PhoneNotifications";
@@ -25,11 +26,8 @@ export function Settings() {
     return localStorage.getItem('hunter-theme') || 'default';
   });
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
-  const [categories, setCategories] = useState<QuestCategory[]>([
-    { id: 'main-mission', name: 'Main Mission', icon: '⚔️', originalName: 'Main Mission' },
-    { id: 'training', name: 'Training', icon: '🛡️', originalName: 'Training' },
-    { id: 'side-quest', name: 'Side Quest', icon: '⭐', originalName: 'Side Quest' }
-  ]);
+  const { categories: userCategories, updateCategory } = useUserCategories();
+  const [categories, setCategories] = useState<QuestCategory[]>([]);
   const [editForm, setEditForm] = useState({ name: '', icon: '' });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedTheme, setSelectedTheme] = useState(() => {
@@ -150,6 +148,19 @@ export function Settings() {
       description: 'Nature and forest vibes'
     }
   ];
+
+  // Convert Firestore categories to local format when they change
+  useEffect(() => {
+    if (userCategories.length > 0) {
+      const convertedCategories = userCategories.map(cat => ({
+        id: cat.id,
+        name: cat.name,
+        icon: cat.icon,
+        originalName: cat.originalName
+      }));
+      setCategories(convertedCategories);
+    }
+  }, [userCategories]);
 
   useEffect(() => {
     // Apply saved theme on component mount (without showing toast)

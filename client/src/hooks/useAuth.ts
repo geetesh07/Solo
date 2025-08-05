@@ -17,9 +17,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     console.log('AuthProvider: Setting up auth state listener');
-    const unsubscribe = onAuthStateChange((user) => {
+    const unsubscribe = onAuthStateChange(async (user) => {
       console.log('AuthProvider: Auth state changed', { user: user ? user.email : 'null' });
       setUser(user);
+      
+      if (user) {
+        // Set user in data manager for proper data isolation
+        const { userDataManager } = await import('@/lib/userDataManager');
+        userDataManager.setUser(user);
+        
+        // Check if user profile exists, create if not
+        try {
+          const profile = await userDataManager.getUserProfile();
+          if (!profile) {
+            console.log('Creating new user profile for:', user.email);
+            await userDataManager.createUserProfile(user);
+          } else {
+            // Update last login date
+            await userDataManager.updateUserProfile({
+              lastLoginDate: new Date().toISOString()
+            });
+          }
+        } catch (error) {
+          console.error('Error managing user profile:', error);
+        }
+      }
+      
       setLoading(false);
     });
 
