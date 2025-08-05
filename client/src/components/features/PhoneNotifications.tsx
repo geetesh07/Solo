@@ -367,25 +367,6 @@ export function PhoneNotifications() {
             </div>
           </div>
         )}
-                className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-xs rounded transition-colors"
-                data-testid="button-save-reminder"
-              >
-                <Check className="w-3 h-3" />
-              </button>
-              <button
-                onClick={() => {
-                  setIsAddingNew(false);
-                  setNewTime('');
-                  setNewLabel('');
-                }}
-                className="px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white text-xs rounded transition-colors"
-                data-testid="button-cancel-reminder"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* Existing Reminders */}
         <div className="space-y-2">
