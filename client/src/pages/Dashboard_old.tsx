@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserProfile } from "@/hooks/useUserData";
+import { useUserGoals } from "@/hooks/useUserData";
 import { AppSidebar } from "../components/layout/AppSidebar";
 import { TopBar } from "../components/layout/TopBar";
-import { useGoals } from "@/hooks/useGoals";
 import { Crown, Star, CheckCircle, Calendar, BarChart3, Target, Plus, X, Bell, Trash2, Check, Menu, Flame } from "lucide-react";
 import { AnalyticsDashboard } from "../components/analytics/AnalyticsDashboard";
 import { CalendarView } from "../components/calendar/CalendarView";
@@ -17,29 +18,16 @@ import { showToast } from "@/components/ui/toast";
 import { PWAInstall } from "@/components/features/PWAInstall";
 import { serviceWorkerManager, HunterNotifications } from "@/lib/serviceWorker";
 
-interface Goal {
-  id: string;
-  title: string;
-  completed: boolean;
-  priority: 'low' | 'medium' | 'high';
-  dueDate?: string;
-}
-
-interface Category {
-  id: string;
-  name: string;
-  goals: Goal[];
-  icon: string;
-  color: string;
-}
-
 function Dashboard() {
   const { user } = useAuth();
+  const { profile, loading: profileLoading } = useUserProfile();
+  const { goals, loading: goalsLoading, createGoal, updateGoal, deleteGoal } = useUserGoals();
   
   // CRITICAL: Ensure user is authenticated before rendering anything
   if (!user || !user.uid) {
     return null; // This will cause ProtectedRoutes to redirect to login
   }
+
   const [location, setLocation] = useLocation();
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] = useState(false);
@@ -95,10 +83,7 @@ function Dashboard() {
         console.log('Service Worker not available, using fallback notifications');
       }
     });
-  }, []);
-
-  // CRITICAL: Use authenticated Firebase data instead of localStorage
-  const { goals, categories, loading: goalsLoading, addGoal, updateGoal, deleteGoal } = useGoals();
+  }, [user.uid]);
 
   const [newGoal, setNewGoal] = useState({ 
     title: '', 
@@ -108,79 +93,108 @@ function Dashboard() {
   });
   const [isAddingGoal, setIsAddingGoal] = useState<string | null>(null);
 
-  // All data now comes from Firebase - no localStorage needed
-          dueDate.setHours(23, 59, 59, 999);
-          
-          if (dueDate < now && !goal.completed) {
-            showToast({
-              type: 'warning',
-              title: 'Quest Expired!',
-              message: `"${goal.title}" has been removed due to missed deadline`,
-              duration: 6000
-            });
-            return false;
-          }
-          return true;
-        })
-      })));
-    }, 3600000); // Check every hour
-
-    return () => clearInterval(interval);
-  }, []);
-
   // Calculate dynamic user stats from actual goals
-  const totalGoals = categories.flatMap(cat => cat.goals).length;
-  const completedGoals = categories.flatMap(cat => cat.goals).filter(g => g.completed).length;
-  const currentXP = completedGoals * 25; // 25 XP per completed goal
-  const level = Math.floor(currentXP / 100) + 1;
-  const maxXP = level * 100;
+  const totalGoals = goals.length;
+  const completedGoals = goals.filter(g => g.status === 'completed').length;
+  const currentXP = profile?.xp || 0;
+  const level = profile?.level || 1;
   const currentLevelXP = currentXP % 100;
-  const streak = 0; // Could be calculated from completion dates
-  const rank = level <= 2 ? "E-Rank" : level <= 5 ? "D-Rank" : level <= 10 ? "C-Rank" : level <= 15 ? "B-Rank" : level <= 25 ? "A-Rank" : "S-Rank";
+  const streak = profile?.streak || 0;
+  const rank = profile?.rank || "E-Rank";
 
-  const handleAddGoal = (categoryId: string) => {
+  // Firebase-based goal management functions
+  const handleAddGoal = async (categoryId: string) => {
     if (!newGoal.title.trim()) return;
     
-    const goal: Goal = {
-      id: Date.now().toString(),
-      title: newGoal.title,
-      completed: false,
-      priority: newGoal.priority,
-      dueDate: newGoal.dueDate || undefined
-    };
-
-    setCategories(prev => prev.map(cat => 
-      cat.id === categoryId 
-        ? { ...cat, goals: [...cat.goals, goal] }
-        : cat
-    ));
-
-    setNewGoal({ title: '', categoryId: '', priority: 'medium', dueDate: new Date().toISOString().split('T')[0] });
-    setIsAddingGoal(null);
+    try {
+      await createGoal({
+        title: newGoal.title,
+        category: categoryId,
+        priority: newGoal.priority,
+        dueDate: newGoal.dueDate || undefined,
+        status: 'pending',
+        xpReward: 25
+      });
+      
+      setNewGoal({ 
+        title: '', 
+        categoryId: '', 
+        priority: 'medium', 
+        dueDate: new Date().toISOString().split('T')[0] 
+      });
+      setIsAddingGoal(null);
+      
+      showToast({
+        type: 'success',
+        title: 'Quest Added!',
+        message: `"${newGoal.title}" has been added to your quest list`
+      });
+    } catch (error) {
+      console.error('Error adding goal:', error);
+      showToast({
+        type: 'error',
+        title: 'Failed to Add Quest',
+        message: 'Please try again'
+      });
+    }
   };
 
-  const handleToggleGoal = (categoryId: string, goalId: string) => {
-    setCategories(prev => prev.map(cat => 
-      cat.id === categoryId 
-        ? {
-            ...cat,
-            goals: cat.goals.map(goal => 
-              goal.id === goalId 
-                ? { ...goal, completed: !goal.completed }
-                : goal
-            )
-          }
-        : cat
-    ));
+  const handleToggleGoal = async (goalId: string) => {
+    try {
+      const goal = goals.find(g => g.id === goalId);
+      if (!goal) return;
+      
+      await updateGoal(goalId, {
+        status: goal.status === 'completed' ? 'pending' : 'completed',
+        completedAt: goal.status === 'completed' ? undefined : new Date().toISOString()
+      });
+      
+      if (goal.status !== 'completed') {
+        showToast({
+          type: 'success',
+          title: 'Quest Completed!',
+          message: `"${goal.title}" marked as complete. XP gained!`
+        });
+      }
+    } catch (error) {
+      console.error('Error toggling goal:', error);
+      showToast({
+        type: 'error',
+        title: 'Update Failed',
+        message: 'Please try again'
+      });
+    }
   };
 
-  const handleDeleteGoal = (categoryId: string, goalId: string) => {
-    setCategories(prev => prev.map(cat => 
-      cat.id === categoryId 
-        ? { ...cat, goals: cat.goals.filter(goal => goal.id !== goalId) }
-        : cat
-    ));
+  const handleDeleteGoal = async (goalId: string) => {
+    try {
+      await deleteGoal(goalId);
+      showToast({
+        type: 'success',
+        title: 'Quest Deleted',
+        message: 'Quest has been removed from your list'
+      });
+    } catch (error) {
+      console.error('Error deleting goal:', error);
+      showToast({
+        type: 'error',
+        title: 'Delete Failed',
+        message: 'Please try again'
+      });
+    }
   };
+
+  // Show loading state
+  if (profileLoading || goalsLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="text-cyan-400 font-['Orbitron'] text-xl">Loading Hunter Data...</div>
+        </div>
+      </div>
+    );
+  }
 
   const renderDashboard = () => (
     <div className="space-y-5">
@@ -205,7 +219,7 @@ function Dashboard() {
               <p className="text-gray-300">Welcome back, {user?.displayName || 'Hunter'}</p>
             </div>
           </div>
-          <div className={`flex space-x-5 text-center ${completedGoals === 0 && streak === 0 ? 'hidden md:flex' : 'flex'}`}>
+          <div className="flex space-x-5 text-center">
             <div>
               <div className="text-xl font-bold text-green-400">{completedGoals}</div>
               <div className="text-xs text-gray-400">Completed</div>
@@ -241,319 +255,154 @@ function Dashboard() {
         </div>
       </div>
 
-      {/* Enhanced Stats Grid - Mobile Optimized */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
-        {[
-          { label: 'COMPLETED', value: completedGoals, icon: CheckCircle, color: 'text-green-400', bg: 'from-green-900/20 to-green-800/10' },
-          { label: 'STREAK', value: streak, icon: Star, color: 'text-amber-400', bg: 'from-amber-900/20 to-amber-800/10' },
-          { label: 'THIS WEEK', value: categories.flatMap(cat => cat.goals).filter(g => g.completed).length, icon: Calendar, color: 'text-blue-400', bg: 'from-blue-900/20 to-blue-800/10' },
-          { label: 'EFFICIENCY', value: totalGoals > 0 ? Math.round((completedGoals / totalGoals) * 100) : 0, icon: BarChart3, color: 'text-purple-400', bg: 'from-purple-900/20 to-purple-800/10', suffix: '%' }
-        ].map((stat, index) => (
-          <div key={index} className={`bg-gradient-to-br ${stat.bg} border border-gray-700/30 rounded-lg p-2 md:p-4 text-center shadow-lg backdrop-blur-sm min-h-[80px] flex flex-col justify-center`}>
-            <stat.icon className={`w-4 h-4 md:w-6 md:h-6 mx-auto mb-1 md:mb-2 ${stat.color}`} />
-            <div className="text-lg md:text-xl font-bold text-white mb-0.5 md:mb-1">
-              {stat.value}{stat.suffix || ''}
-            </div>
-            <div className="text-[10px] md:text-xs text-gray-400 font-medium leading-tight">{stat.label}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Active Quests Section */}
+      {/* Goals Display */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-white font-['Orbitron']">
-            <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-              ACTIVE QUESTS
-            </span>
-          </h2>
-          <button 
-            onClick={() => setIsOnboardingOpen(true)}
-            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors shadow-lg"
-          >
-            📖 Tutorial
-          </button>
-        </div>
-
-        {/* Quest Categories */}
-        {categories.map((category) => (
-          <div key={category.id} className={`bg-gradient-to-br from-gray-900/60 to-gray-800/40 border rounded-xl overflow-hidden shadow-xl backdrop-blur-sm ${
-            category.id === 'main-mission' ? 'border-red-500/30 shadow-red-500/10' :
-            category.id === 'training' ? 'border-blue-500/30 shadow-blue-500/10' :
-            'border-green-500/30 shadow-green-500/10'
-          }`}>
-            {/* Category Header */}
-            <div className={`p-4 border-b ${
-              category.id === 'main-mission' ? 'border-red-500/20 bg-gradient-to-r from-red-900/20 to-transparent' :
-              category.id === 'training' ? 'border-blue-500/20 bg-gradient-to-r from-blue-900/20 to-transparent' :
-              'border-green-500/20 bg-gradient-to-r from-green-900/20 to-transparent'
-            }`}>
-              <div className="flex items-center justify-between">
+        <h2 className="text-xl font-bold text-white font-['Orbitron']">Active Quests</h2>
+        {totalGoals === 0 ? (
+          <div className="text-center py-8 text-gray-400">
+            <Target className="w-12 h-12 mx-auto mb-4 opacity-50" />
+            <p>No active quests. Create your first quest to begin your hunter journey!</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {goals.map((goal) => (
+              <div key={goal.id} className="bg-gray-800/50 border border-gray-700 rounded-lg p-4 flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <span className="text-2xl">{category.icon}</span>
+                  <button
+                    onClick={() => handleToggleGoal(goal.id)}
+                    className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                      goal.status === 'completed'
+                        ? 'bg-green-500 border-green-500 text-white'
+                        : 'border-gray-400 hover:border-green-500'
+                    }`}
+                  >
+                    {goal.status === 'completed' && <Check className="w-4 h-4" />}
+                  </button>
                   <div>
-                    <h3 className={`font-bold font-['Orbitron'] ${
-                      category.id === 'main-mission' ? 'text-red-400' :
-                      category.id === 'training' ? 'text-blue-400' :
-                      'text-green-400'
-                    }`}>{category.name}</h3>
-                    <span className="text-sm text-gray-400">({category.goals.length} active quests)</span>
+                    <h3 className={`font-medium ${goal.status === 'completed' ? 'text-gray-400 line-through' : 'text-white'}`}>
+                      {goal.title}
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      {goal.category} • {goal.priority} priority
+                      {goal.dueDate && ` • Due: ${new Date(goal.dueDate).toLocaleDateString()}`}
+                    </p>
                   </div>
                 </div>
                 <button
-                  onClick={() => setIsAddingGoal(category.id)}
-                  className={`px-3 py-2 rounded-lg font-medium text-sm transition-all shadow-lg ${
-                    category.id === 'main-mission' ? 'bg-red-600 hover:bg-red-700 text-white hover:shadow-red-500/25' :
-                    category.id === 'training' ? 'bg-blue-600 hover:bg-blue-700 text-white hover:shadow-blue-500/25' :
-                    'bg-green-600 hover:bg-green-700 text-white hover:shadow-green-500/25'
-                  }`}
+                  onClick={() => handleDeleteGoal(goal.id)}
+                  className="text-red-400 hover:text-red-300 transition-colors"
                 >
-                  <Plus className="w-4 h-4 mr-1 inline" />
-                  Add Goal
+                  <Trash2 className="w-4 h-4" />
                 </button>
               </div>
-            </div>
-
-            {/* Add Goal Form */}
-            {isAddingGoal === category.id && (
-              <div className="p-4 bg-gray-800/60 border-b border-gray-700/50">
-                <div className="space-y-3">
-                  <input
-                    type="text"
-                    placeholder="Enter your quest objective..."
-                    value={newGoal.title}
-                    onChange={(e) => setNewGoal(prev => ({ ...prev, title: e.target.value }))}
-                    className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:border-cyan-400 focus:outline-none shadow-inner"
-                    onKeyPress={(e) => e.key === 'Enter' && handleAddGoal(category.id)}
-                  />
-                  <div className="flex flex-col md:flex-row gap-3">
-                    <input
-                      type="date"
-                      value={newGoal.dueDate}
-                      onChange={(e) => setNewGoal(prev => ({ ...prev, dueDate: e.target.value }))}
-                      className="flex-1 bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-cyan-400 focus:outline-none min-h-[44px]"
-                    />
-                    <select
-                      value={newGoal.priority}
-                      onChange={(e) => setNewGoal(prev => ({ ...prev, priority: e.target.value as 'low' | 'medium' | 'high' }))}
-                      className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-cyan-400 focus:outline-none min-h-[44px] md:min-w-[140px]"
-                    >
-                      <option value="low">Low Priority</option>
-                      <option value="medium">Medium Priority</option>
-                      <option value="high">High Priority</option>
-                    </select>
-                  </div>
-                  <div className="flex flex-col md:flex-row gap-3">
-                    <button
-                      onClick={() => handleAddGoal(category.id)}
-                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-medium transition-colors shadow-lg min-h-[44px] flex-1 md:flex-none"
-                      data-testid="button-create-quest"
-                    >
-                      Create Quest
-                    </button>
-                    <button
-                      onClick={() => setIsAddingGoal(null)}
-                      className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-3 rounded-lg transition-colors min-h-[44px] flex-1 md:flex-none"
-                      data-testid="button-cancel-quest"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Goals List */}
-            <div className="p-4">
-              {category.goals.length === 0 ? (
-                <div className="text-center py-6 text-gray-400">
-                  <Target className="w-10 h-10 text-gray-600 mx-auto mb-3" />
-                  <p className="text-sm">No quests active. Begin your journey by adding a goal!</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {category.goals.map((goal) => (
-                    <div key={goal.id} className="bg-gray-800/50 border border-gray-700/40 rounded-lg p-3 flex items-center justify-between group transition-all duration-200 hover:bg-gray-800/70">
-                      <div className="flex items-center space-x-3 flex-1">
-                        <button
-                          onClick={() => handleToggleGoal(category.id, goal.id)}
-                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
-                            goal.completed
-                              ? 'bg-green-500 border-green-500 text-white shadow-lg shadow-green-500/25'
-                              : 'border-gray-500 hover:border-green-400 hover:shadow-lg hover:shadow-green-400/25'
-                          }`}
-                        >
-                          {goal.completed && <Check className="w-3 h-3" />}
-                        </button>
-                        <div className="flex-1">
-                          <h4 className={`font-medium ${goal.completed ? 'text-gray-500 line-through' : 'text-white'}`}>
-                            {goal.title}
-                          </h4>
-                          <div className="flex items-center space-x-3 text-xs text-gray-400 mt-1">
-                            <span className={`px-2 py-1 rounded font-medium ${
-                              goal.priority === 'high' ? 'bg-red-900/30 text-red-400 border border-red-500/20' :
-                              goal.priority === 'medium' ? 'bg-yellow-900/30 text-yellow-400 border border-yellow-500/20' :
-                              'bg-green-900/30 text-green-400 border border-green-500/20'
-                            }`}>
-                              {goal.priority} priority
-                            </span>
-                            {goal.dueDate && (
-                              <span className="flex items-center bg-gray-700/50 px-2 py-1 rounded">
-                                <Calendar className="w-3 h-3 mr-1" />
-                                {new Date(goal.dueDate).toLocaleDateString('en-GB')}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => handleDeleteGoal(category.id, goal.id)}
-                        className="opacity-0 group-hover:opacity-100 p-2 rounded-lg hover:bg-red-600/20 text-gray-400 hover:text-red-400 transition-all duration-200"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            ))}
           </div>
-        ))}
+        )}
+      </div>
+
+      {/* Add Goal Section */}
+      <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4">
+        <div className="flex items-center space-x-3">
+          <input
+            type="text"
+            value={newGoal.title}
+            onChange={(e) => setNewGoal({ ...newGoal, title: e.target.value })}
+            placeholder="Enter new quest..."
+            className="flex-1 bg-gray-900 border border-gray-600 rounded px-3 py-2 text-white placeholder-gray-400 focus:outline-none focus:border-cyan-400"
+          />
+          <select
+            value={newGoal.priority}
+            onChange={(e) => setNewGoal({ ...newGoal, priority: e.target.value as 'low' | 'medium' | 'high' })}
+            className="bg-gray-900 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-cyan-400"
+          >
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+          </select>
+          <input
+            type="date"
+            value={newGoal.dueDate}
+            onChange={(e) => setNewGoal({ ...newGoal, dueDate: e.target.value })}
+            className="bg-gray-900 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:border-cyan-400"
+          />
+          <button
+            onClick={() => handleAddGoal('main-mission')}
+            className="bg-cyan-500 hover:bg-cyan-600 text-white px-4 py-2 rounded transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
+        </div>
       </div>
     </div>
   );
-
-  const renderCalendar = () => (
-    <div className="slide-up h-full overflow-y-auto p-4 md:p-6">
-      <CalendarView goals={categories.flatMap(cat => 
-        cat.goals.map(goal => ({
-          ...goal,
-          category: cat.name
-        }))
-      )} />
-    </div>
-  );
-
-  const renderAnalytics = () => (
-    <div className="slide-up p-4 md:p-6">
-      <AnalyticsDashboard categories={categories} />
-    </div>
-  );
-
-  const renderNotes = () => (
-    <div className="slide-up h-full">
-      <ShadowArchives />
-    </div>
-  );
-
-  const renderSettings = () => (
-    <div className="slide-up h-full">
-      <Settings />
-    </div>
-  );
-
-  const renderStreaks = () => {
-    const completedGoalsToday = categories.flatMap(cat => cat.goals).filter(g => g.completed).length;
-    const totalGoalsToday = categories.flatMap(cat => cat.goals).length;
-    
-    return (
-      <div className="slide-up p-4 md:p-6">
-        <StreakTracker 
-          completedGoalsToday={completedGoalsToday}
-          totalGoalsToday={totalGoalsToday}
-        />
-      </div>
-    );
-  };
-
-  const renderCurrentView = () => {
-    switch (currentView) {
-      case 'dashboard': return renderDashboard();
-      case 'streaks': return renderStreaks();
-      case 'calendar': return renderCalendar();
-      case 'analytics': return renderAnalytics();
-      case 'notes': return renderNotes();
-      case 'settings': return renderSettings();
-      default: return renderDashboard();
-    }
-  };
 
   return (
-    <div className="h-screen bg-background text-foreground flex relative overflow-hidden">
-      {/* Mobile Sidebar Overlay */}
-      {isMobileSidebarOpen && (
-        <div 
-          className="md:hidden fixed inset-0 bg-background/80 backdrop-blur-sm z-40 fade-in"
-          onClick={() => setIsMobileSidebarOpen(false)}
-        />
-      )}
-      
-      {/* Sidebar */}
-      <div className={`
-        transition-all duration-300 ease-out
-        ${isDesktopSidebarCollapsed ? 'md:w-0 md:overflow-hidden' : 'md:w-64'}
-        md:relative md:translate-x-0 md:block
-        fixed left-0 top-0 z-50 h-full w-64
-        ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-      `}>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 flex">
+      {/* Desktop Sidebar */}
+      <div className={`hidden lg:block transition-all duration-300 ${isDesktopSidebarCollapsed ? 'w-16' : 'w-64'}`}>
         <AppSidebar
           currentView={currentView}
-          onViewChange={(view) => {
-            const path = view === 'dashboard' ? '/' : `/${view}`;
-            setLocation(path);
-            setIsMobileSidebarOpen(false);
-          }}
-          userLevel={level}
-          currentXP={currentLevelXP}
-          maxXP={100}
-          rank={rank}
-          user={user}
+          onViewChange={(view) => setLocation(view === 'dashboard' ? '/' : `/${view}`)}
+          collapsed={isDesktopSidebarCollapsed}
+          onToggleCollapse={() => setIsDesktopSidebarCollapsed(!isDesktopSidebarCollapsed)}
         />
       </div>
-      
-      <main className="flex-1 overflow-hidden">
-        <TopBar 
-          user={user}
-          onOpenMorningModal={() => setIsMorningModalOpen(true)}
-          onToggleMobileSidebar={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
-          onToggleDesktopSidebar={() => setIsDesktopSidebarCollapsed(!isDesktopSidebarCollapsed)}
-          isDesktopSidebarCollapsed={isDesktopSidebarCollapsed}
-        />
-        
-        <div className={`h-[calc(100vh-4rem)] overflow-y-auto overflow-x-hidden pb-20 md:pb-6 ${
-          currentView === 'dashboard' ? 'p-2 md:p-6' : 'p-0'
-        }`}>
-          <div className="fade-in">
-            {renderCurrentView()}
+
+      {/* Mobile Sidebar Overlay */}
+      {isMobileSidebarOpen && (
+        <>
+          <div 
+            className="lg:hidden fixed inset-0 bg-black/50 z-40" 
+            onClick={() => setIsMobileSidebarOpen(false)}
+          />
+          <div className="lg:hidden fixed left-0 top-0 h-full w-64 z-50">
+            <AppSidebar
+              currentView={currentView}
+              onViewChange={(view) => {
+                setLocation(view === 'dashboard' ? '/' : `/${view}`);
+                setIsMobileSidebarOpen(false);
+              }}
+            />
           </div>
-        </div>
-      </main>
-
-      {/* Morning Planning Modal */}
-      <MorningModal 
-        isOpen={isMorningModalOpen}
-        onClose={() => setIsMorningModalOpen(false)}
-      />
-      
-      {/* Onboarding Modal */}
-      <OnboardingModal 
-        isOpen={isOnboardingOpen}
-        onClose={() => setIsOnboardingOpen(false)}
-      />
-
-      {/* Motivational Greeting */}
-      {showGreeting && (
-        <MotivationalGreeting 
-          userName={user?.displayName || 'Hunter'}
-          onClose={() => setShowGreeting(false)}
-        />
+        </>
       )}
 
-      {/* PWA Install Prompt */}
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col min-w-0">
+        <TopBar 
+          onMenuClick={() => setIsMobileSidebarOpen(true)}
+          user={user}
+        />
+        
+        <main className="flex-1 p-4 lg:p-6 overflow-y-auto">
+          {currentView === 'dashboard' && renderDashboard()}
+          {currentView === 'analytics' && <AnalyticsDashboard />}
+          {currentView === 'calendar' && <CalendarView />}
+          {currentView === 'settings' && <Settings />}
+          {currentView === 'notes' && <ShadowArchives />}
+          {currentView === 'streaks' && <StreakTracker completedGoalsToday={completedGoals} totalGoalsToday={totalGoals} />}
+        </main>
+      </div>
+
+      {/* Modals */}
+      {showGreeting && (
+        <MotivationalGreeting
+          onClose={() => setShowGreeting(false)}
+          userName={user?.displayName || 'Hunter'}
+        />
+      )}
+      
+      {isMorningModalOpen && (
+        <MorningModal isOpen={isMorningModalOpen} onClose={() => setIsMorningModalOpen(false)} />
+      )}
+      
+      {isOnboardingOpen && (
+        <OnboardingModal isOpen={isOnboardingOpen} onClose={() => setIsOnboardingOpen(false)} />
+      )}
+
       <PWAInstall />
     </div>
   );
 }
 
-export { Dashboard };
 export default Dashboard;
