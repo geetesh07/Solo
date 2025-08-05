@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import { ToastContainer } from "@/components/ui/toast";
 import { PWAInstallPrompt } from "@/components/features/PWAInstallPrompt";
+import { ErrorBoundary } from "@/components/ui/error-boundary";
 import Dashboard from "@/pages/Dashboard";
 import Login from "@/pages/Login";
 import "@/index.css";
@@ -59,15 +60,17 @@ function ProtectedRoutes() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <AuthProvider>
-          <ProtectedRoutes />
-          <ToastContainer />
-          <PWAInstallPrompt />
-        </AuthProvider>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <AuthProvider>
+            <ProtectedRoutes />
+            <ToastContainer />
+            <PWAInstallPrompt />
+          </AuthProvider>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 
