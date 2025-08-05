@@ -404,7 +404,7 @@ class UserDataManager {
               callback(null);
             }
           },
-          (error) => {
+          (error: any) => {
             console.error('Profile subscription error:', error);
             handleFirestoreError(error);
           }
@@ -447,7 +447,7 @@ class UserDataManager {
             }) as Goal);
             callback(goals);
           },
-          (error) => {
+          (error: any) => {
             console.error('Goals subscription error:', error);
             handleFirestoreError(error);
           }

@@ -342,7 +342,7 @@ function Dashboard() {
       <div className={`hidden lg:block transition-all duration-300 ${isDesktopSidebarCollapsed ? 'w-16' : 'w-64'}`}>
         <AppSidebar
           currentView={currentView}
-          onNavigate={setLocation}
+          onViewChange={(view) => setLocation(view === 'dashboard' ? '/' : `/${view}`)}
           collapsed={isDesktopSidebarCollapsed}
           onToggleCollapse={() => setIsDesktopSidebarCollapsed(!isDesktopSidebarCollapsed)}
         />
@@ -358,8 +358,8 @@ function Dashboard() {
           <div className="lg:hidden fixed left-0 top-0 h-full w-64 z-50">
             <AppSidebar
               currentView={currentView}
-              onNavigate={(path) => {
-                setLocation(path);
+              onViewChange={(view) => {
+                setLocation(view === 'dashboard' ? '/' : `/${view}`);
                 setIsMobileSidebarOpen(false);
               }}
             />
@@ -380,7 +380,7 @@ function Dashboard() {
           {currentView === 'calendar' && <CalendarView />}
           {currentView === 'settings' && <Settings />}
           {currentView === 'notes' && <ShadowArchives />}
-          {currentView === 'streaks' && <StreakTracker />}
+          {currentView === 'streaks' && <StreakTracker completedGoalsToday={completedGoals} totalGoalsToday={totalGoals} />}
         </main>
       </div>
 
@@ -393,11 +393,11 @@ function Dashboard() {
       )}
       
       {isMorningModalOpen && (
-        <MorningModal onClose={() => setIsMorningModalOpen(false)} />
+        <MorningModal isOpen={isMorningModalOpen} onClose={() => setIsMorningModalOpen(false)} />
       )}
       
       {isOnboardingOpen && (
-        <OnboardingModal onClose={() => setIsOnboardingOpen(false)} />
+        <OnboardingModal isOpen={isOnboardingOpen} onClose={() => setIsOnboardingOpen(false)} />
       )}
 
       <PWAInstall />
