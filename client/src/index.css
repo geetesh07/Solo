@@ -67,6 +67,16 @@ body {
   overflow-x: hidden;
 }
 
+/* Critical: Ensure styles load in production */
+html {
+  background: #0a0a0f !important;
+  background-image: 
+    radial-gradient(circle at 25% 25%, rgba(0, 150, 255, 0.1) 0%, transparent 40%),
+    radial-gradient(circle at 75% 75%, rgba(139, 69, 19, 0.08) 0%, transparent 40%),
+    linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(13, 13, 25, 0.95) 100%) !important;
+  background-attachment: fixed !important;
+}
+
 /* Solo Leveling Inspired Background Patterns */
 body::before {
   content: '';
