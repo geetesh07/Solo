@@ -74,7 +74,7 @@ export const ensureFirestoreConnection = async () => {
       await initializeFirestore();
     }
     
-    if (connectionRetryCount < MAX_RETRY_ATTEMPTS) {
+    if (connectionRetryCount < MAX_RETRY_ATTEMPTS && firestoreInstance) {
       await enableNetwork(firestoreInstance);
       console.log('Firestore connection restored');
       connectionRetryCount = 0;
@@ -119,7 +119,9 @@ export const handleFirestoreError = async (error: any) => {
       
       // Clear any cached data
       try {
-        await clearIndexedDbPersistence(firestoreInstance);
+        if (firestoreInstance) {
+          await clearIndexedDbPersistence(firestoreInstance);
+        }
       } catch (clearError) {
         console.warn('Could not clear persistence:', clearError);
       }
@@ -150,8 +152,7 @@ export const handleFirestoreError = async (error: any) => {
 console.log('Firebase initialized with project:', import.meta.env.VITE_FIREBASE_PROJECT_ID);
 
 // Export missing functions that are referenced in hooks
-export const onAuthStateChange = onAuthStateChanged;
-export const logOut = signOut;
+// Note: Full implementations of logOut and onAuthStateChange are defined below
 
 // Export getRedirectResult for use in auth hooks
 export { getRedirectResult };
