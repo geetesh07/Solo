@@ -1,6 +1,6 @@
 import React, { useState, useEffect, createContext, useContext, ReactNode } from 'react';
-import { User } from 'firebase/auth';
-import { onAuthStateChange, signInWithGoogle, logOut } from '@/lib/firebase';
+import type { User } from 'firebase/auth';
+import { onAuthStateChange, signInWithGoogle, logOut, getRedirectResult, auth } from '@/lib/firebase';
 
 interface AuthContextType {
   user: User | null;
@@ -18,6 +18,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     console.log('AuthProvider: Setting up auth state listener');
     
+    // Handle redirect result for storage-partitioned environments
+    const handleRedirectResult = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result) {
+          console.log('AuthProvider: Redirect sign-in successful:', result.user?.email);
+          setUser(result.user);
+        }
+      } catch (error) {
+        console.error('AuthProvider: Redirect result error:', error);
+      }
+    };
+    
+    // Check for redirect result on page load
+    handleRedirectResult();
+    
     // Add timeout to prevent infinite loading in production
     const loadingTimeout = setTimeout(() => {
       console.log('AuthProvider: Timeout reached, stopping loading state');
@@ -26,7 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     let isUnmounted = false;
     
-    const unsubscribe = onAuthStateChange(async (user) => {
+    const unsubscribe = onAuthStateChange(async (user: User | null) => {
       if (isUnmounted) return;
       
       console.log('AuthProvider: Auth state changed', { user: user ? user.email : 'null' });

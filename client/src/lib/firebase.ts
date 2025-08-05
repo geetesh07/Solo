@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, type User } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "firebase/auth";
+import type { User } from "firebase/auth";
 import { getFirestore, enableNetwork, disableNetwork, terminate, clearIndexedDbPersistence, type Firestore } from "firebase/firestore";
 
 // Validate required Firebase configuration
@@ -148,14 +149,44 @@ export const handleFirestoreError = async (error: any) => {
 
 console.log('Firebase initialized with project:', import.meta.env.VITE_FIREBASE_PROJECT_ID);
 
-const provider = new GoogleAuthProvider();
+// Export missing functions that are referenced in hooks
+export const onAuthStateChange = onAuthStateChanged;
+export const logOut = signOut;
 
+// Export getRedirectResult for use in auth hooks
+export { getRedirectResult };
+
+const provider = new GoogleAuthProvider();
+// Configure provider for better compatibility
+provider.setCustomParameters({
+  prompt: 'select_account'
+});
+
+// Enhanced authentication with fallback methods
 export const signInWithGoogle = async () => {
   try {
     console.log('Firebase: Attempting Google sign-in...');
-    const result = await signInWithPopup(auth, provider);
-    console.log('Firebase: Sign-in successful:', result.user?.email);
-    return result.user;
+    
+    // First try popup method
+    try {
+      const result = await signInWithPopup(auth, provider);
+      console.log('Firebase: Popup sign-in successful:', result.user?.email);
+      return result.user;
+    } catch (popupError: any) {
+      console.warn('Popup sign-in failed, trying redirect method:', popupError);
+      
+      // If popup fails due to storage or browser restrictions, use redirect
+      if (popupError.code === 'auth/popup-blocked' || 
+          popupError.code === 'auth/popup-closed-by-user' ||
+          popupError.message?.includes('storage') ||
+          popupError.message?.includes('sessionStorage')) {
+        
+        console.log('Using redirect sign-in method');
+        await signInWithRedirect(auth, provider);
+        return null; // Redirect will handle the return
+      }
+      throw popupError;
+    }
   } catch (error: any) {
     console.error("Firebase: Sign-in error:", error);
     
