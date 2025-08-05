@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import { ToastContainer } from "@/components/ui/toast";
 import { PWAInstallPrompt } from "@/components/features/PWAInstallPrompt";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import Dashboard from "@/pages/Dashboard";
 import Login from "@/pages/Login";
 import "@/index.css";
@@ -28,6 +29,9 @@ function ProtectedRoutes() {
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <div className="text-cyan-400 font-['Orbitron'] text-xl">Authenticating...</div>
+          <div className="text-gray-400 text-sm mt-2">
+            Connecting to Firebase...
+          </div>
         </div>
       </div>
     );
@@ -63,15 +67,17 @@ function ProtectedRoutes() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <AuthProvider>
-          <ProtectedRoutes />
-          <ToastContainer />
-          <PWAInstallPrompt />
-        </AuthProvider>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <AuthProvider>
+            <ProtectedRoutes />
+            <ToastContainer />
+            <PWAInstallPrompt />
+          </AuthProvider>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 

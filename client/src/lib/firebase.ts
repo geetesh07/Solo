@@ -4,6 +4,12 @@ import { getFirestore, connectFirestoreEmulator, enableNetwork, disableNetwork }
 
 // Validate required Firebase configuration
 if (!import.meta.env.VITE_FIREBASE_API_KEY || !import.meta.env.VITE_FIREBASE_PROJECT_ID || !import.meta.env.VITE_FIREBASE_APP_ID) {
+  console.error('Firebase configuration incomplete. Missing required environment variables.');
+  console.error('Available env vars:', {
+    hasApiKey: !!import.meta.env.VITE_FIREBASE_API_KEY,
+    hasProjectId: !!import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    hasAppId: !!import.meta.env.VITE_FIREBASE_APP_ID
+  });
   throw new Error('Firebase configuration incomplete. Missing required environment variables.');
 }
 

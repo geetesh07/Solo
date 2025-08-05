@@ -17,22 +17,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     console.log('AuthProvider: Setting up auth state listener');
+    
+    // Add timeout to prevent infinite loading in production
+    const loadingTimeout = setTimeout(() => {
+      console.log('AuthProvider: Timeout reached, stopping loading state');
+      setLoading(false);
+    }, 8000); // 8 second timeout
+    
+    let isUnmounted = false;
+    
     const unsubscribe = onAuthStateChange(async (user) => {
+      if (isUnmounted) return;
+      
       console.log('AuthProvider: Auth state changed', { user: user ? user.email : 'null' });
+      clearTimeout(loadingTimeout); // Clear timeout when auth state resolves
       setUser(user);
       
-      if (user) {
-        // Set user in data manager for proper data isolation
-        const { userDataManager } = await import('@/lib/userDataManager');
-        userDataManager.setUser(user);
-        
-        // Check if user profile exists, create if not
+      if (user && !isUnmounted) {
         try {
+          // Set user in data manager for proper data isolation
+          const { userDataManager } = await import('@/lib/userDataManager');
+          userDataManager.setUser(user);
+          
+          // Check if user profile exists, create if not
           const profile = await userDataManager.getUserProfile();
-          if (!profile) {
+          if (!profile && !isUnmounted) {
             console.log('Creating new user profile for:', user.email);
             await userDataManager.createUserProfile(user);
-          } else {
+          } else if (!isUnmounted) {
             // Update last login date
             await userDataManager.updateUserProfile({
               lastLoginDate: new Date().toISOString()
@@ -40,13 +52,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
         } catch (error) {
           console.error('Error managing user profile:', error);
+          // Don't let profile errors block the app
         }
       }
       
-      setLoading(false);
+      if (!isUnmounted) {
+        setLoading(false);
+      }
     });
 
-    return () => unsubscribe();
+    return () => {
+      isUnmounted = true;
+      clearTimeout(loadingTimeout);
+      unsubscribe();
+    };
   }, []);
 
   const signIn = async () => {
